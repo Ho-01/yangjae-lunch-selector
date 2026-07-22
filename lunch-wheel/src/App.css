@@ -1605,4 +1605,132 @@ footer {
   .wheel-wrap {
     min-height: 0;
   }
+
+  .location-banner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 6px;
+    padding: 10px 12px;
+  }
+
+  .location-banner-text {
+    gap: 1px;
+  }
+
+  .location-banner-text strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .location-banner .btn {
+    width: auto;
+    padding-inline: 12px;
+    white-space: nowrap;
+  }
+
+  .toolbar .btn:only-child {
+    grid-column: 1 / -1;
+    justify-self: start;
+    width: auto;
+  }
+
+  .spin-area {
+    position: sticky;
+    bottom: max(4px, env(safe-area-inset-bottom));
+    z-index: 10;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 4px;
+    border: 1px solid rgba(229, 229, 229, 0.9);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 14px rgba(60, 60, 60, 0.1);
+    backdrop-filter: blur(6px);
+  }
+
+  .spin-btn,
+  .mini-btn {
+    min-height: 44px;
+  }
+
+  .spin-btn {
+    border-bottom-width: 3px;
+    border-radius: 9px;
+    font-size: 15px;
+  }
+
+  .mini-btn {
+    min-width: 46px;
+    padding-inline: 8px;
+    border-bottom-width: 2px;
+    border-radius: 9px;
+    font-size: 11px;
+  }
+
+  dialog {
+    width: calc(100% - 12px);
+    max-height: calc(100dvh - 12px);
+  }
+
+  .modal-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 11px 12px;
+  }
+
+  .modal-head h2 {
+    font-size: 19px;
+  }
+
+  .modal-body {
+    max-height: calc(100dvh - 69px);
+    padding: 12px;
+  }
+
+  .add-row {
+    gap: 7px;
+    margin-bottom: 10px;
+    padding-bottom: 12px;
+  }
+
+  .edit-block {
+    padding-bottom: 10px;
+  }
+
+  .edit-row {
+    gap: 7px;
+  }
+
+  .edit-row select {
+    grid-column: 1 / -1;
+  }
+
+  .edit-row .icon-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .place-link-editor {
+    margin-top: 7px;
+    padding: 9px;
+  }
+
+  .place-link-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .place-link-actions {
+    justify-content: flex-end;
+  }
+
+  .place-photo-row img,
+  .result-place .place-photo-row img {
+    width: 68px;
+    height: 51px;
+  }
 }
