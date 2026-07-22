@@ -28,6 +28,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--ink);
   background: var(--canvas);
   font-family:
@@ -37,6 +38,123 @@ body {
     system-ui,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Mobile-first interaction refinements */
+@media (max-width: 640px) {
+  .app {
+    width: 100%;
+    padding: max(16px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+  }
+
+  .topbar { margin-bottom: 12px; padding: 0 2px 14px; }
+  .title-row { gap: 6px 10px; margin-bottom: 5px; }
+  h1 { font-size: clamp(27px, 9vw, 34px); }
+  .title-location { font-size: 14px; }
+  .subtitle { font-size: 13px; line-height: 1.5; }
+
+  .mode-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .mode-toggle button { min-height: 44px; }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .toolbar .btn {
+    justify-content: center;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 9px;
+    font-size: 12px;
+  }
+
+  .toolbar .btn:last-child:nth-child(3) { grid-column: 1 / -1; }
+
+  .location-banner { align-items: stretch; flex-direction: column; }
+  .location-banner .btn { justify-content: center; min-height: 44px; }
+  .main-card { padding: 8px; border-radius: 13px; }
+  .weather-strip { gap: 9px; padding: 9px 10px; }
+
+  .wheel-wrap {
+    min-height: 0;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .canvas-shell { width: min(100%, 430px); }
+
+  .spin-area {
+    grid-template-columns: minmax(0, 1fr) auto;
+    position: sticky;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    z-index: 10;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 6px 24px rgba(60, 60, 60, 0.12);
+    backdrop-filter: blur(8px);
+  }
+
+  .spin-btn { min-height: 54px; font-size: 16px; }
+  .mini-btn { min-width: 54px; min-height: 54px; padding-inline: 10px; }
+  .side-card { padding: 14px; }
+  .ban-actions button, .icon-btn { min-height: 44px; }
+  .ban-item { min-height: 44px; }
+  .ban-item input { width: 20px; height: 20px; }
+
+  dialog {
+    width: calc(100% - 16px);
+    max-height: calc(100dvh - 16px);
+    margin: auto;
+    border-radius: 14px;
+  }
+
+  .modal-head { padding: 13px 14px; }
+  .modal-body { max-height: calc(100dvh - 75px); padding: 14px; overscroll-behavior: contain; }
+  .close-x { width: 44px; height: 44px; }
+  input[type='text'], select { min-height: 44px; font-size: 16px; }
+  .place-search-row { grid-template-columns: 1fr; }
+  .place-search-row .btn, .add-row .btn { justify-content: center; min-height: 44px; }
+
+  .toast {
+    bottom: max(14px, env(safe-area-inset-bottom));
+    width: max-content;
+    max-width: calc(100% - 24px);
+    text-align: center;
+  }
+
+  footer { padding-inline: 4px; }
+}
+
+@media (max-width: 380px) {
+  .toolbar { grid-template-columns: 1fr; }
+  .toolbar .btn:last-child:nth-child(3) { grid-column: auto; }
+  .edit-row { grid-template-columns: 1fr; }
+  .edit-row input { grid-column: auto; }
+  .spin-area { grid-template-columns: 1fr 52px; }
+  .mini-btn { min-width: 52px; padding: 0; font-size: 0; }
+  .mini-btn .ui-icon { margin-right: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 button,
@@ -1467,5 +1585,24 @@ footer {
 
   .result .menu {
     font-size: 24px;
+  }
+
+  /* Keep the mobile interaction refinements above the legacy breakpoint rules. */
+  .app {
+    width: 100%;
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+
+  .topbar {
+    padding-bottom: 14px;
+    margin-bottom: 12px;
+  }
+
+  .toolbar {
+    margin-top: 10px;
+  }
+
+  .wheel-wrap {
+    min-height: 0;
   }
 }
