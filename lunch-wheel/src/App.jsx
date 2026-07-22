@@ -3,6 +3,7 @@ import './App.css'
 import LunchWheel from './components/LunchWheel/LunchWheel'
 import MenuExclusionList from './components/MenuExclusionList'
 import MenuManagerDialog from './components/MenuManagerDialog'
+import MenuTypeManagerDialog from './components/MenuTypeManagerDialog'
 import NearbyControls from './components/NearbyControls'
 import ProbabilityList from './components/ProbabilityList'
 import { UI_ICONS } from './constants/icons'
@@ -34,6 +35,9 @@ export default function App() {
     removeMenu,
     connectGooglePlace,
     disconnectGooglePlace,
+    addMenuType,
+    saveMenuType,
+    removeMenuType,
   } = useMenus()
 
   const nearby = useNearbyPlaces()
@@ -63,6 +67,7 @@ export default function App() {
 
   const [displayOrder, setDisplayOrder] = useState([])
   const [manageOpen, setManageOpen] = useState(false)
+  const [typeManageOpen, setTypeManageOpen] = useState(false)
   const [spinning, setSpinning] = useState(false)
   const [toast, setToast] = useState('')
   const toastTimer = useRef(0)
@@ -182,6 +187,36 @@ export default function App() {
     } catch (err) {
       console.error(err)
       showToast(err?.message || '메뉴를 삭제하지 못했습니다.')
+    }
+  }
+
+  async function handleAddMenuType(payload) {
+    try {
+      await addMenuType(payload)
+      showToast('메뉴 타입을 추가했습니다.')
+    } catch (err) {
+      console.error(err)
+      showToast(err?.message || '메뉴 타입을 추가하지 못했습니다.')
+    }
+  }
+
+  async function handleSaveMenuType(payload) {
+    try {
+      await saveMenuType(payload)
+      showToast('메뉴 타입을 저장했습니다.')
+    } catch (err) {
+      console.error(err)
+      showToast(err?.message || '메뉴 타입을 저장하지 못했습니다.')
+    }
+  }
+
+  async function handleDeleteMenuType(id) {
+    try {
+      await removeMenuType(id)
+      showToast('메뉴 타입을 삭제했습니다.')
+    } catch (err) {
+      console.error(err)
+      showToast(err?.message || '메뉴 타입을 삭제하지 못했습니다.')
     }
   }
 
@@ -330,16 +365,27 @@ export default function App() {
             날씨 새로고침
           </button>
           {!isNearby ? (
-            <button
-              type="button"
-              className="btn primary"
-              disabled={busy}
-              onClick={() => setManageOpen(true)}
-              aria-label="메뉴 관리"
-            >
-              <ListPlusIcon className="ui-icon" aria-hidden />
-              메뉴 관리
-            </button>
+            <>
+              <button
+                type="button"
+                className="btn ghost"
+                disabled={busy}
+                onClick={() => setTypeManageOpen(true)}
+                aria-label="메뉴 타입 관리"
+              >
+                타입 관리
+              </button>
+              <button
+                type="button"
+                className="btn primary"
+                disabled={busy}
+                onClick={() => setManageOpen(true)}
+                aria-label="메뉴 관리"
+              >
+                <ListPlusIcon className="ui-icon" aria-hidden />
+                메뉴 관리
+              </button>
+            </>
           ) : null}
         </div>
       </header>
@@ -426,6 +472,17 @@ export default function App() {
         onDelete={handleDeleteMenu}
         onConnectPlace={connectGooglePlace}
         onDisconnectPlace={disconnectGooglePlace}
+        onToast={showToast}
+      />
+
+      <MenuTypeManagerDialog
+        open={typeManageOpen}
+        onClose={() => setTypeManageOpen(false)}
+        menuTypes={menuTypes}
+        saving={menuSaving}
+        onAdd={handleAddMenuType}
+        onSave={handleSaveMenuType}
+        onDelete={handleDeleteMenuType}
         onToast={showToast}
       />
 

@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { fetchActiveTeamBySlug } from '../services/teamService'
-import { fetchActiveMenuTypes } from '../services/menuTypeService'
+import {
+  countActiveMenusForType,
+  createMenuType,
+  deactivateMenuType,
+  fetchActiveMenuTypes,
+  updateMenuType,
+} from '../services/menuTypeService'
 import {
   createMenu,
   deactivateMenu,
@@ -211,6 +217,78 @@ export function useMenus() {
     }
   }, [menus])
 
+  const addMenuType = useCallback(
+    async ({ name, code, iconKey, color, weatherWeightConfig }) => {
+      if (!team) throw new Error('팀 정보가 없습니다.')
+      setSaving(true)
+      try {
+        const sortOrder =
+          menuTypes.reduce((max, type) => Math.max(max, type.sort_order ?? 0), 0) +
+          1
+        const created = await createMenuType({
+          teamId: team.id,
+          name,
+          code,
+          iconKey,
+          color,
+          weatherWeightConfig,
+          sortOrder,
+        })
+        setMenuTypes((prev) => [...prev, created])
+        return created
+      } finally {
+        setSaving(false)
+      }
+    },
+    [team, menuTypes],
+  )
+
+  const saveMenuType = useCallback(async (payload) => {
+    setSaving(true)
+    try {
+      const updated = await updateMenuType(payload)
+      setMenuTypes((prev) =>
+        prev.map((type) => (type.id === updated.id ? updated : type)),
+      )
+      setMenus((prev) =>
+        prev.map((menu) =>
+          menu.menu_type?.id === updated.id || menu.menu_type_id === updated.id
+            ? {
+                ...menu,
+                menu_type: {
+                  id: updated.id,
+                  code: updated.code,
+                  name: updated.name,
+                  icon_key: updated.icon_key,
+                  color: updated.color,
+                  weather_weight_config: updated.weather_weight_config,
+                },
+              }
+            : menu,
+        ),
+      )
+      return updated
+    } finally {
+      setSaving(false)
+    }
+  }, [])
+
+  const removeMenuType = useCallback(async (id) => {
+    setSaving(true)
+    try {
+      const used = await countActiveMenusForType(id)
+      if (used > 0) {
+        throw new Error(
+          `이 타입을 쓰는 메뉴가 ${used}개 있습니다. 메뉴 타입을 바꾼 뒤 삭제해주세요.`,
+        )
+      }
+      await deactivateMenuType(id)
+      setMenuTypes((prev) => prev.filter((type) => type.id !== id))
+    } finally {
+      setSaving(false)
+    }
+  }, [])
+
   return {
     team,
     menuTypes,
@@ -227,5 +305,8 @@ export function useMenus() {
     removeMenu,
     connectGooglePlace,
     disconnectGooglePlace,
+    addMenuType,
+    saveMenuType,
+    removeMenuType,
   }
 }
