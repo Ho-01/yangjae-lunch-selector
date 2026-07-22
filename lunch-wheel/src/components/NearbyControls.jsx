@@ -92,6 +92,11 @@ export default function NearbyControls({
         </button>
       </div>
 
+      <p className="nearby-hint">
+        위치가 안 되면: 사이트 위치 권한 허용, Windows 위치 서비스 ON,
+        HTTPS/localhost 접속을 확인하세요.
+      </p>
+
       <div className="nearby-status">
         {error ? <p className="nearby-error">{error}</p> : null}
         <p>

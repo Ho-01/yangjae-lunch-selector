@@ -470,6 +470,13 @@ canvas {
   font-weight: 700;
 }
 
+.nearby-hint {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .side-card {
   padding: 16px;
 }

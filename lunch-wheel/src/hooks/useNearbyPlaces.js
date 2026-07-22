@@ -77,28 +77,60 @@ function writeCache(parts, places) {
 
 function getCurrentPosition() {
   return new Promise((resolve, reject) => {
+    if (!window.isSecureContext) {
+      reject(
+        new Error(
+          '위치 정보는 HTTPS(또는 localhost)에서만 사용할 수 있습니다. 배포 URL이나 npm run dev로 접속해주세요.',
+        ),
+      )
+      return
+    }
+
     if (!navigator.geolocation) {
       reject(new Error('이 브라우저는 위치 정보를 지원하지 않습니다.'))
       return
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        })
-      },
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          reject(new Error('위치 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요.'))
-        } else {
-          reject(new Error('위치를 가져오지 못했습니다.'))
-        }
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60_000 },
-    )
+
+    const onSuccess = (pos) => {
+      resolve({
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+      })
+    }
+
+    const explainError = (err) => {
+      if (err?.code === 1 || err?.code === err?.PERMISSION_DENIED) {
+        return '위치 권한이 거부되었습니다. 주소창 왼쪽 자물쇠/사이트 설정에서 위치를 허용한 뒤 다시 시도해주세요.'
+      }
+      if (err?.code === 3 || err?.code === err?.TIMEOUT) {
+        return '위치 확인 시간이 초과되었습니다. Wi-Fi/GPS를 켠 뒤 다시 시도해주세요.'
+      }
+      if (err?.code === 2 || err?.code === err?.POSITION_UNAVAILABLE) {
+        return '기기에서 위치를 확인할 수 없습니다. Windows 설정 → 개인 정보 보호 → 위치 서비스가 켜져 있는지 확인해주세요.'
+      }
+      return `위치를 가져오지 못했습니다${err?.message ? ` (${err.message})` : ''}.`
+    }
+
+    // 1차: 빠른 대략 위치 (캐시 허용)
+    navigator.geolocation.getCurrentPosition(onSuccess, (firstErr) => {
+      // 2차: 정확도 높여 재시도
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        (secondErr) => reject(new Error(explainError(secondErr || firstErr))),
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 0,
+        },
+      )
+    }, {
+      enableHighAccuracy: false,
+      timeout: 12000,
+      maximumAge: 5 * 60_000,
+    })
   })
 }
+
 
 function filterByRating(places, minRating) {
   if (!minRating) return places
