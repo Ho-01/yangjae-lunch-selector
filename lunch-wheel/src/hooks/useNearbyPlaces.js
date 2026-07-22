@@ -38,6 +38,10 @@ function roundCoord(value) {
   return Math.round(Number(value) * 1000) / 1000
 }
 
+function formatCoord(value) {
+  return Number(value).toFixed(5)
+}
+
 function cacheKeyParts({ latitude, longitude, radiusMeters }) {
   return {
     lat: roundCoord(latitude),
@@ -95,6 +99,7 @@ function getCurrentPosition() {
       resolve({
         latitude: pos.coords.latitude,
         longitude: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
       })
     }
 
@@ -111,26 +116,49 @@ function getCurrentPosition() {
       return `위치를 가져오지 못했습니다${err?.message ? ` (${err.message})` : ''}.`
     }
 
-    // 1차: 빠른 대략 위치 (캐시 허용)
-    navigator.geolocation.getCurrentPosition(onSuccess, (firstErr) => {
-      // 2차: 정확도 높여 재시도
-      navigator.geolocation.getCurrentPosition(
-        onSuccess,
-        (secondErr) => reject(new Error(explainError(secondErr || firstErr))),
-        {
-          enableHighAccuracy: true,
-          timeout: 20000,
-          maximumAge: 0,
-        },
-      )
-    }, {
-      enableHighAccuracy: false,
-      timeout: 12000,
-      maximumAge: 5 * 60_000,
-    })
+    navigator.geolocation.getCurrentPosition(
+      onSuccess,
+      (firstErr) => {
+        navigator.geolocation.getCurrentPosition(
+          onSuccess,
+          (secondErr) => reject(new Error(explainError(secondErr || firstErr))),
+          {
+            enableHighAccuracy: true,
+            timeout: 20000,
+            maximumAge: 0,
+          },
+        )
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 12000,
+        maximumAge: 5 * 60_000,
+      },
+    )
   })
 }
 
+async function reverseGeocodeLabel(latitude, longitude) {
+  try {
+    const params = new URLSearchParams({
+      latitude: String(latitude),
+      longitude: String(longitude),
+      localityLanguage: 'ko',
+    })
+    const res = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?${params}`,
+    )
+    if (!res.ok) return null
+    const data = await res.json()
+    const parts = [
+      data.locality || data.city,
+      data.principalSubdivision,
+    ].filter(Boolean)
+    return parts.length ? parts.join(' · ') : data.countryName || null
+  } catch {
+    return null
+  }
+}
 
 function filterByRating(places, minRating) {
   if (!minRating) return places
@@ -142,6 +170,11 @@ function filterByRating(places, minRating) {
 export function useNearbyPlaces() {
   const [settings, setSettingsState] = useState(readSettings)
   const [coords, setCoords] = useState(null)
+  const [locationLabel, setLocationLabel] = useState('')
+  const [locatedAt, setLocatedAt] = useState(null)
+  const [locating, setLocating] = useState(false)
+  const [locateError, setLocateError] = useState(null)
+
   const [rawPlaces, setRawPlaces] = useState([])
   const [excludedIds, setExcludedIds] = useState(() => new Set())
   const [loading, setLoading] = useState(false)
@@ -168,20 +201,49 @@ export function useNearbyPlaces() {
   const weatherLocation = useMemo(() => {
     if (!coords) return null
     return {
-      location_name: '내 위치',
+      location_name: locationLabel || '내 위치',
       weather_latitude: coords.latitude,
       weather_longitude: coords.longitude,
       timezone: 'Asia/Seoul',
     }
+  }, [coords, locationLabel])
+
+  const coordsText = useMemo(() => {
+    if (!coords) return ''
+    return `${formatCoord(coords.latitude)}, ${formatCoord(coords.longitude)}`
   }, [coords])
 
+  const locate = useCallback(async () => {
+    setLocating(true)
+    setLocateError(null)
+    try {
+      const position = await getCurrentPosition()
+      setCoords(position)
+      setLocatedAt(Date.now())
+      const label = await reverseGeocodeLabel(
+        position.latitude,
+        position.longitude,
+      )
+      setLocationLabel(label || '내 위치')
+      return position
+    } catch (err) {
+      console.error(err)
+      setLocateError(err?.message || '위치를 확인하지 못했습니다.')
+      throw err
+    } finally {
+      setLocating(false)
+    }
+  }, [])
+
   const loadNearby = useCallback(
-    async ({ force = false } = {}) => {
+    async ({ force = false, position: givenPosition = null } = {}) => {
       setLoading(true)
       setError(null)
       try {
-        const position = await getCurrentPosition()
-        setCoords(position)
+        const position = givenPosition || coords
+        if (!position) {
+          throw new Error('먼저 현재 위치를 확인해주세요.')
+        }
 
         const parts = cacheKeyParts({
           latitude: position.latitude,
@@ -222,7 +284,7 @@ export function useNearbyPlaces() {
         setLoading(false)
       }
     },
-    [settings.radiusMeters],
+    [coords, settings.radiusMeters],
   )
 
   const clearCache = useCallback(() => {
@@ -234,6 +296,11 @@ export function useNearbyPlaces() {
     settings,
     setSettings,
     coords,
+    coordsText,
+    locationLabel,
+    locatedAt,
+    locating,
+    locateError,
     menus,
     rawPlaces,
     filteredPlaces,
@@ -245,6 +312,7 @@ export function useNearbyPlaces() {
     fetchedAt,
     apiCallsThisSession,
     weatherLocation,
+    locate,
     loadNearby,
     clearCache,
   }

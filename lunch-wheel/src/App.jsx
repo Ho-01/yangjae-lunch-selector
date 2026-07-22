@@ -185,6 +185,16 @@ export default function App() {
     }
   }
 
+  async function handleNearbyLocate() {
+    try {
+      await nearby.locate()
+      showToast('현재 위치를 확인했습니다.')
+      await refreshWeather()
+    } catch (err) {
+      showToast(err?.message || '위치를 확인하지 못했습니다.')
+    }
+  }
+
   async function handleNearbyLoad() {
     try {
       const result = await nearby.loadNearby({ force: false })
@@ -210,12 +220,19 @@ export default function App() {
     }
   }
 
+  useEffect(() => {
+    if (!isNearby) return
+    if (nearby.coords || nearby.locating) return
+    nearby.locate().catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only auto-locate when entering nearby tab
+  }, [isNearby])
+
   const busy =
-    spinning || menuSaving || exclusionSaving || nearby.loading
+    spinning || menuSaving || exclusionSaving || nearby.loading || nearby.locating
   const locationLabel = isNearby
-    ? nearby.coords
-      ? '내 위치'
-      : '내 위치 (미확인)'
+    ? nearby.locating
+      ? '위치 확인 중…'
+      : nearby.locationLabel || (nearby.coords ? '내 위치' : '내 위치 (미확인)')
     : team?.location_name || '양재역'
 
   if (loading) {
@@ -247,6 +264,34 @@ export default function App() {
         <div>
           <div className="eyebrow">{locationLabel} 기준 · 현재 날씨 반영</div>
           <h1>오늘 뭐 먹지?</h1>
+          {isNearby ? (
+            <div className="location-banner">
+              <div className="location-banner-text">
+                <strong>
+                  {nearby.locating
+                    ? '현재 위치 확인 중…'
+                    : nearby.locationLabel || '현재 위치'}
+                </strong>
+                {nearby.coordsText ? (
+                  <span className="location-coords">{nearby.coordsText}</span>
+                ) : (
+                  <span className="location-coords">좌표 없음</span>
+                )}
+                {nearby.locateError ? (
+                  <span className="location-error">{nearby.locateError}</span>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                className="btn ghost"
+                disabled={busy}
+                onClick={handleNearbyLocate}
+                aria-label="현재 위치 다시 확인"
+              >
+                {nearby.locating ? '확인 중…' : '위치 다시 확인'}
+              </button>
+            </div>
+          ) : null}
           <p className="subtitle">
             {isNearby
               ? '내 주변 식당으로 돌림판을 구성합니다. 후보 간 확률은 동일합니다.'
@@ -329,13 +374,20 @@ export default function App() {
               settings={nearby.settings}
               onSettingsChange={nearby.setSettings}
               loading={nearby.loading}
+              locating={nearby.locating}
               disabled={spinning}
+              coords={nearby.coords}
+              coordsText={nearby.coordsText}
+              locationLabel={nearby.locationLabel}
+              locatedAt={nearby.locatedAt}
+              locateError={nearby.locateError}
               fromCache={nearby.fromCache}
               fetchedAt={nearby.fetchedAt}
               filteredCount={nearby.filteredPlaces.length}
               rawCount={nearby.rawPlaces.length}
               apiCallsThisSession={nearby.apiCallsThisSession}
               error={nearby.error}
+              onLocate={handleNearbyLocate}
               onLoad={handleNearbyLoad}
               onForceRefresh={handleNearbyForceRefresh}
             />
