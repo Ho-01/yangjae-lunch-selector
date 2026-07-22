@@ -10,6 +10,18 @@ const SEARCH_FIELD_MASK = [
   'places.nationalPhoneNumber',
 ].join(',')
 
+/** Nearby: no photos — avoids photo media costs and keeps the payload small */
+const NEARBY_FIELD_MASK = [
+  'places.id',
+  'places.displayName',
+  'places.formattedAddress',
+  'places.location',
+  'places.rating',
+  'places.userRatingCount',
+  'places.googleMapsUri',
+  'places.primaryType',
+].join(',')
+
 export function getGooglePlacesApiKey() {
   return process.env.GOOGLE_PLACES_API_KEY || ''
 }
@@ -36,6 +48,7 @@ export function mapGooglePlace(place) {
     longitude: place.location?.longitude ?? null,
     rating: place.rating ?? null,
     ratingCount: place.userRatingCount ?? null,
+    primaryType: place.primaryType || null,
     url:
       place.googleMapsUri ||
       (placeId
@@ -80,6 +93,53 @@ export async function searchTextPlaces({
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
     const message = data?.error?.message || `Places 검색 실패 (${res.status})`
+    const error = new Error(message)
+    error.status = res.status
+    throw error
+  }
+
+  return (data.places || []).map(mapGooglePlace)
+}
+
+export async function searchNearbyPlaces({
+  apiKey,
+  latitude,
+  longitude,
+  radiusMeters = 1000,
+  maxResultCount = 15,
+}) {
+  const radius = Math.min(5000, Math.max(100, Number(radiusMeters) || 1000))
+  const count = Math.min(20, Math.max(1, Number(maxResultCount) || 15))
+
+  const body = {
+    includedPrimaryTypes: ['restaurant'],
+    maxResultCount: count,
+    rankPreference: 'DISTANCE',
+    languageCode: 'ko',
+    locationRestriction: {
+      circle: {
+        center: { latitude, longitude },
+        radius,
+      },
+    },
+  }
+
+  const res = await fetch(
+    'https://places.googleapis.com/v1/places:searchNearby',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': apiKey,
+        'X-Goog-FieldMask': NEARBY_FIELD_MASK,
+      },
+      body: JSON.stringify(body),
+    },
+  )
+
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const message = data?.error?.message || `주변 검색 실패 (${res.status})`
     const error = new Error(message)
     error.status = res.status
     throw error

@@ -1,9 +1,9 @@
 import { WEATHER_TIMEOUT_MS } from '../constants/app'
 
 /**
- * @param {{ weather_latitude: number, weather_longitude: number, timezone: string }} team
+ * @param {{ weather_latitude: number, weather_longitude: number, timezone?: string }} location
  */
-export async function fetchCurrentWeather(team) {
+export async function fetchCurrentWeather(location) {
   const fields = [
     'temperature_2m',
     'apparent_temperature',
@@ -16,10 +16,10 @@ export async function fetchCurrentWeather(team) {
   ].join(',')
 
   const params = new URLSearchParams({
-    latitude: String(team.weather_latitude),
-    longitude: String(team.weather_longitude),
+    latitude: String(location.weather_latitude),
+    longitude: String(location.weather_longitude),
     current: fields,
-    timezone: team.timezone || 'Asia/Seoul',
+    timezone: location.timezone || 'Asia/Seoul',
   })
 
   const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`

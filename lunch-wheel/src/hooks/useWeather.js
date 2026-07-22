@@ -1,14 +1,17 @@
 import { useCallback, useState } from 'react'
 import { fetchCurrentWeather } from '../services/weatherService'
 
-export function useWeather(team) {
+/**
+ * @param {{ weather_latitude: number, weather_longitude: number, timezone?: string } | null} location
+ */
+export function useWeather(location) {
   const [weather, setWeather] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   const refresh = useCallback(
     async ({ quiet = false } = {}) => {
-      if (!team) return null
+      if (!location) return null
 
       if (!quiet) {
         setLoading(true)
@@ -16,7 +19,7 @@ export function useWeather(team) {
       setError(null)
 
       try {
-        const data = await fetchCurrentWeather(team)
+        const data = await fetchCurrentWeather(location)
         setWeather(data)
         return data
       } catch (err) {
@@ -28,7 +31,7 @@ export function useWeather(team) {
         if (!quiet) setLoading(false)
       }
     },
-    [team],
+    [location],
   )
 
   return {

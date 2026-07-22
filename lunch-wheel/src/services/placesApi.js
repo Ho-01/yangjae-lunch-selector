@@ -29,3 +29,62 @@ export function getPrimaryGoogleLink(placeLinks = []) {
     null
   )
 }
+
+/**
+ * Nearby Search — call sparingly. Prefer client cache (30m).
+ * Does not request photos.
+ */
+export async function searchNearbyGooglePlaces({
+  latitude,
+  longitude,
+  radiusMeters,
+  maxResultCount,
+}) {
+  const res = await fetch('/api/places/nearby', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      latitude,
+      longitude,
+      radiusMeters,
+      maxResultCount,
+    }),
+  })
+
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    throw new Error(data.error || '주변 식당 검색에 실패했습니다.')
+  }
+  return data.places || []
+}
+
+/** Map Places results into lunch-wheel menu shape (equal weather weights). */
+export function placesToMenus(places) {
+  return places.map((place, index) => ({
+    id: `nearby-${place.placeId}`,
+    name: place.placeName,
+    sort_order: index + 1,
+    menu_type: {
+      id: 'nearby-general',
+      code: 'general',
+      name: '주변 식당',
+      icon_key: 'utensils',
+      color: '#6A5B85',
+      weather_weight_config: { base: 1 },
+    },
+    place_links: [
+      {
+        id: `link-${place.placeId}`,
+        provider: 'google',
+        url: place.url,
+        place_id: place.placeId,
+        place_name: place.placeName,
+        formatted_address: place.formattedAddress,
+        rating: place.rating,
+        rating_count: place.ratingCount,
+        photo_refs: [],
+        is_active: true,
+      },
+    ],
+  }))
+}

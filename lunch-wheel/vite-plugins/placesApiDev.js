@@ -2,6 +2,7 @@ import {
   fetchPlacePhotoBuffer,
   getGooglePlacesApiKey,
   readJsonBody,
+  searchNearbyPlaces,
   searchTextPlaces,
   sendJson,
 } from '../api/lib/googlePlaces.js'
@@ -39,6 +40,37 @@ export function placesApiDevPlugin() {
               longitude: Number.isFinite(longitude) ? longitude : undefined,
             })
             return sendJson(res, 200, { places })
+          }
+
+          if (req.method === 'POST' && matchPath(req.url || '', '/api/places/nearby')) {
+            const apiKey = getGooglePlacesApiKey()
+            if (!apiKey) {
+              return sendJson(res, 500, {
+                error: 'GOOGLE_PLACES_API_KEY가 서버에 설정되지 않았습니다.',
+              })
+            }
+
+            const body = await readJsonBody(req)
+            const latitude = Number(body.latitude)
+            const longitude = Number(body.longitude)
+            if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+              return sendJson(res, 400, { error: '위치 좌표가 필요합니다.' })
+            }
+
+            const places = await searchNearbyPlaces({
+              apiKey,
+              latitude,
+              longitude,
+              radiusMeters: body.radiusMeters,
+              maxResultCount: body.maxResultCount,
+            })
+            return sendJson(res, 200, {
+              places,
+              meta: {
+                billed: true,
+                note: 'Nearby Search 1회 호출입니다. 클라이언트 캐시를 사용하세요.',
+              },
+            })
           }
 
           if (req.method === 'GET' && (req.url || '').startsWith('/api/places/photo')) {

@@ -3,10 +3,12 @@ import './App.css'
 import LunchWheel from './components/LunchWheel/LunchWheel'
 import MenuExclusionList from './components/MenuExclusionList'
 import MenuManagerDialog from './components/MenuManagerDialog'
+import NearbyControls from './components/NearbyControls'
 import ProbabilityList from './components/ProbabilityList'
 import { UI_ICONS } from './constants/icons'
 import { useMenus } from './hooks/useMenus'
 import { useDailyExclusions } from './hooks/useDailyExclusions'
+import { useNearbyPlaces } from './hooks/useNearbyPlaces'
 import { useWeather } from './hooks/useWeather'
 import { getWeightedMenus } from './utils/weatherWeights'
 
@@ -15,12 +17,15 @@ function Toast({ message }) {
 }
 
 export default function App() {
+  const [mode, setMode] = useState('team')
+  const isNearby = mode === 'nearby'
+
   const {
     team,
     menuTypes,
-    menus,
-    excludedIds,
-    setExcludedIds,
+    menus: teamMenus,
+    excludedIds: teamExcludedIds,
+    setExcludedIds: setTeamExcludedIds,
     loading,
     saving: menuSaving,
     error: dataError,
@@ -31,12 +36,15 @@ export default function App() {
     disconnectGooglePlace,
   } = useMenus()
 
+  const nearby = useNearbyPlaces()
+
+  const weatherLocation = isNearby ? nearby.weatherLocation : team
   const {
     weather,
     loading: weatherLoading,
     error: weatherError,
     refresh: refreshWeather,
-  } = useWeather(team)
+  } = useWeather(weatherLocation)
 
   const {
     saving: exclusionSaving,
@@ -45,10 +53,13 @@ export default function App() {
     clearAll,
   } = useDailyExclusions({
     teamId: team?.id,
-    menus,
-    excludedIds,
-    setExcludedIds,
+    menus: teamMenus,
+    excludedIds: teamExcludedIds,
+    setExcludedIds: setTeamExcludedIds,
   })
+
+  const menus = isNearby ? nearby.menus : teamMenus
+  const excludedIds = isNearby ? nearby.excludedIds : teamExcludedIds
 
   const [displayOrder, setDisplayOrder] = useState([])
   const [manageOpen, setManageOpen] = useState(false)
@@ -64,9 +75,9 @@ export default function App() {
   }, [menus])
 
   useEffect(() => {
-    if (!team) return
+    if (!weatherLocation) return
     refreshWeather()
-  }, [team, refreshWeather])
+  }, [weatherLocation, refreshWeather])
 
   const weightedItems = useMemo(
     () => getWeightedMenus(menus, excludedIds, weather),
@@ -76,7 +87,7 @@ export default function App() {
   function showToast(message) {
     setToast(message)
     clearTimeout(toastTimer.current)
-    toastTimer.current = setTimeout(() => setToast(''), 1800)
+    toastTimer.current = setTimeout(() => setToast(''), 2200)
   }
 
   useEffect(() => {
@@ -89,6 +100,15 @@ export default function App() {
   }
 
   async function handleToggle(menuId, checked) {
+    if (isNearby) {
+      nearby.setExcludedIds((prev) => {
+        const next = new Set(prev)
+        if (checked) next.add(menuId)
+        else next.delete(menuId)
+        return next
+      })
+      return
+    }
     try {
       await toggleExclusion(menuId, checked)
     } catch (err) {
@@ -98,6 +118,11 @@ export default function App() {
   }
 
   async function handleBanAll() {
+    if (isNearby) {
+      nearby.setExcludedIds(new Set(menus.map((menu) => menu.id)))
+      showToast('모든 메뉴를 제외했습니다.')
+      return
+    }
     try {
       await banAll()
       showToast('모든 메뉴를 제외했습니다.')
@@ -108,6 +133,11 @@ export default function App() {
   }
 
   async function handleClearAll() {
+    if (isNearby) {
+      nearby.setExcludedIds(new Set())
+      showToast('모든 제외를 해제했습니다.')
+      return
+    }
     try {
       await clearAll()
       showToast('모든 제외를 해제했습니다.')
@@ -155,8 +185,38 @@ export default function App() {
     }
   }
 
-  const busy = spinning || menuSaving || exclusionSaving
-  const location = team?.location_name || '양재역'
+  async function handleNearbyLoad() {
+    try {
+      const result = await nearby.loadNearby({ force: false })
+      showToast(
+        result.fromCache
+          ? `캐시에서 ${result.places.length}곳을 불러왔습니다.`
+          : `주변 식당 ${result.places.length}곳을 불러왔습니다. (Places 1회)`,
+      )
+      await refreshWeather()
+    } catch (err) {
+      showToast(err?.message || '주변 식당을 불러오지 못했습니다.')
+    }
+  }
+
+  async function handleNearbyForceRefresh() {
+    try {
+      nearby.clearCache()
+      const result = await nearby.loadNearby({ force: true })
+      showToast(`주변 식당 ${result.places.length}곳을 새로 불러왔습니다. (Places 1회)`)
+      await refreshWeather()
+    } catch (err) {
+      showToast(err?.message || '주변 식당을 불러오지 못했습니다.')
+    }
+  }
+
+  const busy =
+    spinning || menuSaving || exclusionSaving || nearby.loading
+  const locationLabel = isNearby
+    ? nearby.coords
+      ? '내 위치'
+      : '내 위치 (미확인)'
+    : team?.location_name || '양재역'
 
   if (loading) {
     return (
@@ -185,39 +245,65 @@ export default function App() {
     <main className="app">
       <header className="topbar">
         <div>
-          <div className="eyebrow">{location} 기준 · 현재 날씨 반영</div>
+          <div className="eyebrow">{locationLabel} 기준 · 현재 날씨 반영</div>
           <h1>오늘 뭐 먹지?</h1>
           <p className="subtitle">
-            현재 날씨와 메뉴 성격을 반영해 후보별 확률을 조정합니다.
+            {isNearby
+              ? '내 주변 식당으로 돌림판을 구성합니다. 후보 간 확률은 동일합니다.'
+              : '현재 날씨와 메뉴 성격을 반영해 후보별 확률을 조정합니다.'}
           </p>
+          <div className="mode-toggle" role="tablist" aria-label="돌림판 모드">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={!isNearby}
+              className={!isNearby ? 'is-active' : ''}
+              disabled={busy}
+              onClick={() => setMode('team')}
+            >
+              팀 메뉴
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isNearby}
+              className={isNearby ? 'is-active' : ''}
+              disabled={busy}
+              onClick={() => setMode('nearby')}
+            >
+              내 주변
+            </button>
+          </div>
         </div>
         <div className="toolbar">
           <button
             type="button"
             className="btn ghost"
-            disabled={busy || weatherLoading}
+            disabled={busy || weatherLoading || (isNearby && !nearby.coords)}
             onClick={handleRefreshWeather}
             aria-label="날씨 새로고침"
           >
             <RefreshIcon className="ui-icon" aria-hidden />
             날씨 새로고침
           </button>
-          <button
-            type="button"
-            className="btn primary"
-            disabled={busy}
-            onClick={() => setManageOpen(true)}
-            aria-label="메뉴 관리"
-          >
-            <ListPlusIcon className="ui-icon" aria-hidden />
-            메뉴 관리
-          </button>
+          {!isNearby ? (
+            <button
+              type="button"
+              className="btn primary"
+              disabled={busy}
+              onClick={() => setManageOpen(true)}
+              aria-label="메뉴 관리"
+            >
+              <ListPlusIcon className="ui-icon" aria-hidden />
+              메뉴 관리
+            </button>
+          ) : null}
         </div>
       </header>
 
       <section className="layout">
         <LunchWheel
-          team={team}
+          team={weatherLocation || team}
           menus={menus}
           displayOrder={displayOrder}
           setDisplayOrder={setDisplayOrder}
@@ -229,10 +315,32 @@ export default function App() {
           spinning={spinning}
           setSpinning={setSpinning}
           onToast={showToast}
-          disabledExtras={menuSaving || exclusionSaving}
+          disabledExtras={
+            menuSaving ||
+            exclusionSaving ||
+            nearby.loading ||
+            (isNearby && menus.length === 0)
+          }
         />
 
         <aside className="side">
+          {isNearby ? (
+            <NearbyControls
+              settings={nearby.settings}
+              onSettingsChange={nearby.setSettings}
+              loading={nearby.loading}
+              disabled={spinning}
+              fromCache={nearby.fromCache}
+              fetchedAt={nearby.fetchedAt}
+              filteredCount={nearby.filteredPlaces.length}
+              rawCount={nearby.rawPlaces.length}
+              apiCallsThisSession={nearby.apiCallsThisSession}
+              error={nearby.error}
+              onLoad={handleNearbyLoad}
+              onForceRefresh={handleNearbyForceRefresh}
+            />
+          ) : null}
+
           <MenuExclusionList
             menus={menus}
             excludedIds={excludedIds}
@@ -246,17 +354,20 @@ export default function App() {
       </section>
 
       <footer>
-        현재 날씨: Open-Meteo API · 위치 기준: {location}(
-        {team.weather_latitude}, {team.weather_longitude})
+        현재 날씨: Open-Meteo API · 위치 기준: {locationLabel}
+        {weatherLocation
+          ? ` (${weatherLocation.weather_latitude}, ${weatherLocation.weather_longitude})`
+          : ''}
         <br />
-        메뉴와 오늘 제외 상태는 Supabase에 저장됩니다.
-        {/* TEMP: anon RLS — Auth 도입 전 임시 정책 */}
+        {isNearby
+          ? '내 주변 모드는 Places Nearby를 불러오기 버튼으로만 호출하고, 결과는 브라우저에 30분 캐시합니다.'
+          : '메뉴와 오늘 제외 상태는 Supabase에 저장됩니다.'}
       </footer>
 
       <MenuManagerDialog
         open={manageOpen}
         onClose={() => setManageOpen(false)}
-        menus={menus}
+        menus={teamMenus}
         menuTypes={menuTypes}
         team={team}
         saving={menuSaving}

@@ -97,6 +97,34 @@ h1 {
   gap: 8px;
 }
 
+.mode-toggle {
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.mode-toggle button {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 7px 12px;
+  background: var(--canvas);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mode-toggle button.is-active {
+  border-color: var(--primary-shadow);
+  background: #f3f8ef;
+  color: var(--primary-shadow);
+}
+
+.mode-toggle button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -403,6 +431,43 @@ canvas {
 .side {
   display: grid;
   gap: 14px;
+}
+
+.nearby-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.nearby-fields label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.nearby-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.nearby-status {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.nearby-status p {
+  margin: 0 0 4px;
+}
+
+.nearby-error {
+  color: var(--accent-red);
+  font-weight: 700;
 }
 
 .side-card {
@@ -1110,6 +1175,14 @@ footer {
   }
 
   .side {
+    grid-template-columns: 1fr;
+  }
+
+  .nearby-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .nearby-actions {
     grid-template-columns: 1fr;
   }
 
