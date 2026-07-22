@@ -236,11 +236,7 @@ export default function App() {
     : team?.location_name || '양재역'
 
   if (loading) {
-    return (
-      <main className="app">
-        <div className="state-panel">메뉴와 팀 데이터를 불러오는 중…</div>
-      </main>
-    )
+    return <main className="app" aria-busy="true" />
   }
 
   if (dataError || !team) {
@@ -262,8 +258,10 @@ export default function App() {
     <main className="app">
       <header className="topbar">
         <div>
-          <div className="eyebrow">{locationLabel} 기준 · 현재 날씨 반영</div>
-          <h1>오늘 뭐 먹지?</h1>
+          <div className="title-row">
+            <h1>오늘 뭐 먹지?</h1>
+            <span className="title-location">{locationLabel}</span>
+          </div>
           {isNearby ? (
             <div className="location-banner">
               <div className="location-banner-text">
@@ -306,7 +304,7 @@ export default function App() {
               disabled={busy}
               onClick={() => setMode('team')}
             >
-              팀 메뉴
+              양재역 주변
             </button>
             <button
               type="button"
