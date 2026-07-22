@@ -8,9 +8,28 @@ import {
   updateMenu,
 } from '../services/menuService'
 import { fetchExclusions } from '../services/exclusionService'
+import {
+  deactivateGoogleLinksForMenu,
+  deactivatePlaceLink,
+  fetchPlaceLinks,
+  upsertGooglePlaceLink,
+} from '../services/placeLinkService'
 import { getKoreaDateString } from '../utils/koreaDate'
 import { TEAM_SLUG } from '../constants/app'
 import { isSupabaseConfigured } from '../lib/supabase'
+
+function attachLinks(menus, links) {
+  const byMenu = new Map()
+  links.forEach((link) => {
+    const list = byMenu.get(link.menu_id) || []
+    list.push(link)
+    byMenu.set(link.menu_id, list)
+  })
+  return menus.map((menu) => ({
+    ...menu,
+    place_links: byMenu.get(menu.id) || [],
+  }))
+}
 
 export function useMenus() {
   const [team, setTeam] = useState(null)
@@ -31,15 +50,16 @@ export function useMenus() {
       }
 
       const activeTeam = await fetchActiveTeamBySlug(TEAM_SLUG)
-      const [types, activeMenus, exclusions] = await Promise.all([
+      const [types, activeMenus, exclusions, links] = await Promise.all([
         fetchActiveMenuTypes(activeTeam.id),
         fetchActiveMenus(activeTeam.id),
         fetchExclusions(activeTeam.id, getKoreaDateString()),
+        fetchPlaceLinks(activeTeam.id),
       ])
 
       setTeam(activeTeam)
       setMenuTypes(types)
-      setMenus(activeMenus)
+      setMenus(attachLinks(activeMenus, links))
       setExcludedIds(new Set(exclusions.map((row) => row.menu_id)))
     } catch (err) {
       console.error(err)
@@ -70,7 +90,7 @@ export function useMenus() {
           menuTypeId,
           sortOrder,
         })
-        setMenus((prev) => [...prev, created])
+        setMenus((prev) => [...prev, { ...created, place_links: [] }])
         return created
       } finally {
         setSaving(false)
@@ -83,7 +103,13 @@ export function useMenus() {
     setSaving(true)
     try {
       const updated = await updateMenu({ id, name, menuTypeId })
-      setMenus((prev) => prev.map((menu) => (menu.id === id ? updated : menu)))
+      setMenus((prev) =>
+        prev.map((menu) =>
+          menu.id === id
+            ? { ...updated, place_links: menu.place_links || [] }
+            : menu,
+        ),
+      )
       return updated
     } finally {
       setSaving(false)
@@ -105,6 +131,62 @@ export function useMenus() {
     }
   }, [])
 
+  const connectGooglePlace = useCallback(
+    async ({ menuId, place }) => {
+      if (!team) throw new Error('팀 정보가 없습니다.')
+      setSaving(true)
+      try {
+        const link = await upsertGooglePlaceLink({
+          teamId: team.id,
+          menuId,
+          place,
+        })
+        setMenus((prev) =>
+          prev.map((menu) => {
+            if (menu.id !== menuId) return menu
+            const others = (menu.place_links || []).filter(
+              (item) => !(item.provider === 'google' && item.is_active),
+            )
+            return { ...menu, place_links: [...others, link] }
+          }),
+        )
+        return link
+      } finally {
+        setSaving(false)
+      }
+    },
+    [team],
+  )
+
+  const disconnectGooglePlace = useCallback(async (menuId) => {
+    setSaving(true)
+    try {
+      const menu = menus.find((item) => item.id === menuId)
+      const googleLinks = (menu?.place_links || []).filter(
+        (link) => link.provider === 'google',
+      )
+      if (googleLinks.length) {
+        await Promise.all(googleLinks.map((link) => deactivatePlaceLink(link.id)))
+      } else {
+        await deactivateGoogleLinksForMenu(menuId)
+      }
+      setMenus((prev) =>
+        prev.map((item) =>
+          item.id === menuId
+            ? {
+                ...item,
+                place_links: (item.place_links || []).filter(
+                  (link) => link.provider !== 'google',
+                ),
+              }
+            : item,
+        ),
+      )
+    } finally {
+      setSaving(false)
+    }
+  }, [menus])
+
   return {
     team,
     menuTypes,
@@ -119,5 +201,7 @@ export function useMenus() {
     addMenu,
     saveMenu,
     removeMenu,
+    connectGooglePlace,
+    disconnectGooglePlace,
   }
 }

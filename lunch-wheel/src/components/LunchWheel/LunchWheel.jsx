@@ -101,6 +101,7 @@ export default function LunchWheel({
         setResult({
           name: targetMenu.name,
           reason: weatherReason(targetMenu, weatherSnapshot),
+          place_links: targetMenu.place_links || [],
         })
         if (navigator.vibrate) navigator.vibrate([60, 45, 90])
       }
@@ -199,6 +200,7 @@ export default function LunchWheel({
         visible={Boolean(result)}
         menuName={result?.name}
         reason={result?.reason}
+        placeLinks={result?.place_links}
       />
     </article>
   )

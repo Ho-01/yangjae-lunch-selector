@@ -464,30 +464,35 @@ canvas {
   padding-right: 3px;
 }
 
+.ban-item-block {
+  padding: 8px 9px;
+  border-bottom: 1px solid var(--line);
+  background: var(--canvas);
+}
+
+.ban-item-block:last-child {
+  border-bottom: 0;
+}
+
+.ban-item-block:hover {
+  background: var(--surface-1);
+}
+
+.ban-item-block.is-banned {
+  color: #999;
+  background: #fff7f7;
+}
+
+.ban-item-block.is-banned .ban-name {
+  text-decoration: line-through;
+}
+
 .ban-item {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 9px;
-  min-height: 42px;
-  padding: 8px 9px;
-  border-bottom: 1px solid var(--line);
-  background: var(--canvas);
-  transition: background 0.12s ease;
-}
-
-.ban-item:last-child {
-  border-bottom: 0;
-}
-
-.ban-item:hover {
-  background: var(--surface-1);
-}
-
-.ban-item.is-banned {
-  color: #999;
-  background: #fff7f7;
-  text-decoration: line-through;
+  min-height: 34px;
 }
 
 .ban-item input {
@@ -709,20 +714,195 @@ select:focus {
   gap: 6px;
 }
 
+.edit-block {
+  padding: 7px 0 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.edit-block:last-child {
+  border-bottom: 0;
+}
+
 .edit-row {
   display: grid;
   grid-template-columns: minmax(170px, 1fr) 170px auto auto;
   gap: 7px;
   align-items: center;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.edit-row:last-child {
+  padding: 0;
   border-bottom: 0;
 }
 
+.place-link-editor {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-1);
+}
+
+.place-link-empty,
+.place-link-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.place-link-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.place-link-meta strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.place-link-address {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.place-search-panel {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.place-search-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.place-search-results {
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.place-result {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 9px 10px;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.place-result:hover {
+  background: #f3f8ef;
+}
+
+.place-result strong {
+  display: block;
+  font-size: 13px;
+}
+
+.place-result span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.place-result em {
+  font-style: normal;
+  font-weight: 800;
+  color: var(--secondary);
+  font-size: 12px;
+}
+
+.place-meta {
+  margin-top: 6px;
+}
+
+.place-meta.is-compact {
+  margin-left: 26px;
+}
+
+.place-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.place-rating {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.place-rating.muted {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.place-map-link {
+  color: var(--secondary);
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.place-map-link:hover {
+  text-decoration: underline;
+}
+
+.place-photo-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 7px;
+  overflow-x: auto;
+}
+
+.place-photo-row img {
+  width: 72px;
+  height: 54px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+  flex: 0 0 auto;
+}
+
+.place-meta.is-compact .place-photo-row img {
+  width: 56px;
+  height: 42px;
+}
+
+.result-place {
+  padding: 0 15px 14px;
+}
+
+.result-place .place-photo-row img {
+  width: 88px;
+  height: 66px;
+}
+
 .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--line);
   border-radius: 9px;
   padding: 9px 10px;
@@ -730,6 +910,7 @@ select:focus {
   color: var(--ink);
   font-size: 12px;
   font-weight: 800;
+  text-decoration: none;
 }
 
 .icon-btn:hover {

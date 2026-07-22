@@ -27,6 +27,8 @@ export default function App() {
     addMenu,
     saveMenu,
     removeMenu,
+    connectGooglePlace,
+    disconnectGooglePlace,
   } = useMenus()
 
   const {
@@ -256,10 +258,14 @@ export default function App() {
         onClose={() => setManageOpen(false)}
         menus={menus}
         menuTypes={menuTypes}
+        team={team}
         saving={menuSaving}
         onAdd={handleAddMenu}
         onSave={handleSaveMenu}
         onDelete={handleDeleteMenu}
+        onConnectPlace={connectGooglePlace}
+        onDisconnectPlace={disconnectGooglePlace}
+        onToast={showToast}
       />
 
       <Toast message={toast} />

@@ -1,4 +1,5 @@
 import TypeChip from './TypeChip'
+import PlaceMeta from './PlaceMeta'
 
 export default function MenuExclusionList({
   menus,
@@ -39,22 +40,29 @@ export default function MenuExclusionList({
           menus.map((menu) => {
             const banned = excludedIds.has(menu.id)
             return (
-              <label
+              <div
                 key={menu.id}
-                className={`ban-item${banned ? ' is-banned' : ''}`}
+                className={`ban-item-block${banned ? ' is-banned' : ''}`}
               >
-                <input
-                  type="checkbox"
-                  checked={banned}
-                  disabled={disabled}
-                  aria-label={`${menu.name} 오늘 제외`}
-                  onChange={(event) => onToggle(menu.id, event.target.checked)}
+                <label className="ban-item">
+                  <input
+                    type="checkbox"
+                    checked={banned}
+                    disabled={disabled}
+                    aria-label={`${menu.name} 오늘 제외`}
+                    onChange={(event) => onToggle(menu.id, event.target.checked)}
+                  />
+                  <span className="ban-name" title={menu.name}>
+                    {menu.name}
+                  </span>
+                  <TypeChip menuType={menu.menu_type} />
+                </label>
+                <PlaceMeta
+                  placeLinks={menu.place_links}
+                  compact
+                  showPhotos
                 />
-                <span className="ban-name" title={menu.name}>
-                  {menu.name}
-                </span>
-                <TypeChip menuType={menu.menu_type} />
-              </label>
+              </div>
             )
           })
         )}
