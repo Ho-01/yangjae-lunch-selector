@@ -30,12 +30,16 @@ GOOGLE_PLACES_API_KEY=
 2. `supabase/seed.sql`
 3. `supabase/migrations/20260722150000_create_menu_place_link.sql`  
    (이미 1·2를 적용한 프로젝트는 **3만** 실행하면 됩니다.)
+4. `supabase/migrations/20260722160000_menu_place_photos_storage.sql`  
+   (팀 메뉴 Google 사진 Storage 캐시 버킷)
 
 Supabase Dashboard SQL Editor에서 위 순서로 실행하거나, Supabase CLI로 마이그레이션/시드를 적용합니다.
 
 ### `t_menu_place_link`
 
 메뉴당 지도/장소 링크를 여러 개 둘 수 있는 테이블입니다. Google Places 연동 시 `place_id`, 별점, 사진 메타를 캐시합니다. API 키는 DB가 아니라 서버 env에 둡니다.
+
+팀 메뉴 사진은 연결 시 Supabase Storage에 저장하고, `fetched_at` 기준 **7일**마다 백그라운드에서 별점·사진을 갱신합니다. 평소 접속 시 Google Photo API는 호출하지 않습니다. 내 주변 모드는 사진을 받지 않습니다.
 
 4. 개발 서버
 

@@ -14,6 +14,10 @@ import {
   fetchPlaceLinks,
   upsertGooglePlaceLink,
 } from '../services/placeLinkService'
+import {
+  cachePlacePhotosForLink,
+  refreshStalePlaceLinks,
+} from '../services/placePhotoCache'
 import { getKoreaDateString } from '../utils/koreaDate'
 import { TEAM_SLUG } from '../constants/app'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -29,6 +33,14 @@ function attachLinks(menus, links) {
     ...menu,
     place_links: byMenu.get(menu.id) || [],
   }))
+}
+
+function replaceLinkInMenus(menus, nextLink) {
+  return menus.map((menu) => {
+    if (menu.id !== nextLink.menu_id) return menu
+    const others = (menu.place_links || []).filter((item) => item.id !== nextLink.id)
+    return { ...menu, place_links: [...others, nextLink] }
+  })
 }
 
 export function useMenus() {
@@ -61,6 +73,13 @@ export function useMenus() {
       setMenuTypes(types)
       setMenus(attachLinks(activeMenus, links))
       setExcludedIds(new Set(exclusions.map((row) => row.menu_id)))
+
+      // Background: cache missing photos / refresh weekly (does not block UI)
+      refreshStalePlaceLinks(links, {
+        onUpdated: (nextLink) => {
+          setMenus((prev) => replaceLinkInMenus(prev, nextLink))
+        },
+      }).catch((err) => console.error(err))
     } catch (err) {
       console.error(err)
       setError(err?.message || '데이터를 불러오지 못했습니다.')
@@ -136,11 +155,12 @@ export function useMenus() {
       if (!team) throw new Error('팀 정보가 없습니다.')
       setSaving(true)
       try {
-        const link = await upsertGooglePlaceLink({
+        let link = await upsertGooglePlaceLink({
           teamId: team.id,
           menuId,
           place,
         })
+
         setMenus((prev) =>
           prev.map((menu) => {
             if (menu.id !== menuId) return menu
@@ -150,6 +170,10 @@ export function useMenus() {
             return { ...menu, place_links: [...others, link] }
           }),
         )
+
+        // Cache photos to Storage (Google Photo billed once here)
+        link = await cachePlacePhotosForLink(link, place.photoRefs || [])
+        setMenus((prev) => replaceLinkInMenus(prev, link))
         return link
       } finally {
         setSaving(false)

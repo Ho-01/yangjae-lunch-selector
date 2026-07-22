@@ -1,9 +1,6 @@
 import { useState } from 'react'
-import {
-  getPrimaryGoogleLink,
-  googlePlacePhotoUrl,
-  searchGooglePlaces,
-} from '../services/placesApi'
+import { getPrimaryGoogleLink, searchGooglePlaces } from '../services/placesApi'
+import { getPlacePhotoSrcs } from '../services/placePhotoCache'
 
 export default function PlaceLinkEditor({
   menu,
@@ -19,6 +16,7 @@ export default function PlaceLinkEditor({
   const [searching, setSearching] = useState(false)
 
   const link = getPrimaryGoogleLink(menu.place_links)
+  const photos = link ? getPlacePhotoSrcs(link, 4) : []
 
   async function handleSearch() {
     const q = query.trim() || menu.name
@@ -112,15 +110,10 @@ export default function PlaceLinkEditor({
               해제
             </button>
           </div>
-          {Array.isArray(link.photo_refs) && link.photo_refs.length > 0 ? (
+          {photos.length > 0 ? (
             <div className="place-photo-row">
-              {link.photo_refs.slice(0, 4).map((photo) => (
-                <img
-                  key={photo.name}
-                  src={googlePlacePhotoUrl(photo.name, 160)}
-                  alt=""
-                  loading="lazy"
-                />
+              {photos.map((src) => (
+                <img key={src} src={src} alt="" loading="lazy" />
               ))}
             </div>
           ) : null}

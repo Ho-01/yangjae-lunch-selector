@@ -44,3 +44,8 @@ export const NEARBY_CACHE_TTL_MS = 30 * 60 * 1000
 export const NEARBY_RADIUS_OPTIONS = [500, 1000, 1500, 2000, 3000]
 export const NEARBY_MIN_RATING_OPTIONS = [0, 3.5, 4.0, 4.3]
 export const NEARBY_MAX_RESULTS = 15
+
+/** Team menu Google place cache (ratings + Storage photos) */
+export const PLACE_LINK_REFRESH_MS = 7 * 24 * 60 * 60 * 1000
+export const PLACE_PHOTO_BUCKET = 'menu-place-photos'
+export const PLACE_CACHE_MAX_PHOTOS = 3

@@ -148,6 +148,47 @@ export async function searchNearbyPlaces({
   return (data.places || []).map(mapGooglePlace)
 }
 
+const DETAILS_FIELD_MASK = [
+  'id',
+  'displayName',
+  'formattedAddress',
+  'location',
+  'rating',
+  'userRatingCount',
+  'photos',
+  'googleMapsUri',
+  'nationalPhoneNumber',
+  'primaryType',
+].join(',')
+
+export async function fetchPlaceDetails({ apiKey, placeId }) {
+  const id = String(placeId || '').replace(/^places\//, '')
+  if (!id) {
+    throw new Error('placeId가 필요합니다.')
+  }
+
+  const res = await fetch(
+    `https://places.googleapis.com/v1/places/${encodeURIComponent(id)}`,
+    {
+      method: 'GET',
+      headers: {
+        'X-Goog-Api-Key': apiKey,
+        'X-Goog-FieldMask': DETAILS_FIELD_MASK,
+      },
+    },
+  )
+
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const message = data?.error?.message || `장소 상세 조회 실패 (${res.status})`
+    const error = new Error(message)
+    error.status = res.status
+    throw error
+  }
+
+  return mapGooglePlace(data)
+}
+
 export async function fetchPlacePhotoBuffer({
   apiKey,
   name,

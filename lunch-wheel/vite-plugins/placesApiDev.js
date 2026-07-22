@@ -1,4 +1,5 @@
 import {
+  fetchPlaceDetails,
   fetchPlacePhotoBuffer,
   getGooglePlacesApiKey,
   readJsonBody,
@@ -71,6 +72,24 @@ export function placesApiDevPlugin() {
                 note: 'Nearby Search 1회 호출입니다. 클라이언트 캐시를 사용하세요.',
               },
             })
+          }
+
+          if (req.method === 'GET' && (req.url || '').startsWith('/api/places/details')) {
+            const apiKey = getGooglePlacesApiKey()
+            if (!apiKey) {
+              return sendJson(res, 500, {
+                error: 'GOOGLE_PLACES_API_KEY가 서버에 설정되지 않았습니다.',
+              })
+            }
+
+            const url = new URL(req.url, 'http://localhost')
+            const placeId = String(url.searchParams.get('placeId') || '').trim()
+            if (!placeId) {
+              return sendJson(res, 400, { error: 'placeId가 필요합니다.' })
+            }
+
+            const place = await fetchPlaceDetails({ apiKey, placeId })
+            return sendJson(res, 200, { place })
           }
 
           if (req.method === 'GET' && (req.url || '').startsWith('/api/places/photo')) {

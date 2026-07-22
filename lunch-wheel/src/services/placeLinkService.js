@@ -119,6 +119,43 @@ export async function upsertGooglePlaceLink({ teamId, menuId, place }) {
   return mapLink(data)
 }
 
+export async function updatePlaceLinkCache(id, patch) {
+  const { data, error } = await getSupabase()
+    .from('t_menu_place_link')
+    .update({
+      ...patch,
+      fetched_at: patch.fetched_at || new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select(
+      `
+      id,
+      team_id,
+      menu_id,
+      provider,
+      url,
+      place_id,
+      place_name,
+      formatted_address,
+      phone,
+      latitude,
+      longitude,
+      rating,
+      rating_count,
+      photo_refs,
+      photo_urls,
+      fetch_status,
+      fetched_at,
+      sort_order,
+      is_active
+    `,
+    )
+    .single()
+
+  if (error) throw error
+  return mapLink(data)
+}
+
 export async function deactivatePlaceLink(id) {
   const { error } = await getSupabase()
     .from('t_menu_place_link')

@@ -12,6 +12,16 @@ export async function searchGooglePlaces({ query, latitude, longitude }) {
   return data.places || []
 }
 
+export async function fetchGooglePlaceDetails(placeId) {
+  const params = new URLSearchParams({ placeId })
+  const res = await fetch(`/api/places/details?${params.toString()}`)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    throw new Error(data.error || '장소 상세 조회에 실패했습니다.')
+  }
+  return data.place
+}
+
 export function googlePlacePhotoUrl(photoName, maxWidthPx = 320) {
   if (!photoName) return ''
   const params = new URLSearchParams({

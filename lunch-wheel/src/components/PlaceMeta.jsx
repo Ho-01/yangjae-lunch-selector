@@ -1,4 +1,5 @@
-import { getPrimaryGoogleLink, googlePlacePhotoUrl } from '../services/placesApi'
+import { getPrimaryGoogleLink } from '../services/placesApi'
+import { getPlacePhotoSrcs } from '../services/placePhotoCache'
 
 export default function PlaceMeta({
   placeLinks,
@@ -7,6 +8,8 @@ export default function PlaceMeta({
 }) {
   const link = getPrimaryGoogleLink(placeLinks)
   if (!link) return null
+
+  const photos = showPhotos ? getPlacePhotoSrcs(link, compact ? 3 : 4) : []
 
   return (
     <div className={`place-meta${compact ? ' is-compact' : ''}`}>
@@ -31,15 +34,10 @@ export default function PlaceMeta({
           </a>
         ) : null}
       </div>
-      {showPhotos && Array.isArray(link.photo_refs) && link.photo_refs.length > 0 ? (
+      {photos.length > 0 ? (
         <div className="place-photo-row">
-          {link.photo_refs.slice(0, 4).map((photo) => (
-            <img
-              key={photo.name}
-              src={googlePlacePhotoUrl(photo.name, compact ? 96 : 180)}
-              alt=""
-              loading="lazy"
-            />
+          {photos.map((src) => (
+            <img key={src} src={src} alt="" loading="lazy" />
           ))}
         </div>
       ) : null}
