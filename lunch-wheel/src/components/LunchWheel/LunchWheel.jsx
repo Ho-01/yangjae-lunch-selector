@@ -26,6 +26,7 @@ export default function LunchWheel({
   onToast,
   onSpinComplete,
   ignoreWeather = false,
+  disabledLabel,
   disabledExtras,
 }) {
   const [rotation, setRotation] = useState(0)
@@ -188,9 +189,9 @@ export default function LunchWheel({
           className="spin-btn"
           disabled={spinning || disabledExtras}
           onClick={handleSpin}
-          aria-label={spinLabel}
+          aria-label={disabledExtras && disabledLabel ? disabledLabel : spinLabel}
         >
-          {spinLabel}
+          {disabledExtras && disabledLabel ? disabledLabel : spinLabel}
         </button>
         <button
           type="button"

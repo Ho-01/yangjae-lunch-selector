@@ -552,6 +552,13 @@ export default function App() {
           onToast={showToast}
           onSpinComplete={handleRoomSpinComplete}
           ignoreWeather={isRoom}
+          disabledLabel={
+            isRoom && lunchRoom.room?.status === 'COMPLETED'
+              ? '결정 완료'
+              : isRoom && !lunchRoom.session?.isHost
+                ? '방장이 돌리는 중이에요'
+                : undefined
+          }
           disabledExtras={
             menuSaving ||
             exclusionSaving ||

@@ -4,6 +4,7 @@ import {
   createRoomResultImage,
   downloadRoomResult,
 } from '../utils/roomShareCard'
+import { UI_ICONS } from '../constants/icons'
 
 export default function LunchRoomPanel({
   room,
@@ -16,6 +17,7 @@ export default function LunchRoomPanel({
   onRemoveCandidate,
   onToast,
 }) {
+  const CrownIcon = UI_ICONS.crown
   const [likes, setLikes] = useState([])
   const [veto, setVeto] = useState(null)
   const [query, setQuery] = useState('')
@@ -144,7 +146,7 @@ export default function LunchRoomPanel({
       <div className="room-members">
         {room.members.map((member) => (
           <span key={member.id}>
-            {member.isHost ? '👑 ' : ''}
+            {member.isHost ? <CrownIcon className="room-host-icon" aria-label="방장" /> : null}
             {member.nickname}
           </span>
         ))}

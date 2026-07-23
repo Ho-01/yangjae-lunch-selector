@@ -12,6 +12,26 @@ function fitText(ctx, text, maxWidth) {
   return value
 }
 
+function drawCrown(ctx, x, y, size) {
+  ctx.save()
+  ctx.translate(x, y)
+  ctx.scale(size / 32, size / 32)
+  ctx.beginPath()
+  ctx.moveTo(3, 10)
+  ctx.lineTo(10, 18)
+  ctx.lineTo(16, 7)
+  ctx.lineTo(22, 18)
+  ctx.lineTo(29, 10)
+  ctx.lineTo(26, 26)
+  ctx.lineTo(6, 26)
+  ctx.closePath()
+  ctx.strokeStyle = '#ffc800'
+  ctx.lineWidth = 2.5
+  ctx.lineJoin = 'round'
+  ctx.stroke()
+  ctx.restore()
+}
+
 export async function createRoomResultImage(room) {
   await document.fonts?.ready
   const canvas = document.createElement('canvas')
@@ -46,7 +66,7 @@ export async function createRoomResultImage(room) {
   ctx.fillStyle = '#777777'
   ctx.font = '800 28px Pretendard, sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText('🎉 오늘의 점심은', 540, 235)
+  ctx.fillText('오늘의 점심은', 540, 235)
   ctx.fillStyle = '#3c3c3c'
   ctx.font = '900 82px Pretendard, sans-serif'
   ctx.fillText(fitText(ctx, winner?.name || '결과 확인 중', 850), 540, 345)
@@ -86,14 +106,16 @@ export async function createRoomResultImage(room) {
   ctx.fillStyle = '#777777'
   ctx.font = '750 26px Pretendard, sans-serif'
   const memberNames = room.members
-    .map((member) => `${member.isHost ? '👑 ' : ''}${member.nickname}`)
+    .map((member) => `${member.nickname}${member.isHost ? ' (방장)' : ''}`)
     .join('  ·  ')
-  ctx.fillText(fitText(ctx, memberNames, 930), 72, memberY + 50)
+  const host = room.members.find((member) => member.isHost)
+  if (host) drawCrown(ctx, 72, memberY + 17, 28)
+  ctx.fillText(fitText(ctx, memberNames, 890), host ? 110 : 72, memberY + 50)
 
   ctx.fillStyle = '#58cc02'
   ctx.font = '900 29px Pretendard, sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText('결과에 승복하고 맛있게 먹기 🤝', 540, 1280)
+  ctx.fillText('결과에 승복하고 맛있게 먹기', 540, 1280)
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(
@@ -111,4 +133,3 @@ export function downloadRoomResult(blob, code) {
   link.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
-

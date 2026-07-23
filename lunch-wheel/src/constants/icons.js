@@ -5,6 +5,7 @@ import {
   LuCloudLightning,
   LuCloudRain,
   LuCloudSun,
+  LuCrown,
   LuFlame,
   LuLeaf,
   LuListPlus,
@@ -49,6 +50,7 @@ export const UI_ICONS = {
   listPlus: LuListPlus,
   shuffle: LuShuffle,
   close: LuX,
+  crown: LuCrown,
 }
 
 export function getTypeIcon(iconKey) {

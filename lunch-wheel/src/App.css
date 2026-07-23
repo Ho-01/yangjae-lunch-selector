@@ -276,6 +276,14 @@ body {
   font-weight: 800;
 }
 
+.room-host-icon {
+  width: 13px;
+  height: 13px;
+  margin-right: 3px;
+  color: var(--accent-yellow);
+  vertical-align: -2px;
+}
+
 .room-instruction {
   display: grid;
   gap: 2px;
