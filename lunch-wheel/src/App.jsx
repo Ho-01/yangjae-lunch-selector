@@ -341,11 +341,13 @@ export default function App() {
 
   const busy =
     spinning || menuSaving || exclusionSaving || nearby.loading || nearby.locating
-  const locationLabel = isNearby
-    ? nearby.locating
-      ? '위치 확인 중…'
-      : nearby.locationLabel || (nearby.coords ? '내 위치' : '내 위치 (미확인)')
-    : team?.location_name || '양재역'
+  const locationLabel = isRoom
+    ? lunchRoom.room?.locationLabel || '점심방'
+    : isNearby
+      ? nearby.locating
+        ? '위치 확인 중…'
+        : nearby.locationLabel || (nearby.coords ? '내 위치' : '내 위치 (미확인)')
+      : team?.location_name || '양재역'
 
   if (loading) {
     return <main className="app" aria-busy="true" />
