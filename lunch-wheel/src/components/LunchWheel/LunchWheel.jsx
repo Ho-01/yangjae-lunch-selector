@@ -24,6 +24,7 @@ export default function LunchWheel({
   spinning,
   setSpinning,
   onToast,
+  onSpinComplete,
   disabledExtras,
 }) {
   const [rotation, setRotation] = useState(0)
@@ -103,6 +104,7 @@ export default function LunchWheel({
           reason: weatherReason(targetMenu, weatherSnapshot),
           place_links: targetMenu.place_links || [],
         })
+        onSpinComplete?.(targetMenu)
         if (navigator.vibrate) navigator.vibrate([60, 45, 90])
       }
     }

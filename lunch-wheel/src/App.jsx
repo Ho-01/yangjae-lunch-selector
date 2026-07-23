@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import LunchWheel from './components/LunchWheel/LunchWheel'
+import LunchRoomDialog from './components/LunchRoomDialog'
+import LunchRoomPanel from './components/LunchRoomPanel'
 import MenuExclusionList from './components/MenuExclusionList'
 import MenuManagerDialog from './components/MenuManagerDialog'
 import MenuTypeManagerDialog from './components/MenuTypeManagerDialog'
@@ -10,6 +12,7 @@ import { UI_ICONS } from './constants/icons'
 import { useMenus } from './hooks/useMenus'
 import { useDailyExclusions } from './hooks/useDailyExclusions'
 import { useNearbyPlaces } from './hooks/useNearbyPlaces'
+import { useLunchRoom } from './hooks/useLunchRoom'
 import { useWeather } from './hooks/useWeather'
 import { getWeightedMenus } from './utils/weatherWeights'
 
@@ -41,6 +44,7 @@ export default function App() {
   } = useMenus()
 
   const nearby = useNearbyPlaces()
+  const lunchRoom = useLunchRoom(team?.id)
 
   const weatherLocation = isNearby ? nearby.weatherLocation : team
   const {
@@ -68,6 +72,10 @@ export default function App() {
   const [displayOrder, setDisplayOrder] = useState([])
   const [manageOpen, setManageOpen] = useState(false)
   const [typeManageOpen, setTypeManageOpen] = useState(false)
+  const [roomInviteCode] = useState(
+    () => new URLSearchParams(window.location.search).get('room') || '',
+  )
+  const [roomDialogOpen, setRoomDialogOpen] = useState(Boolean(roomInviteCode))
   const [spinning, setSpinning] = useState(false)
   const [toast, setToast] = useState('')
   const toastTimer = useRef(0)
@@ -88,6 +96,17 @@ export default function App() {
     () => getWeightedMenus(menus, excludedIds, weather),
     [menus, excludedIds, weather],
   )
+
+  const roomCandidateMenus = useMemo(() => {
+    if (!lunchRoom.room || lunchRoom.room.status === 'OPEN') return null
+    const ids = new Set(lunchRoom.room.candidateMenuIds || [])
+    return teamMenus.filter((menu) => ids.has(menu.id))
+  }, [lunchRoom.room, teamMenus])
+
+  const wheelMenus =
+    !isNearby && roomCandidateMenus?.length ? roomCandidateMenus : menus
+  const wheelExcludedIds =
+    !isNearby && roomCandidateMenus?.length ? new Set() : excludedIds
 
   function showToast(message) {
     setToast(message)
@@ -255,6 +274,37 @@ export default function App() {
     }
   }
 
+  async function handleCreateRoom(nickname) {
+    try {
+      setMode('team')
+      const room = await lunchRoom.create(nickname)
+      showToast(`점심방 ${room.code}를 만들었어요.`)
+    } catch (err) {
+      showToast(err?.message || '점심방을 만들지 못했어요.')
+      throw err
+    }
+  }
+
+  async function handleJoinRoom(code, nickname) {
+    try {
+      setMode('team')
+      await lunchRoom.join(code, nickname)
+      showToast(`${code} 방에 참여했어요.`)
+    } catch (err) {
+      showToast(err?.message || '점심방에 참여하지 못했어요.')
+      throw err
+    }
+  }
+
+  async function handleRoomSpinComplete(menu) {
+    if (!lunchRoom.session?.isHost) return
+    try {
+      await lunchRoom.complete(menu.id)
+    } catch (err) {
+      showToast(err?.message || '점심방 결과를 저장하지 못했어요.')
+    }
+  }
+
   useEffect(() => {
     if (!isNearby) return
     if (nearby.coords || nearby.locating) return
@@ -370,6 +420,14 @@ export default function App() {
                 type="button"
                 className="btn ghost"
                 disabled={busy}
+                onClick={() => setRoomDialogOpen(true)}
+              >
+                같이 고르기
+              </button>
+              <button
+                type="button"
+                className="btn ghost"
+                disabled={busy}
                 onClick={() => setTypeManageOpen(true)}
                 aria-label="메뉴 타입 관리"
               >
@@ -390,13 +448,39 @@ export default function App() {
         </div>
       </header>
 
+      {!isNearby && lunchRoom.room ? (
+        <LunchRoomPanel
+          room={lunchRoom.room}
+          session={lunchRoom.session}
+          loading={lunchRoom.loading}
+          onVote={async (likes, veto) => {
+            try {
+              await lunchRoom.vote(likes, veto)
+              showToast('내 선택을 저장했어요.')
+            } catch (err) {
+              showToast(err?.message || '투표를 저장하지 못했어요.')
+            }
+          }}
+          onCloseVoting={async () => {
+            try {
+              await lunchRoom.close()
+              showToast('투표를 마감하고 후보를 정했어요.')
+            } catch (err) {
+              showToast(err?.message || '투표를 마감하지 못했어요.')
+            }
+          }}
+          onLeave={lunchRoom.leave}
+          onToast={showToast}
+        />
+      ) : null}
+
       <section className="layout">
         <LunchWheel
           team={weatherLocation || team}
-          menus={menus}
+          menus={wheelMenus}
           displayOrder={displayOrder}
           setDisplayOrder={setDisplayOrder}
-          excludedIds={excludedIds}
+          excludedIds={wheelExcludedIds}
           weather={weather}
           weatherLoading={weatherLoading}
           weatherError={weatherError}
@@ -404,11 +488,17 @@ export default function App() {
           spinning={spinning}
           setSpinning={setSpinning}
           onToast={showToast}
+          onSpinComplete={handleRoomSpinComplete}
           disabledExtras={
             menuSaving ||
             exclusionSaving ||
             nearby.loading ||
-            (isNearby && menus.length === 0)
+            (isNearby && menus.length === 0) ||
+            (!isNearby &&
+              lunchRoom.room &&
+              (lunchRoom.room.status === 'OPEN' ||
+                lunchRoom.room.status === 'COMPLETED' ||
+                !lunchRoom.session?.isHost))
           }
         />
 
@@ -473,6 +563,15 @@ export default function App() {
         onConnectPlace={connectGooglePlace}
         onDisconnectPlace={disconnectGooglePlace}
         onToast={showToast}
+      />
+
+      <LunchRoomDialog
+        open={roomDialogOpen}
+        defaultCode={roomInviteCode}
+        onClose={() => setRoomDialogOpen(false)}
+        loading={lunchRoom.loading}
+        onCreate={handleCreateRoom}
+        onJoin={handleJoinRoom}
       />
 
       <MenuTypeManagerDialog
