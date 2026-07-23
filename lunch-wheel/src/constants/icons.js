@@ -10,6 +10,7 @@ import {
   LuLeaf,
   LuListPlus,
   LuLoader,
+  LuPencil,
   LuRefreshCw,
   LuShuffle,
   LuSnowflake,
@@ -51,6 +52,7 @@ export const UI_ICONS = {
   shuffle: LuShuffle,
   close: LuX,
   crown: LuCrown,
+  pencil: LuPencil,
 }
 
 export function getTypeIcon(iconKey) {

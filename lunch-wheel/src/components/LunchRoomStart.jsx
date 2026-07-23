@@ -131,13 +131,13 @@ export default function LunchRoomStart({
         <input
           value={nickname}
           maxLength={20}
-          placeholder="내 닉네임"
+          placeholder="닉네임 (비워두면 자동 생성)"
           onChange={(event) => setNickname(event.target.value)}
         />
         <button
           type="button"
           className="btn primary"
-          disabled={loading || !nickname.trim()}
+          disabled={loading}
           onClick={create}
         >
           {loading ? '준비 중…' : '점심방 만들기'}

@@ -1,4 +1,5 @@
 import { getSupabase } from '../lib/supabase'
+import { resolveRoomNickname } from '../utils/roomNickname'
 
 const CLIENT_ID_KEY = 'lunch-wheel-room-client-id'
 const SESSION_KEY = 'lunch-wheel-room-session'
@@ -35,10 +36,11 @@ async function rpc(name, params) {
 }
 
 export async function createRoom(teamId, nickname, setup) {
+  const resolvedNickname = resolveRoomNickname(nickname)
   if (setup.locationMode === 'NONE') {
     const session = await rpc('create_empty_lunch_room', {
       p_team_id: teamId,
-      p_nickname: nickname,
+      p_nickname: resolvedNickname,
       p_client_id: getRoomClientId(),
     })
     saveRoomSession(session)
@@ -46,7 +48,7 @@ export async function createRoom(teamId, nickname, setup) {
   }
   const session = await rpc('create_lunch_room_v2', {
     p_team_id: teamId,
-    p_nickname: nickname,
+    p_nickname: resolvedNickname,
     p_client_id: getRoomClientId(),
     p_location_mode: setup.locationMode,
     p_location_label: setup.locationLabel || null,
@@ -60,13 +62,23 @@ export async function createRoom(teamId, nickname, setup) {
 }
 
 export async function joinRoom(code, nickname) {
+  const resolvedNickname = resolveRoomNickname(nickname)
   const session = await rpc('join_lunch_room', {
     p_code: code,
-    p_nickname: nickname,
+    p_nickname: resolvedNickname,
     p_client_id: getRoomClientId(),
   })
   saveRoomSession(session)
   return session
+}
+
+export function renameRoomMember(session, nickname) {
+  return rpc('rename_lunch_room_member', {
+    p_code: session.code,
+    p_member_id: session.memberId,
+    p_token: session.token,
+    p_nickname: nickname,
+  })
 }
 
 export async function fetchRoom(code) {

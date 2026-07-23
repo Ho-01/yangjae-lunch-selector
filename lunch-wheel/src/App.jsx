@@ -571,6 +571,16 @@ export default function App() {
               showToast(err?.message || '재촉 알림을 보내지 못했어요.')
             }
           }}
+          onRename={async (nickname) => {
+            try {
+              await lunchRoom.rename(nickname)
+              showToast(`닉네임을 '${nickname}'(으)로 바꿨어요.`)
+              return true
+            } catch (err) {
+              showToast(err?.message || '닉네임을 바꾸지 못했어요.')
+              return false
+            }
+          }}
           onToast={showToast}
         />
       ) : null}

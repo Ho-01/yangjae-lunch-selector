@@ -17,9 +17,11 @@ export default function LunchRoomPanel({
   onAddCandidates,
   onRemoveCandidate,
   onNudge,
+  onRename,
   onToast,
 }) {
   const CrownIcon = UI_ICONS.crown
+  const PencilIcon = UI_ICONS.pencil
   const [likes, setLikes] = useState([])
   const [veto, setVeto] = useState(null)
   const [query, setQuery] = useState('')
@@ -27,6 +29,8 @@ export default function LunchRoomPanel({
   const [searching, setSearching] = useState(false)
   const [searchResults, setSearchResults] = useState([])
   const [clock, setClock] = useState(Date.now())
+  const [renaming, setRenaming] = useState(false)
+  const [nicknameDraft, setNicknameDraft] = useState('')
 
   const winner = room.menus.find((menu) => menu.id === room.winnerMenuId)
   const currentMember = room.members.find((member) => member.id === session.memberId)
@@ -130,6 +134,16 @@ export default function LunchRoomPanel({
     onToast('후보에 추가했어요.')
   }
 
+  async function saveNickname() {
+    const nickname = nicknameDraft.trim()
+    if (!nickname) {
+      onToast('새 닉네임을 입력해주세요.')
+      return
+    }
+    const saved = await onRename(nickname)
+    if (saved !== false) setRenaming(false)
+  }
+
   async function shareResult() {
     try {
       const blob = await createRoomResultImage(room)
@@ -188,6 +202,50 @@ export default function LunchRoomPanel({
             {member.isReady ? <small>준비</small> : null}
           </span>
         ))}
+      </div>
+      <div className="room-profile">
+        {renaming ? (
+          <div className="room-rename-form">
+            <input
+              value={nicknameDraft}
+              maxLength={20}
+              autoFocus
+              aria-label="새 닉네임"
+              onChange={(event) => setNicknameDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') saveNickname()
+                if (event.key === 'Escape') setRenaming(false)
+              }}
+            />
+            <button
+              type="button"
+              className="btn primary"
+              disabled={loading}
+              onClick={saveNickname}
+            >
+              저장
+            </button>
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={() => setRenaming(false)}
+            >
+              취소
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="room-rename-open"
+            onClick={() => {
+              setNicknameDraft(currentMember?.nickname || '')
+              setRenaming(true)
+            }}
+          >
+            <PencilIcon className="ui-icon" aria-hidden />
+            내 닉네임 변경
+          </button>
+        )}
       </div>
 
       {room.events?.length ? (

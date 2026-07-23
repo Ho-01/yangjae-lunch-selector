@@ -14,6 +14,7 @@ import {
   setMemberReady,
   startRoomSpin,
   sendRoomNudge,
+  renameRoomMember,
 } from '../services/lunchRoomService'
 
 export function useLunchRoom(teamId) {
@@ -143,6 +144,14 @@ export function useLunchRoom(teamId) {
       return next
     })
 
+  const rename = (nickname) =>
+    run(async () => {
+      await renameRoomMember(session, nickname)
+      const next = await refresh()
+      notifyRoomChanged('member_renamed')
+      return next
+    })
+
   const complete = (menuId) =>
     run(async () => {
       await completeRoom(session, menuId)
@@ -186,6 +195,7 @@ export function useLunchRoom(teamId) {
     close,
     startSpin,
     nudge,
+    rename,
     complete,
     addCandidates,
     removeCandidate,

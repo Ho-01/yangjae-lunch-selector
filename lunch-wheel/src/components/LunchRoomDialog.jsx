@@ -28,7 +28,6 @@ export default function LunchRoomDialog({
 
   async function submit(event) {
     event.preventDefault()
-    if (!nickname.trim()) return
     if (mode === 'create') await onCreate(nickname.trim())
     else await onJoin(code.trim().toUpperCase(), nickname.trim())
     onClose()
@@ -90,9 +89,8 @@ export default function LunchRoomDialog({
           <input
             value={nickname}
             maxLength={20}
-            placeholder="함께 볼 닉네임"
+            placeholder="비워두면 자동으로 만들어드려요"
             onChange={(event) => setNickname(event.target.value)}
-            required
           />
         </label>
         <button type="submit" className="btn primary room-submit" disabled={loading}>
