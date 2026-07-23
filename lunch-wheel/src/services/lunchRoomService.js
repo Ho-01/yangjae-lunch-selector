@@ -34,11 +34,17 @@ async function rpc(name, params) {
   return data
 }
 
-export async function createRoom(teamId, nickname) {
-  const session = await rpc('create_lunch_room', {
+export async function createRoom(teamId, nickname, setup) {
+  const session = await rpc('create_lunch_room_v2', {
     p_team_id: teamId,
     p_nickname: nickname,
     p_client_id: getRoomClientId(),
+    p_location_mode: setup.locationMode,
+    p_location_label: setup.locationLabel || null,
+    p_latitude: setup.latitude || null,
+    p_longitude: setup.longitude || null,
+    p_radius_meters: setup.radiusMeters || null,
+    p_candidates: setup.candidates,
   })
   saveRoomSession(session)
   return session
@@ -55,21 +61,21 @@ export async function joinRoom(code, nickname) {
 }
 
 export function fetchRoom(code) {
-  return rpc('get_lunch_room', { p_code: code })
+  return rpc('get_lunch_room_v2', { p_code: code })
 }
 
 export function saveVotes(session, likeMenuIds, vetoMenuId) {
-  return rpc('save_lunch_room_votes', {
+  return rpc('save_lunch_room_candidate_votes', {
     p_code: session.code,
     p_member_id: session.memberId,
     p_token: session.token,
-    p_like_menu_ids: likeMenuIds,
-    p_veto_menu_id: vetoMenuId || null,
+    p_like_candidate_ids: likeMenuIds,
+    p_veto_candidate_id: vetoMenuId || null,
   })
 }
 
 export function closeVoting(session) {
-  return rpc('close_lunch_room_voting', {
+  return rpc('close_lunch_room_voting_v2', {
     p_code: session.code,
     p_member_id: session.memberId,
     p_token: session.token,
@@ -77,11 +83,28 @@ export function closeVoting(session) {
 }
 
 export function completeRoom(session, winnerMenuId) {
-  return rpc('complete_lunch_room', {
+  return rpc('complete_lunch_room_v2', {
     p_code: session.code,
     p_member_id: session.memberId,
     p_token: session.token,
-    p_winner_menu_id: winnerMenuId,
+    p_winner_candidate_id: winnerMenuId,
   })
 }
 
+export function addRoomCandidates(session, candidates) {
+  return rpc('add_lunch_room_candidates', {
+    p_code: session.code,
+    p_member_id: session.memberId,
+    p_token: session.token,
+    p_candidates: candidates,
+  })
+}
+
+export function removeRoomCandidate(session, candidateId) {
+  return rpc('remove_lunch_room_candidate', {
+    p_code: session.code,
+    p_member_id: session.memberId,
+    p_token: session.token,
+    p_candidate_id: candidateId,
+  })
+}

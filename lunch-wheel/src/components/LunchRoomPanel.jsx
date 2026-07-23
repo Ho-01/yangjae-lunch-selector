@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { searchGooglePlaces } from '../services/placesApi'
 
 export default function LunchRoomPanel({
   room,
@@ -7,10 +8,16 @@ export default function LunchRoomPanel({
   onVote,
   onCloseVoting,
   onLeave,
+  onAddCandidates,
+  onRemoveCandidate,
   onToast,
 }) {
   const [likes, setLikes] = useState([])
   const [veto, setVeto] = useState(null)
+  const [query, setQuery] = useState('')
+  const [manualName, setManualName] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState([])
 
   const winner = room.menus.find((menu) => menu.id === room.winnerMenuId)
   const candidates = useMemo(
@@ -46,6 +53,43 @@ export default function LunchRoomPanel({
     }
   }
 
+  async function searchPlaces() {
+    if (query.trim().length < 2) return
+    setSearching(true)
+    try {
+      setSearchResults(await searchGooglePlaces({
+        query: query.trim(),
+        latitude: room.latitude,
+        longitude: room.longitude,
+      }))
+    } catch (err) {
+      onToast(err.message || '식당을 검색하지 못했어요.')
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  async function addPlace(place) {
+    await onAddCandidates([{
+      sourceType: 'PLACE_SEARCH',
+      provider: 'google',
+      placeId: place.placeId,
+      name: place.placeName,
+      address: place.formattedAddress,
+      rating: place.rating,
+      ratingCount: place.ratingCount,
+    }])
+    setSearchResults((prev) => prev.filter((item) => item.placeId !== place.placeId))
+    onToast('후보에 추가했어요.')
+  }
+
+  async function addManual() {
+    if (!manualName.trim()) return
+    await onAddCandidates([{ sourceType: 'MANUAL', name: manualName.trim() }])
+    setManualName('')
+    onToast('후보에 추가했어요.')
+  }
+
   return (
     <section className="room-panel" aria-live="polite">
       <div className="room-panel-head">
@@ -74,6 +118,39 @@ export default function LunchRoomPanel({
 
       {room.status === 'OPEN' ? (
         <>
+          {session.isHost ? (
+            <div className="room-candidate-tools">
+              <div>
+                <input
+                  value={query}
+                  placeholder="식당 검색해서 추가"
+                  onChange={(event) => setQuery(event.target.value)}
+                  onKeyDown={(event) => event.key === 'Enter' && searchPlaces()}
+                />
+                <button type="button" className="btn ghost" disabled={searching} onClick={searchPlaces}>
+                  {searching ? '검색 중…' : '검색'}
+                </button>
+              </div>
+              {searchResults.length ? (
+                <div className="room-search-results">
+                  {searchResults.map((place) => (
+                    <button type="button" key={place.placeId} onClick={() => addPlace(place)}>
+                      <strong>{place.placeName}</strong>
+                      <span>{place.formattedAddress}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <div>
+                <input
+                  value={manualName}
+                  placeholder="이름만 직접 추가"
+                  onChange={(event) => setManualName(event.target.value)}
+                />
+                <button type="button" className="btn ghost" onClick={addManual}>추가</button>
+              </div>
+            </div>
+          ) : null}
           <div className="room-instruction">
             <strong>먹고 싶은 메뉴 최대 3개</strong>
             <span>정말 피하고 싶은 메뉴는 1개만 제외할 수 있어요.</span>
@@ -89,6 +166,16 @@ export default function LunchRoomPanel({
                   <strong>{menu.name}</strong>
                   <span>좋아요 {menu.likeCount}</span>
                 </button>
+                {session.isHost ? (
+                  <button
+                    type="button"
+                    className="room-remove"
+                    title="후보 삭제"
+                    onClick={() => onRemoveCandidate(menu.id)}
+                  >
+                    ×
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   className={`room-veto${veto === menu.id ? ' is-active' : ''}`}

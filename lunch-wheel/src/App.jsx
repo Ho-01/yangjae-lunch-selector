@@ -3,6 +3,7 @@ import './App.css'
 import LunchWheel from './components/LunchWheel/LunchWheel'
 import LunchRoomDialog from './components/LunchRoomDialog'
 import LunchRoomPanel from './components/LunchRoomPanel'
+import LunchRoomStart from './components/LunchRoomStart'
 import MenuExclusionList from './components/MenuExclusionList'
 import MenuManagerDialog from './components/MenuManagerDialog'
 import MenuTypeManagerDialog from './components/MenuTypeManagerDialog'
@@ -23,6 +24,7 @@ function Toast({ message }) {
 export default function App() {
   const [mode, setMode] = useState('team')
   const isNearby = mode === 'nearby'
+  const isRoom = mode === 'room'
 
   const {
     team,
@@ -100,13 +102,28 @@ export default function App() {
   const roomCandidateMenus = useMemo(() => {
     if (!lunchRoom.room || lunchRoom.room.status === 'OPEN') return null
     const ids = new Set(lunchRoom.room.candidateMenuIds || [])
-    return teamMenus.filter((menu) => ids.has(menu.id))
-  }, [lunchRoom.room, teamMenus])
+    return lunchRoom.room.menus
+      .filter((menu) => ids.has(menu.id))
+      .map((menu, index) => ({
+        id: menu.id,
+        name: menu.name,
+        sort_order: index,
+        menu_type: {
+          id: 'room-candidate',
+          code: 'general',
+          name: '점심방 후보',
+          icon_key: 'utensils',
+          color: '#6A5B85',
+          weather_weight_config: { base: 1 },
+        },
+        place_links: [],
+      }))
+  }, [lunchRoom.room])
 
   const wheelMenus =
-    !isNearby && roomCandidateMenus?.length ? roomCandidateMenus : menus
+    isRoom && roomCandidateMenus?.length ? roomCandidateMenus : menus
   const wheelExcludedIds =
-    !isNearby && roomCandidateMenus?.length ? new Set() : excludedIds
+    isRoom && roomCandidateMenus?.length ? new Set() : excludedIds
 
   function showToast(message) {
     setToast(message)
@@ -274,10 +291,20 @@ export default function App() {
     }
   }
 
-  async function handleCreateRoom(nickname) {
+  async function handleCreateRoom(nickname, setup) {
     try {
-      setMode('team')
-      const room = await lunchRoom.create(nickname)
+      setMode('room')
+      const resolvedSetup = setup || {
+        locationMode: 'TEAM',
+        locationLabel: team.location_name,
+        candidates: teamMenus.map((menu, index) => ({
+          sourceType: 'TEAM_MENU',
+          menuId: menu.id,
+          name: menu.name,
+          sortOrder: index + 1,
+        })),
+      }
+      const room = await lunchRoom.create(nickname, resolvedSetup)
       showToast(`점심방 ${room.code}를 만들었어요.`)
     } catch (err) {
       showToast(err?.message || '점심방을 만들지 못했어요.')
@@ -287,7 +314,7 @@ export default function App() {
 
   async function handleJoinRoom(code, nickname) {
     try {
-      setMode('team')
+      setMode('room')
       await lunchRoom.join(code, nickname)
       showToast(`${code} 방에 참여했어요.`)
     } catch (err) {
@@ -384,12 +411,22 @@ export default function App() {
             <button
               type="button"
               role="tab"
-              aria-selected={!isNearby}
-              className={!isNearby ? 'is-active' : ''}
+              aria-selected={!isNearby && !isRoom}
+              className={!isNearby && !isRoom ? 'is-active' : ''}
               disabled={busy}
               onClick={() => setMode('team')}
             >
               양재역 주변
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isRoom}
+              className={isRoom ? 'is-active' : ''}
+              disabled={busy}
+              onClick={() => setMode('room')}
+            >
+              같이 고르기
             </button>
             <button
               type="button"
@@ -414,16 +451,8 @@ export default function App() {
             <RefreshIcon className="ui-icon" aria-hidden />
             날씨 새로고침
           </button>
-          {!isNearby ? (
+          {!isNearby && !isRoom ? (
             <>
-              <button
-                type="button"
-                className="btn ghost"
-                disabled={busy}
-                onClick={() => setRoomDialogOpen(true)}
-              >
-                같이 고르기
-              </button>
               <button
                 type="button"
                 className="btn ghost"
@@ -448,7 +477,18 @@ export default function App() {
         </div>
       </header>
 
-      {!isNearby && lunchRoom.room ? (
+      {isRoom && !lunchRoom.room ? (
+        <LunchRoomStart
+          team={team}
+          teamMenus={teamMenus}
+          nearby={nearby}
+          loading={lunchRoom.loading}
+          onCreate={handleCreateRoom}
+          onOpenJoin={() => setRoomDialogOpen(true)}
+        />
+      ) : null}
+
+      {isRoom && lunchRoom.room ? (
         <LunchRoomPanel
           room={lunchRoom.room}
           session={lunchRoom.session}
@@ -470,10 +510,13 @@ export default function App() {
             }
           }}
           onLeave={lunchRoom.leave}
+          onAddCandidates={lunchRoom.addCandidates}
+          onRemoveCandidate={lunchRoom.removeCandidate}
           onToast={showToast}
         />
       ) : null}
 
+      {!isRoom || (lunchRoom.room && lunchRoom.room.status !== 'OPEN') ? (
       <section className="layout">
         <LunchWheel
           team={weatherLocation || team}
@@ -494,7 +537,7 @@ export default function App() {
             exclusionSaving ||
             nearby.loading ||
             (isNearby && menus.length === 0) ||
-            (!isNearby &&
+            (isRoom &&
               lunchRoom.room &&
               (lunchRoom.room.status === 'OPEN' ||
                 lunchRoom.room.status === 'COMPLETED' ||
@@ -538,6 +581,7 @@ export default function App() {
           <ProbabilityList items={weightedItems} weather={weather} />
         </aside>
       </section>
+      ) : null}
 
       <footer>
         현재 날씨: Open-Meteo API · 위치 기준: {locationLabel}

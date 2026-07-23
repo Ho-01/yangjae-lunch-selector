@@ -8,6 +8,8 @@ import {
   joinRoom,
   loadRoomSession,
   saveVotes,
+  addRoomCandidates,
+  removeRoomCandidate,
 } from '../services/lunchRoomService'
 
 export function useLunchRoom(teamId) {
@@ -49,9 +51,9 @@ export function useLunchRoom(teamId) {
     }
   }
 
-  const create = (nickname) =>
+  const create = (nickname, setup) =>
     run(async () => {
-      const next = await createRoom(teamId, nickname)
+      const next = await createRoom(teamId, nickname, setup)
       setSession(next)
       setRoom(await fetchRoom(next.code))
       return next
@@ -83,6 +85,18 @@ export function useLunchRoom(teamId) {
       return refresh()
     })
 
+  const addCandidates = (candidates) =>
+    run(async () => {
+      await addRoomCandidates(session, candidates)
+      return refresh()
+    })
+
+  const removeCandidate = (candidateId) =>
+    run(async () => {
+      await removeRoomCandidate(session, candidateId)
+      return refresh()
+    })
+
   function leave() {
     clearRoomSession()
     setSession(null)
@@ -100,6 +114,8 @@ export function useLunchRoom(teamId) {
     vote,
     close,
     complete,
+    addCandidates,
+    removeCandidate,
     leave,
     refresh,
   }
