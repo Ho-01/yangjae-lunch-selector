@@ -552,6 +552,7 @@ export default function App() {
           onToast={showToast}
           onSpinComplete={handleRoomSpinComplete}
           ignoreWeather={isRoom}
+          wheelMode={mode}
           disabledLabel={
             isRoom && lunchRoom.room?.status === 'COMPLETED'
               ? '결정 완료'

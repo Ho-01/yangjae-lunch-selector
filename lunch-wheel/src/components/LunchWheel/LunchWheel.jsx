@@ -26,6 +26,7 @@ export default function LunchWheel({
   onToast,
   onSpinComplete,
   ignoreWeather = false,
+  wheelMode = 'team',
   disabledLabel,
   disabledExtras,
 }) {
@@ -54,6 +55,13 @@ export default function LunchWheel({
   )
 
   const canvasItems = itemsOverride ?? weightedItems
+  const hubLabel =
+    wheelMode === 'nearby' ? '식당' : wheelMode === 'room' ? '후보' : '메뉴'
+  const hubStatus = spinning
+    ? 'spinning'
+    : result || disabledLabel === '결정 완료'
+      ? 'complete'
+      : 'ready'
 
   const handleSegmentsChange = useCallback((segments) => {
     segmentsRef.current = segments
@@ -180,6 +188,8 @@ export default function LunchWheel({
           items={canvasItems}
           rotation={rotation}
           onSegmentsChange={handleSegmentsChange}
+          hubLabel={hubLabel}
+          hubStatus={hubStatus}
         />
       </div>
 

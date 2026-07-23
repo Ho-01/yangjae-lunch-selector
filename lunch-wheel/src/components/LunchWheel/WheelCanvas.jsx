@@ -85,7 +85,13 @@ function drawWheel(canvas, items, rotation, onSegments) {
   return segments
 }
 
-export default function WheelCanvas({ items, rotation, onSegmentsChange }) {
+export default function WheelCanvas({
+  items,
+  rotation,
+  onSegmentsChange,
+  hubLabel = '메뉴',
+  hubStatus = 'ready',
+}) {
   const canvasRef = useRef(null)
   const segmentsRef = useRef([])
 
@@ -107,6 +113,15 @@ export default function WheelCanvas({ items, rotation, onSegmentsChange }) {
     return () => window.removeEventListener('resize', onResize)
   }, [items, rotation, onSegmentsChange])
 
+  const hubContent =
+    hubStatus === 'spinning'
+      ? { title: '고르는 중', caption: '잠시만요' }
+      : hubStatus === 'complete'
+        ? { title: '선택 완료', caption: '결과를 확인하세요' }
+        : items.length
+          ? { title: `${hubLabel} ${items.length}`, caption: '돌릴 준비 완료' }
+          : { title: `${hubLabel} 없음`, caption: '후보를 추가해주세요' }
+
   return (
     <div className="canvas-shell">
       <canvas
@@ -115,10 +130,13 @@ export default function WheelCanvas({ items, rotation, onSegmentsChange }) {
         height={900}
         aria-label="점심 메뉴 돌림판"
       />
-      <div className="hub">
-        <div>
-          <strong>LUNCH</strong>
-          <span>YANGJAE</span>
+      <div className={`hub is-${hubStatus}`} aria-live="polite">
+        <div className="hub-content">
+          {hubStatus === 'spinning' ? (
+            <span className="hub-spinner" aria-hidden />
+          ) : null}
+          <strong>{hubContent.title}</strong>
+          <span>{hubContent.caption}</span>
         </div>
       </div>
     </div>

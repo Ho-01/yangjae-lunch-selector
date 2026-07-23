@@ -984,28 +984,59 @@ canvas {
   place-items: center;
   width: 104px;
   height: 104px;
-  border: 7px solid var(--canvas);
+  border: 6px solid rgba(255, 255, 255, 0.96);
   border-radius: 50%;
-  background: var(--primary);
+  background: #22251f;
   color: var(--on-primary);
-  box-shadow: 0 4px 0 var(--primary-shadow);
+  box-shadow:
+    0 0 0 2px rgba(34, 37, 31, 0.14),
+    0 5px 14px rgba(31, 34, 28, 0.22);
   text-align: center;
   user-select: none;
   transform: translate(-50%, -50%);
 }
 
+.hub-content {
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+
 .hub strong {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
 }
 
 .hub span {
   display: block;
-  margin-top: 2px;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 9px;
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 8px;
   font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.hub.is-complete {
+  background: var(--primary);
+}
+
+.hub-spinner {
+  width: 16px;
+  height: 16px;
+  margin: 0 0 7px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: hub-spin 0.75s linear infinite;
+}
+
+@keyframes hub-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spin-area {
@@ -2054,11 +2085,18 @@ footer {
   }
 
   .hub strong {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .hub span {
-    font-size: 8px;
+    margin-top: 5px;
+    font-size: 7px;
+  }
+
+  .hub-spinner {
+    width: 14px;
+    height: 14px;
+    margin-bottom: 5px !important;
   }
 
   .side {
