@@ -35,6 +35,15 @@ async function rpc(name, params) {
 }
 
 export async function createRoom(teamId, nickname, setup) {
+  if (setup.locationMode === 'NONE') {
+    const session = await rpc('create_empty_lunch_room', {
+      p_team_id: teamId,
+      p_nickname: nickname,
+      p_client_id: getRoomClientId(),
+    })
+    saveRoomSession(session)
+    return session
+  }
   const session = await rpc('create_lunch_room_v2', {
     p_team_id: teamId,
     p_nickname: nickname,

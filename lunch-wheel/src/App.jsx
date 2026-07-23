@@ -305,7 +305,16 @@ export default function App() {
         })),
       }
       const room = await lunchRoom.create(nickname, resolvedSetup)
-      showToast(`점심방 ${room.code}를 만들었어요.`)
+      const inviteUrl = new URL(window.location.href)
+      inviteUrl.searchParams.set('room', room.code)
+      try {
+        await navigator.clipboard.writeText(
+          `오늘 점심 같이 골라요! 방 코드: ${room.code}\n${inviteUrl}`,
+        )
+        showToast(`점심방 ${room.code} 생성 · 초대 링크를 복사했어요.`)
+      } catch {
+        showToast(`점심방 ${room.code}를 만들었어요. 코드를 공유해주세요.`)
+      }
     } catch (err) {
       showToast(err?.message || '점심방을 만들지 못했어요.')
       throw err

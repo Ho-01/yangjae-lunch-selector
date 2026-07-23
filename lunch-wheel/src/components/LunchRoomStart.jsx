@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { searchGooglePlaces } from '../services/placesApi'
 
 function teamCandidates(menus) {
   return menus.map((menu, index) => ({
@@ -49,52 +48,6 @@ export default function LunchRoomStart({
 }) {
   const [nickname, setNickname] = useState('')
   const [source, setSource] = useState('TEAM')
-  const [manualName, setManualName] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searching, setSearching] = useState(false)
-  const [searchResults, setSearchResults] = useState([])
-  const [customCandidates, setCustomCandidates] = useState([])
-
-  function addManualCandidate() {
-    const name = manualName.trim()
-    if (!name || customCandidates.some((item) => item.name === name)) return
-    setCustomCandidates((prev) => [
-      ...prev,
-      { sourceType: 'MANUAL', name },
-    ])
-    setManualName('')
-  }
-
-  async function searchPlaces() {
-    if (searchQuery.trim().length < 2) return
-    setSearching(true)
-    try {
-      setSearchResults(
-        await searchGooglePlaces({ query: searchQuery.trim() }),
-      )
-    } finally {
-      setSearching(false)
-    }
-  }
-
-  function addSearchCandidate(place) {
-    if (customCandidates.some((item) => item.placeId === place.placeId)) return
-    setCustomCandidates((prev) => [
-      ...prev,
-      {
-        sourceType: 'PLACE_SEARCH',
-        provider: 'google',
-        placeId: place.placeId,
-        name: place.placeName,
-        address: place.formattedAddress,
-        rating: place.rating,
-        ratingCount: place.ratingCount,
-      },
-    ])
-    setSearchResults((prev) =>
-      prev.filter((item) => item.placeId !== place.placeId),
-    )
-  }
 
   async function create() {
     let candidates
@@ -119,10 +72,7 @@ export default function LunchRoomStart({
         radiusMeters: nearby.settings.radiusMeters,
       }
     } else {
-      candidates = customCandidates.map((item, index) => ({
-        ...item,
-        sortOrder: index + 1,
-      }))
+      candidates = []
       setup = { locationMode: 'NONE', locationLabel: '위치 지정 없음' }
     }
     await onCreate(nickname.trim(), { ...setup, candidates })
@@ -144,7 +94,7 @@ export default function LunchRoomStart({
         {[
           ['TEAM', '양재역 목록', '등록된 메뉴로 바로 시작'],
           ['NEARBY', '내 위치 주변', '현재 위치 반경의 식당으로 시작'],
-          ['NONE', '직접 목록 만들기', '검색과 직접 입력을 섞어서 시작'],
+          ['NONE', '빈 방으로 시작', '방을 만든 뒤 후보를 추가'],
         ].map(([id, title, desc]) => (
           <button
             type="button"
@@ -157,78 +107,6 @@ export default function LunchRoomStart({
           </button>
         ))}
       </div>
-      {source === 'NONE' ? (
-        <div className="room-candidate-builder">
-          <div className="room-builder-section">
-            <strong>Google에서 식당 검색</strong>
-            <div>
-              <input
-                value={searchQuery}
-                placeholder="식당명 또는 지역과 메뉴"
-                onChange={(event) => setSearchQuery(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') searchPlaces()
-                }}
-              />
-              <button type="button" className="btn ghost" onClick={searchPlaces}>
-                {searching ? '검색 중…' : '검색'}
-              </button>
-            </div>
-            {searchResults.length ? (
-              <div className="room-builder-results">
-                {searchResults.map((place) => (
-                  <button
-                    type="button"
-                    key={place.placeId}
-                    onClick={() => addSearchCandidate(place)}
-                  >
-                    <strong>{place.placeName}</strong>
-                    <span>{place.formattedAddress}</span>
-                    <em>추가</em>
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-          <div className="room-builder-section">
-            <strong>이름만 직접 추가</strong>
-            <div>
-              <input
-                value={manualName}
-                placeholder="예: 김치찌개"
-                onChange={(event) => setManualName(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') addManualCandidate()
-                }}
-              />
-              <button type="button" className="btn ghost" onClick={addManualCandidate}>
-                추가
-              </button>
-            </div>
-          </div>
-          <div className="room-builder-picked">
-            <span>선택한 후보 {customCandidates.length}개 · 최소 2개</span>
-            {customCandidates.map((candidate, index) => (
-              <div key={candidate.placeId || `${candidate.name}-${index}`}>
-                <span>
-                  <strong>{candidate.name}</strong>
-                  {candidate.sourceType === 'PLACE_SEARCH' ? ' · Google 장소' : ' · 직접 입력'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCustomCandidates((prev) =>
-                      prev.filter((_, itemIndex) => itemIndex !== index),
-                    )
-                  }
-                >
-                  삭제
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
       {source === 'NEARBY' ? (
         <div className="room-radius">
           <span>검색 반경</span>
@@ -259,11 +137,7 @@ export default function LunchRoomStart({
         <button
           type="button"
           className="btn primary"
-          disabled={
-            loading ||
-            !nickname.trim() ||
-            (source === 'NONE' && customCandidates.length < 2)
-          }
+          disabled={loading || !nickname.trim()}
           onClick={create}
         >
           {loading ? '준비 중…' : '점심방 만들기'}
