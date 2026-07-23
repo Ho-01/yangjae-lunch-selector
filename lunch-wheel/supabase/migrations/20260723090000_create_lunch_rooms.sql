@@ -71,7 +71,7 @@ as $$
     from public.t_lunch_room_member
     where id = p_member_id
       and room_id = p_room_id
-      and token_hash = encode(digest(p_token, 'sha256'), 'hex')
+      and token_hash = encode(extensions.digest(p_token, 'sha256'), 'hex')
   );
 $$;
 
@@ -109,7 +109,7 @@ begin
   end if;
 
   loop
-    v_code := upper(substr(encode(gen_random_bytes(5), 'hex'), 1, 6));
+    v_code := upper(substr(encode(extensions.gen_random_bytes(5), 'hex'), 1, 6));
     exit when not exists (select 1 from public.t_lunch_room where code = v_code);
   end loop;
 
@@ -123,7 +123,7 @@ begin
     v_room.id,
     trim(p_nickname),
     p_client_id,
-    encode(digest(v_token, 'sha256'), 'hex'),
+    encode(extensions.digest(v_token, 'sha256'), 'hex'),
     true
   )
   returning * into v_member;
@@ -176,7 +176,7 @@ begin
     v_room.id,
     trim(p_nickname),
     p_client_id,
-    encode(digest(v_token, 'sha256'), 'hex')
+    encode(extensions.digest(v_token, 'sha256'), 'hex')
   )
   on conflict (room_id, client_id) do update set
     nickname = excluded.nickname,
@@ -322,7 +322,7 @@ begin
   if not exists (
     select 1 from public.t_lunch_room_member
     where id = p_member_id and room_id = v_room.id and is_host
-      and token_hash = encode(digest(p_token, 'sha256'), 'hex')
+      and token_hash = encode(extensions.digest(p_token, 'sha256'), 'hex')
   ) then raise exception '방장만 투표를 마감할 수 있습니다.'; end if;
 
   select array_agg(menu_id order by score desc, like_count desc, random())
@@ -378,7 +378,7 @@ begin
   if not exists (
     select 1 from public.t_lunch_room_member
     where id = p_member_id and room_id = v_room.id and is_host
-      and token_hash = encode(digest(p_token, 'sha256'), 'hex')
+      and token_hash = encode(extensions.digest(p_token, 'sha256'), 'hex')
   ) then raise exception '방장만 결과를 확정할 수 있습니다.'; end if;
   if not (p_winner_menu_id = any(v_room.candidate_menu_ids)) then
     raise exception '최종 후보가 아닌 메뉴입니다.';
