@@ -1,5 +1,9 @@
 import { useMemo, useState } from 'react'
 import { searchGooglePlaces } from '../services/placesApi'
+import {
+  createRoomResultImage,
+  downloadRoomResult,
+} from '../utils/roomShareCard'
 
 export default function LunchRoomPanel({
   room,
@@ -88,6 +92,36 @@ export default function LunchRoomPanel({
     await onAddCandidates([{ sourceType: 'MANUAL', name: manualName.trim() }])
     setManualName('')
     onToast('후보에 추가했어요.')
+  }
+
+  async function shareResult() {
+    try {
+      const blob = await createRoomResultImage(room)
+      const file = new File([blob], `오늘-점심-${room.code}.png`, {
+        type: 'image/png',
+      })
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: `오늘의 점심: ${winner?.name || ''}`,
+          text: '같이 고른 오늘의 점심 결과예요!',
+          files: [file],
+        })
+      } else {
+        downloadRoomResult(blob, room.code)
+        onToast('공유 대신 결과 이미지를 저장했어요.')
+      }
+    } catch (err) {
+      if (err?.name !== 'AbortError') onToast('결과 이미지를 공유하지 못했어요.')
+    }
+  }
+
+  async function saveResult() {
+    try {
+      downloadRoomResult(await createRoomResultImage(room), room.code)
+      onToast('결과 이미지를 저장했어요.')
+    } catch {
+      onToast('결과 이미지를 만들지 못했어요.')
+    }
   }
 
   return (
@@ -231,6 +265,14 @@ export default function LunchRoomPanel({
           <span>오늘의 점심</span>
           <strong>{winner?.name || '결과 확인 중'}</strong>
           <p>결과에 승복하고 맛있게 먹으러 가요!</p>
+          <div className="room-result-actions">
+            <button type="button" className="btn primary" onClick={shareResult}>
+              결과 공유
+            </button>
+            <button type="button" className="btn ghost" onClick={saveResult}>
+              이미지 저장
+            </button>
+          </div>
         </div>
       )}
     </section>

@@ -402,6 +402,18 @@ body {
   font-weight: 950;
 }
 
+.room-result-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.room-result-actions .btn {
+  justify-content: center;
+  min-width: 130px;
+}
+
 @media (max-width: 640px) {
   .room-panel {
     margin-bottom: 10px;
@@ -448,6 +460,11 @@ body {
 
   .room-panel-actions .btn {
     justify-content: center;
+  }
+
+  .room-result-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 }
 

@@ -90,7 +90,7 @@ export default function LunchRoomDialog({
           <input
             value={nickname}
             maxLength={20}
-            placeholder="회사에서 부르는 이름"
+            placeholder="함께 볼 닉네임"
             onChange={(event) => setNickname(event.target.value)}
             required
           />
