@@ -588,6 +588,7 @@ export default function App() {
       {!isRoom || (lunchRoom.room && lunchRoom.room.status !== 'OPEN') ? (
       <section className={`layout${isRoom ? ' room-wheel-layout' : ''}`}>
         <LunchWheel
+          key={mode}
           team={weatherLocation || team}
           menus={wheelMenus}
           displayOrder={displayOrder}
