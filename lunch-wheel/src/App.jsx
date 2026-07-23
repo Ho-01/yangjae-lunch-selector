@@ -528,7 +528,7 @@ export default function App() {
       ) : null}
 
       {!isRoom || (lunchRoom.room && lunchRoom.room.status !== 'OPEN') ? (
-      <section className="layout">
+      <section className={`layout${isRoom ? ' room-wheel-layout' : ''}`}>
         <LunchWheel
           team={weatherLocation || team}
           menus={wheelMenus}
@@ -556,6 +556,7 @@ export default function App() {
           }
         />
 
+        {!isRoom ? (
         <aside className="side">
           {isNearby ? (
             <NearbyControls
@@ -591,6 +592,7 @@ export default function App() {
           />
           <ProbabilityList items={weightedItems} weather={weather} />
         </aside>
+        ) : null}
       </section>
       ) : null}
 
