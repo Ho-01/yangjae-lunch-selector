@@ -25,6 +25,7 @@ export default function LunchWheel({
   setSpinning,
   onToast,
   onSpinComplete,
+  ignoreWeather = false,
   disabledExtras,
 }) {
   const [rotation, setRotation] = useState(0)
@@ -47,8 +48,8 @@ export default function LunchWheel({
   }, [menus, displayOrder])
 
   const weightedItems = useMemo(
-    () => getWeightedMenus(orderedMenus, excludedIds, weather),
-    [orderedMenus, excludedIds, weather],
+    () => getWeightedMenus(orderedMenus, excludedIds, ignoreWeather ? null : weather),
+    [orderedMenus, excludedIds, weather, ignoreWeather],
   )
 
   const canvasItems = itemsOverride ?? weightedItems
@@ -101,7 +102,9 @@ export default function LunchWheel({
         setSpinLabel('다시 돌리기')
         setResult({
           name: targetMenu.name,
-          reason: weatherReason(targetMenu, weatherSnapshot),
+          reason: ignoreWeather
+            ? '함께 고른 최종 후보 중 룰렛이 선택했어요.'
+            : weatherReason(targetMenu, weatherSnapshot),
           place_links: targetMenu.place_links || [],
         })
         onSpinComplete?.(targetMenu)
@@ -125,9 +128,11 @@ export default function LunchWheel({
 
     setSpinning(true)
     setResult(null)
-    setSpinLabel('현재 날씨 확인 중…')
+    setSpinLabel(ignoreWeather ? '룰렛 준비 중…' : '현재 날씨 확인 중…')
 
-    const latestWeather = await onRefreshWeather({ quiet: true })
+    const latestWeather = ignoreWeather
+      ? null
+      : await onRefreshWeather({ quiet: true })
     const items = getWeightedMenus(orderedMenus, excludedIds, latestWeather)
 
     if (!items.length) {
@@ -158,12 +163,14 @@ export default function LunchWheel({
 
   return (
     <article className="card main-card">
-      <WeatherPanel
-        team={team}
-        weather={weather}
-        loading={weatherLoading}
-        error={weatherError}
-      />
+      {!ignoreWeather ? (
+        <WeatherPanel
+          team={team}
+          weather={weather}
+          loading={weatherLoading}
+          error={weatherError}
+        />
+      ) : null}
 
       <div className="wheel-wrap">
         <div className="wheel-aura" />

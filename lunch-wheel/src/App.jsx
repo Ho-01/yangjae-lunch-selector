@@ -48,7 +48,11 @@ export default function App() {
   const nearby = useNearbyPlaces()
   const lunchRoom = useLunchRoom(team?.id)
 
-  const weatherLocation = isNearby ? nearby.weatherLocation : team
+  const weatherLocation = isRoom
+    ? null
+    : isNearby
+      ? nearby.weatherLocation
+      : team
   const {
     weather,
     loading: weatherLoading,
@@ -414,7 +418,9 @@ export default function App() {
             </div>
           ) : null}
           <p className="subtitle">
-            {isNearby
+            {isRoom
+              ? '함께 고른 최종 후보를 동일한 확률로 결정합니다.'
+              : isNearby
               ? '내 주변 식당으로 돌림판을 구성합니다. 후보 간 확률은 동일합니다.'
               : '현재 날씨와 메뉴 성격을 반영해 후보별 확률을 조정합니다.'}
           </p>
@@ -452,6 +458,7 @@ export default function App() {
           </div>
         </div>
         <div className="toolbar">
+          {!isRoom ? (
           <button
             type="button"
             className="btn ghost"
@@ -462,6 +469,7 @@ export default function App() {
             <RefreshIcon className="ui-icon" aria-hidden />
             날씨 새로고침
           </button>
+          ) : null}
           {!isNearby && !isRoom ? (
             <>
               <button
@@ -543,6 +551,7 @@ export default function App() {
           setSpinning={setSpinning}
           onToast={showToast}
           onSpinComplete={handleRoomSpinComplete}
+          ignoreWeather={isRoom}
           disabledExtras={
             menuSaving ||
             exclusionSaving ||
@@ -596,6 +605,7 @@ export default function App() {
       </section>
       ) : null}
 
+      {!isRoom ? (
       <footer>
         현재 날씨: Open-Meteo API · 위치 기준: {locationLabel}
         {weatherLocation
@@ -606,6 +616,7 @@ export default function App() {
           ? '내 주변 모드는 Places Nearby를 불러오기 버튼으로만 호출하고, 결과는 브라우저에 30분 캐시합니다.'
           : '메뉴와 오늘 제외 상태는 Supabase에 저장됩니다.'}
       </footer>
+      ) : null}
 
       <MenuManagerDialog
         open={manageOpen}
