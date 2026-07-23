@@ -118,8 +118,7 @@ export default function LunchRoomPanel({
 
       {room.status === 'OPEN' ? (
         <>
-          {session.isHost ? (
-            <div className="room-candidate-tools">
+          <div className="room-candidate-tools">
               <div>
                 <input
                   value={query}
@@ -149,8 +148,7 @@ export default function LunchRoomPanel({
                 />
                 <button type="button" className="btn ghost" onClick={addManual}>추가</button>
               </div>
-            </div>
-          ) : null}
+          </div>
           <div className="room-instruction">
             <strong>먹고 싶은 메뉴 최대 3개</strong>
             <span>정말 피하고 싶은 메뉴는 1개만 제외할 수 있어요.</span>
