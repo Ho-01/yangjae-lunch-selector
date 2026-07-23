@@ -40,6 +40,7 @@ export default function LunchWheel({
   const rotationRef = useRef(0)
   const rafRef = useRef(0)
   const remoteSpinRef = useRef('')
+  const weightedItemsRef = useRef([])
   const ShuffleIcon = UI_ICONS.shuffle
 
   const orderedMenus = useMemo(() => {
@@ -56,6 +57,7 @@ export default function LunchWheel({
     () => getWeightedMenus(orderedMenus, excludedIds, ignoreWeather ? null : weather),
     [orderedMenus, excludedIds, weather, ignoreWeather],
   )
+  weightedItemsRef.current = weightedItems
 
   const canvasItems = itemsOverride ?? weightedItems
   const hubLabel =
@@ -185,7 +187,8 @@ export default function LunchWheel({
     if (!remoteSpin?.winnerId || !remoteSpin?.startedAt) return undefined
     const key = `${remoteSpin.winnerId}:${remoteSpin.startedAt}`
     if (remoteSpinRef.current === key) return undefined
-    const winner = weightedItems.find((item) => item.id === remoteSpin.winnerId)
+    const spinItems = weightedItemsRef.current
+    const winner = spinItems.find((item) => item.id === remoteSpin.winnerId)
     if (!winner) return undefined
 
     remoteSpinRef.current = key
@@ -197,22 +200,29 @@ export default function LunchWheel({
     const delay = Math.max(0, startedAt - Date.now())
     const elapsed = Math.max(0, Date.now() - startedAt)
     const remaining = Math.max(700, duration - elapsed)
-    const segments = buildSegments(weightedItems)
+    const segments = buildSegments(spinItems)
     segmentsRef.current = segments
-    setItemsOverride(weightedItems)
+    setItemsOverride(spinItems)
 
-    const timer = setTimeout(
-      () => animateSpin(winner, null, segments, remaining),
-      delay,
-    )
-    return () => clearTimeout(timer)
+    let animationStarted = false
+    const timer = setTimeout(() => {
+      animationStarted = true
+      animateSpin(winner, null, segments, remaining)
+    }, delay)
+    return () => {
+      clearTimeout(timer)
+      if (!animationStarted) {
+        remoteSpinRef.current = ''
+        setSpinning(false)
+        setItemsOverride(null)
+      }
+    }
     // animateSpin reads the latest refs and stable state setters.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     remoteSpin?.winnerId,
     remoteSpin?.startedAt,
     remoteSpin?.durationMs,
-    weightedItems,
   ])
 
   return (
