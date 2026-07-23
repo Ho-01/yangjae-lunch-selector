@@ -115,7 +115,7 @@ export async function createRoomResultImage(room) {
   ctx.fillStyle = '#58cc02'
   ctx.font = '900 29px Pretendard, sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText('결과에 승복하고 맛있게 먹기', 540, 1280)
+  ctx.fillText('결과에 승복하고 맛있게 먹으러 가요!', 540, 1280)
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(
