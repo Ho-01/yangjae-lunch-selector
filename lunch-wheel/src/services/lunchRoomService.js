@@ -69,8 +69,15 @@ export async function joinRoom(code, nickname) {
   return session
 }
 
-export function fetchRoom(code) {
-  return rpc('get_lunch_room_v2', { p_code: code })
+export async function fetchRoom(code) {
+  const room = await rpc('get_lunch_room_v2', { p_code: code })
+  try {
+    const events = await rpc('get_lunch_room_events', { p_code: code })
+    return { ...room, events: events || [] }
+  } catch {
+    // Keep rooms usable during the short deploy window before this RPC exists.
+    return { ...room, events: [] }
+  }
 }
 
 export function saveVotes(session, likeMenuIds, vetoMenuId) {
@@ -104,6 +111,14 @@ export function closeVoting(session) {
 
 export function startRoomSpin(session) {
   return rpc('start_lunch_room_spin', {
+    p_code: session.code,
+    p_member_id: session.memberId,
+    p_token: session.token,
+  })
+}
+
+export function sendRoomNudge(session) {
+  return rpc('send_lunch_room_nudge', {
     p_code: session.code,
     p_member_id: session.memberId,
     p_token: session.token,

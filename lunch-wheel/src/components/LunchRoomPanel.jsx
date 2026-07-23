@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { searchGooglePlaces } from '../services/placesApi'
 import {
   createRoomResultImage,
   downloadRoomResult,
 } from '../utils/roomShareCard'
 import { UI_ICONS } from '../constants/icons'
+import { formatRoomEvent } from '../utils/roomEvents'
 
 export default function LunchRoomPanel({
   room,
@@ -15,6 +16,7 @@ export default function LunchRoomPanel({
   onLeave,
   onAddCandidates,
   onRemoveCandidate,
+  onNudge,
   onToast,
 }) {
   const CrownIcon = UI_ICONS.crown
@@ -24,6 +26,7 @@ export default function LunchRoomPanel({
   const [manualName, setManualName] = useState('')
   const [searching, setSearching] = useState(false)
   const [searchResults, setSearchResults] = useState([])
+  const [clock, setClock] = useState(Date.now())
 
   const winner = room.menus.find((menu) => menu.id === room.winnerMenuId)
   const currentMember = room.members.find((member) => member.id === session.memberId)
@@ -31,10 +34,36 @@ export default function LunchRoomPanel({
   const readyCount = room.members.filter((member) => member.isReady).length
   const allReady = room.members.length > 0 && readyCount === room.members.length
   const canFinalize = allReady && room.menus.length >= 2
+  const latestOwnNudge = useMemo(
+    () =>
+      [...(room.events || [])]
+        .reverse()
+        .find(
+          (event) =>
+            event.type === 'NUDGE_SENT' &&
+            event.actorMemberId === session.memberId,
+        ),
+    [room.events, session.memberId],
+  )
+  const nudgeRemaining = latestOwnNudge
+    ? Math.max(
+        0,
+        60 -
+          Math.floor(
+            (clock - new Date(latestOwnNudge.createdAt).getTime()) / 1000,
+          ),
+      )
+    : 0
   const candidates = useMemo(
     () => new Set(room.candidateMenuIds || []),
     [room.candidateMenuIds],
   )
+
+  useEffect(() => {
+    if (!latestOwnNudge || nudgeRemaining <= 0) return undefined
+    const timer = setInterval(() => setClock(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [latestOwnNudge, nudgeRemaining])
 
   function toggleLike(menuId) {
     setLikes((prev) => {
@@ -161,6 +190,20 @@ export default function LunchRoomPanel({
         ))}
       </div>
 
+      {room.events?.length ? (
+        <div className="room-activity">
+          <strong>최근 활동</strong>
+          <div>
+            {room.events
+              .slice(-5)
+              .reverse()
+              .map((event) => (
+                <span key={event.id}>{formatRoomEvent(event)}</span>
+              ))}
+          </div>
+        </div>
+      ) : null}
+
       {room.status === 'OPEN' ? (
         <>
           <div className="room-candidate-tools">
@@ -263,6 +306,18 @@ export default function LunchRoomPanel({
                 }}
               />
             </div>
+            {isReady && !allReady ? (
+              <button
+                type="button"
+                className="room-nudge"
+                disabled={loading || nudgeRemaining > 0}
+                onClick={onNudge}
+              >
+                {nudgeRemaining > 0
+                  ? `${nudgeRemaining}초 후 다시 재촉`
+                  : '아직 준비 전인 사람 재촉하기'}
+              </button>
+            ) : null}
           </div>
           <div className="room-panel-actions">
             <button

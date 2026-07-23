@@ -13,6 +13,7 @@ import {
   removeRoomCandidate,
   setMemberReady,
   startRoomSpin,
+  sendRoomNudge,
 } from '../services/lunchRoomService'
 
 export function useLunchRoom(teamId) {
@@ -134,6 +135,14 @@ export function useLunchRoom(teamId) {
       return result
     })
 
+  const nudge = () =>
+    run(async () => {
+      await sendRoomNudge(session)
+      const next = await refresh()
+      notifyRoomChanged('nudge_sent')
+      return next
+    })
+
   const complete = (menuId) =>
     run(async () => {
       await completeRoom(session, menuId)
@@ -176,6 +185,7 @@ export function useLunchRoom(teamId) {
     setReady,
     close,
     startSpin,
+    nudge,
     complete,
     addCandidates,
     removeCandidate,

@@ -300,6 +300,37 @@ body {
   vertical-align: -2px;
 }
 
+.room-activity {
+  display: grid;
+  gap: 7px;
+  margin: 10px 16px 0;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-1);
+}
+
+.room-activity > strong {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.room-activity > div {
+  display: grid;
+  gap: 5px;
+}
+
+.room-activity span {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .room-instruction {
   display: grid;
   gap: 2px;
@@ -428,6 +459,21 @@ body {
   transition: width 220ms ease;
 }
 
+.room-nudge {
+  justify-self: start;
+  border: 0;
+  padding: 2px 0;
+  background: transparent;
+  color: var(--secondary);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.room-nudge:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
 .room-panel-actions {
   justify-content: flex-end;
   padding: 0 16px 16px;
@@ -533,6 +579,10 @@ body {
   }
 
   .room-ready-status {
+    margin-inline: 12px;
+  }
+
+  .room-activity {
     margin-inline: 12px;
   }
 

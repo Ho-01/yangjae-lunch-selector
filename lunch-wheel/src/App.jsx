@@ -16,6 +16,7 @@ import { useNearbyPlaces } from './hooks/useNearbyPlaces'
 import { useLunchRoom } from './hooks/useLunchRoom'
 import { useWeather } from './hooks/useWeather'
 import { getWeightedMenus } from './utils/weatherWeights'
+import { formatRoomEvent } from './utils/roomEvents'
 
 function Toast({ message }) {
   return <div className={`toast${message ? ' show' : ''}`}>{message}</div>
@@ -85,6 +86,8 @@ export default function App() {
   const [spinning, setSpinning] = useState(false)
   const [toast, setToast] = useState('')
   const toastTimer = useRef(0)
+  const lastRoomEventId = useRef(null)
+  const lastRoomEventCode = useRef(null)
 
   const RefreshIcon = UI_ICONS.refresh
   const ListPlusIcon = UI_ICONS.listPlus
@@ -138,6 +141,35 @@ export default function App() {
   useEffect(() => {
     return () => clearTimeout(toastTimer.current)
   }, [])
+
+  useEffect(() => {
+    const events = lunchRoom.room?.events || []
+    const latest = events.at(-1)
+    if (lastRoomEventCode.current !== lunchRoom.room?.code) {
+      lastRoomEventCode.current = lunchRoom.room?.code
+      lastRoomEventId.current = latest?.id || null
+      return
+    }
+    if (!latest) return
+    if (lastRoomEventId.current === latest.id) return
+    lastRoomEventId.current = latest.id
+    const currentMember = lunchRoom.room?.members?.find(
+      (member) => member.id === lunchRoom.session?.memberId,
+    )
+    const nudgeIsForCurrentMember =
+      latest.type !== 'NUDGE_SENT' || !currentMember?.isReady
+    if (
+      latest.actorMemberId !== lunchRoom.session?.memberId &&
+      nudgeIsForCurrentMember
+    ) {
+      showToast(formatRoomEvent(latest))
+    }
+  }, [
+    lunchRoom.room?.code,
+    lunchRoom.room?.events,
+    lunchRoom.room?.members,
+    lunchRoom.session?.memberId,
+  ])
 
   async function handleRefreshWeather() {
     const data = await refreshWeather()
@@ -531,6 +563,14 @@ export default function App() {
           onLeave={lunchRoom.leave}
           onAddCandidates={lunchRoom.addCandidates}
           onRemoveCandidate={lunchRoom.removeCandidate}
+          onNudge={async () => {
+            try {
+              await lunchRoom.nudge()
+              showToast('아직 준비 전인 사람들에게 재촉 알림을 보냈어요.')
+            } catch (err) {
+              showToast(err?.message || '재촉 알림을 보내지 못했어요.')
+            }
+          }}
           onToast={showToast}
         />
       ) : null}
