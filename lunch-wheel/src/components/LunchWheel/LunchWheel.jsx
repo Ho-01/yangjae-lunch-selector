@@ -25,6 +25,8 @@ export default function LunchWheel({
   setSpinning,
   onToast,
   onSpinComplete,
+  onRequestSpin,
+  remoteSpin,
   ignoreWeather = false,
   wheelMode = 'team',
   disabledLabel,
@@ -37,6 +39,7 @@ export default function LunchWheel({
   const segmentsRef = useRef([])
   const rotationRef = useRef(0)
   const rafRef = useRef(0)
+  const remoteSpinRef = useRef('')
   const ShuffleIcon = UI_ICONS.shuffle
 
   const orderedMenus = useMemo(() => {
@@ -77,7 +80,7 @@ export default function LunchWheel({
     }
   }, [])
 
-  function animateSpin(targetMenu, weatherSnapshot, segments) {
+  function animateSpin(targetMenu, weatherSnapshot, segments, duration = 4300) {
     const seg = segments.find((item) => item.id === targetMenu.id)
     if (!seg) {
       setSpinning(false)
@@ -95,7 +98,6 @@ export default function LunchWheel({
 
     const extraTurns = (6 + Math.floor(Math.random() * 3)) * Math.PI * 2
     const end = start + delta + extraTurns
-    const duration = 4300
     const begin = performance.now()
 
     const frame = (now) => {
@@ -135,6 +137,15 @@ export default function LunchWheel({
       return
     }
 
+    if (onRequestSpin) {
+      try {
+        await onRequestSpin()
+      } catch (err) {
+        onToast(err?.message || '룰렛을 시작하지 못했어요.')
+      }
+      return
+    }
+
     setSpinning(true)
     setResult(null)
     setSpinLabel(ignoreWeather ? '룰렛 준비 중…' : '현재 날씨 확인 중…')
@@ -169,6 +180,40 @@ export default function LunchWheel({
     setRotation(0)
     onToast('돌림판 순서를 섞었습니다.')
   }
+
+  useEffect(() => {
+    if (!remoteSpin?.winnerId || !remoteSpin?.startedAt) return undefined
+    const key = `${remoteSpin.winnerId}:${remoteSpin.startedAt}`
+    if (remoteSpinRef.current === key) return undefined
+    const winner = weightedItems.find((item) => item.id === remoteSpin.winnerId)
+    if (!winner) return undefined
+
+    remoteSpinRef.current = key
+    setResult(null)
+    setSpinning(true)
+    setSpinLabel('돌아가는 중…')
+    const startedAt = new Date(remoteSpin.startedAt).getTime()
+    const duration = remoteSpin.durationMs || 4300
+    const delay = Math.max(0, startedAt - Date.now())
+    const elapsed = Math.max(0, Date.now() - startedAt)
+    const remaining = Math.max(700, duration - elapsed)
+    const segments = buildSegments(weightedItems)
+    segmentsRef.current = segments
+    setItemsOverride(weightedItems)
+
+    const timer = setTimeout(
+      () => animateSpin(winner, null, segments, remaining),
+      delay,
+    )
+    return () => clearTimeout(timer)
+    // animateSpin reads the latest refs and stable state setters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    remoteSpin?.winnerId,
+    remoteSpin?.startedAt,
+    remoteSpin?.durationMs,
+    weightedItems,
+  ])
 
   return (
     <article className="card main-card">
@@ -206,9 +251,9 @@ export default function LunchWheel({
         <button
           type="button"
           className="mini-btn"
-          title="돌림판 메뉴 순서 섞기"
-          aria-label="돌림판 메뉴 순서 섞기"
-          disabled={spinning || disabledExtras}
+          title={onRequestSpin ? '점심방에서는 모두 같은 순서를 사용해요' : '돌림판 메뉴 순서 섞기'}
+          aria-label={onRequestSpin ? '점심방 공통 순서 사용 중' : '돌림판 메뉴 순서 섞기'}
+          disabled={spinning || disabledExtras || Boolean(onRequestSpin)}
           onClick={handleShuffle}
         >
           <ShuffleIcon className="ui-icon" aria-hidden />

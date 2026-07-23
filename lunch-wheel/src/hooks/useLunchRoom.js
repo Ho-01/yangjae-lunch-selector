@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { getSupabase } from '../lib/supabase'
 import {
   clearRoomSession,
   closeVoting,
@@ -10,6 +11,8 @@ import {
   saveVotes,
   addRoomCandidates,
   removeRoomCandidate,
+  setMemberReady,
+  startRoomSpin,
 } from '../services/lunchRoomService'
 
 export function useLunchRoom(teamId) {
@@ -17,6 +20,7 @@ export function useLunchRoom(teamId) {
   const [room, setRoom] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const channelRef = useRef(null)
 
   const refresh = useCallback(async () => {
     if (!session?.code) return null
@@ -34,9 +38,39 @@ export function useLunchRoom(teamId) {
   useEffect(() => {
     if (!session?.code) return undefined
     refresh()
-    const timer = setInterval(refresh, 3000)
-    return () => clearInterval(timer)
+    const supabase = getSupabase()
+    const channel = supabase
+      .channel(`lunch-room:${session.code}`)
+      .on('broadcast', { event: 'room_changed' }, refresh)
+      .subscribe((status) => {
+        if (status !== 'SUBSCRIBED') return
+        refresh()
+        channel
+          .send({
+            type: 'broadcast',
+            event: 'room_changed',
+            payload: { type: 'member_connected' },
+          })
+          .catch(() => {})
+      })
+    channelRef.current = channel
+    const timer = setInterval(refresh, 15000)
+    return () => {
+      clearInterval(timer)
+      channelRef.current = null
+      supabase.removeChannel(channel)
+    }
   }, [session?.code, refresh])
+
+  function notifyRoomChanged(type) {
+    const channel = channelRef.current
+    if (!channel) return
+    channel.send({
+      type: 'broadcast',
+      event: 'room_changed',
+      payload: { type },
+    }).catch(() => {})
+  }
 
   async function run(action) {
     setLoading(true)
@@ -64,37 +98,64 @@ export function useLunchRoom(teamId) {
       const next = await joinRoom(code, nickname)
       setSession(next)
       setRoom(await fetchRoom(next.code))
+      notifyRoomChanged('member_joined')
       return next
     })
 
   const vote = (likes, veto) =>
     run(async () => {
       await saveVotes(session, likes, veto)
-      return refresh()
+      const next = await refresh()
+      notifyRoomChanged('votes_changed')
+      return next
+    })
+
+  const setReady = (isReady, likes, veto) =>
+    run(async () => {
+      await setMemberReady(session, isReady, likes, veto)
+      const next = await refresh()
+      notifyRoomChanged('ready_changed')
+      return next
     })
 
   const close = () =>
     run(async () => {
       await closeVoting(session)
-      return refresh()
+      const next = await refresh()
+      notifyRoomChanged('voting_closed')
+      return next
+    })
+
+  const startSpin = () =>
+    run(async () => {
+      const result = await startRoomSpin(session)
+      await refresh()
+      notifyRoomChanged('spin_started')
+      return result
     })
 
   const complete = (menuId) =>
     run(async () => {
       await completeRoom(session, menuId)
-      return refresh()
+      const next = await refresh()
+      notifyRoomChanged('spin_completed')
+      return next
     })
 
   const addCandidates = (candidates) =>
     run(async () => {
       await addRoomCandidates(session, candidates)
-      return refresh()
+      const next = await refresh()
+      notifyRoomChanged('candidates_changed')
+      return next
     })
 
   const removeCandidate = (candidateId) =>
     run(async () => {
       await removeRoomCandidate(session, candidateId)
-      return refresh()
+      const next = await refresh()
+      notifyRoomChanged('candidates_changed')
+      return next
     })
 
   function leave() {
@@ -112,7 +173,9 @@ export function useLunchRoom(teamId) {
     create,
     join,
     vote,
+    setReady,
     close,
+    startSpin,
     complete,
     addCandidates,
     removeCandidate,

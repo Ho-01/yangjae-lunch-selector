@@ -83,8 +83,27 @@ export function saveVotes(session, likeMenuIds, vetoMenuId) {
   })
 }
 
+export function setMemberReady(session, isReady, likeMenuIds, vetoMenuId) {
+  return rpc('set_lunch_room_member_ready', {
+    p_code: session.code,
+    p_member_id: session.memberId,
+    p_token: session.token,
+    p_is_ready: isReady,
+    p_like_candidate_ids: likeMenuIds || [],
+    p_veto_candidate_id: vetoMenuId || null,
+  })
+}
+
 export function closeVoting(session) {
   return rpc('close_lunch_room_voting_v2', {
+    p_code: session.code,
+    p_member_id: session.memberId,
+    p_token: session.token,
+  })
+}
+
+export function startRoomSpin(session) {
+  return rpc('start_lunch_room_spin', {
     p_code: session.code,
     p_member_id: session.memberId,
     p_token: session.token,

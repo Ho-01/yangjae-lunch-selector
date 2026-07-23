@@ -512,12 +512,12 @@ export default function App() {
           room={lunchRoom.room}
           session={lunchRoom.session}
           loading={lunchRoom.loading}
-          onVote={async (likes, veto) => {
+          onSetReady={async (isReady, likes, veto) => {
             try {
-              await lunchRoom.vote(likes, veto)
-              showToast('내 선택을 저장했어요.')
+              await lunchRoom.setReady(isReady, likes, veto)
+              showToast(isReady ? '준비 완료했어요!' : '준비를 취소했어요.')
             } catch (err) {
-              showToast(err?.message || '투표를 저장하지 못했어요.')
+              showToast(err?.message || '준비 상태를 저장하지 못했어요.')
             }
           }}
           onCloseVoting={async () => {
@@ -551,6 +551,16 @@ export default function App() {
           setSpinning={setSpinning}
           onToast={showToast}
           onSpinComplete={handleRoomSpinComplete}
+          onRequestSpin={isRoom ? lunchRoom.startSpin : undefined}
+          remoteSpin={
+            isRoom && lunchRoom.room?.status === 'SPINNING'
+              ? {
+                  winnerId: lunchRoom.room.winnerMenuId,
+                  startedAt: lunchRoom.room.spinStartedAt,
+                  durationMs: lunchRoom.room.spinDurationMs,
+                }
+              : null
+          }
           ignoreWeather={isRoom}
           wheelMode={mode}
           disabledLabel={
@@ -564,10 +574,12 @@ export default function App() {
             menuSaving ||
             exclusionSaving ||
             nearby.loading ||
+            lunchRoom.loading ||
             (isNearby && menus.length === 0) ||
             (isRoom &&
               lunchRoom.room &&
               (lunchRoom.room.status === 'OPEN' ||
+                lunchRoom.room.status === 'SPINNING' ||
                 lunchRoom.room.status === 'COMPLETED' ||
                 !lunchRoom.session?.isHost))
           }

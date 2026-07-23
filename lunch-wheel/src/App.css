@@ -266,6 +266,9 @@ body {
 }
 
 .room-members span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   flex: 0 0 auto;
   padding: 6px 9px;
   border: 1px solid var(--line);
@@ -274,6 +277,19 @@ body {
   color: var(--ink);
   font-size: 11px;
   font-weight: 800;
+}
+
+.room-members span.is-ready {
+  border-color: #a9c79a;
+  background: #f3f8ef;
+  color: #43652f;
+}
+
+.room-members small {
+  margin-left: 2px;
+  color: var(--primary-shadow);
+  font-size: 8px;
+  font-weight: 900;
 }
 
 .room-host-icon {
@@ -360,6 +376,56 @@ body {
 .room-veto.is-active {
   background: #fff1f1;
   color: var(--accent-red);
+}
+
+.room-like:disabled,
+.room-veto:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.room-ready-status {
+  display: grid;
+  gap: 8px;
+  margin: 0 16px 12px;
+  padding: 11px 12px;
+  border: 1px solid #dce8d4;
+  border-radius: 11px;
+  background: #f7faf5;
+}
+
+.room-ready-status > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.room-ready-status strong {
+  color: #43652f;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.room-ready-status span {
+  color: var(--muted);
+  font-size: 10px;
+  text-align: right;
+}
+
+.room-ready-progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dde6d8;
+}
+
+.room-ready-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+  transition: width 220ms ease;
 }
 
 .room-panel-actions {
@@ -464,6 +530,19 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     padding: 0 12px 12px;
+  }
+
+  .room-ready-status {
+    margin-inline: 12px;
+  }
+
+  .room-ready-status > div:first-child {
+    display: grid;
+    gap: 2px;
+  }
+
+  .room-ready-status span {
+    text-align: left;
   }
 
   .room-panel-actions .btn {

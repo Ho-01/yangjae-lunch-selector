@@ -10,7 +10,7 @@ export default function LunchRoomPanel({
   room,
   session,
   loading,
-  onVote,
+  onSetReady,
   onCloseVoting,
   onLeave,
   onAddCandidates,
@@ -26,6 +26,11 @@ export default function LunchRoomPanel({
   const [searchResults, setSearchResults] = useState([])
 
   const winner = room.menus.find((menu) => menu.id === room.winnerMenuId)
+  const currentMember = room.members.find((member) => member.id === session.memberId)
+  const isReady = Boolean(currentMember?.isReady)
+  const readyCount = room.members.filter((member) => member.isReady).length
+  const allReady = room.members.length > 0 && readyCount === room.members.length
+  const canFinalize = allReady && room.menus.length >= 2
   const candidates = useMemo(
     () => new Set(room.candidateMenuIds || []),
     [room.candidateMenuIds],
@@ -145,9 +150,13 @@ export default function LunchRoomPanel({
 
       <div className="room-members">
         {room.members.map((member) => (
-          <span key={member.id}>
+          <span
+            key={member.id}
+            className={member.isReady ? 'is-ready' : ''}
+          >
             {member.isHost ? <CrownIcon className="room-host-icon" aria-label="방장" /> : null}
             {member.nickname}
+            {member.isReady ? <small>준비</small> : null}
           </span>
         ))}
       </div>
@@ -159,17 +168,18 @@ export default function LunchRoomPanel({
                 <input
                   value={query}
                   placeholder="식당 검색해서 추가"
+                  disabled={isReady}
                   onChange={(event) => setQuery(event.target.value)}
                   onKeyDown={(event) => event.key === 'Enter' && searchPlaces()}
                 />
-                <button type="button" className="btn ghost" disabled={searching} onClick={searchPlaces}>
+                <button type="button" className="btn ghost" disabled={searching || isReady} onClick={searchPlaces}>
                   {searching ? '검색 중…' : '검색'}
                 </button>
               </div>
               {searchResults.length ? (
                 <div className="room-search-results">
                   {searchResults.map((place) => (
-                    <button type="button" key={place.placeId} onClick={() => addPlace(place)}>
+                    <button type="button" key={place.placeId} disabled={isReady} onClick={() => addPlace(place)}>
                       <strong>{place.placeName}</strong>
                       <span>{place.formattedAddress}</span>
                     </button>
@@ -180,9 +190,10 @@ export default function LunchRoomPanel({
                 <input
                   value={manualName}
                   placeholder="이름만 직접 추가"
+                  disabled={isReady}
                   onChange={(event) => setManualName(event.target.value)}
                 />
-                <button type="button" className="btn ghost" onClick={addManual}>추가</button>
+                <button type="button" className="btn ghost" disabled={isReady} onClick={addManual}>추가</button>
               </div>
           </div>
           <div className="room-instruction">
@@ -195,6 +206,7 @@ export default function LunchRoomPanel({
                 <button
                   type="button"
                   className={`room-like${likes.includes(menu.id) ? ' is-active' : ''}`}
+                  disabled={isReady}
                   onClick={() => toggleLike(menu.id)}
                 >
                   <strong>{menu.name}</strong>
@@ -205,6 +217,7 @@ export default function LunchRoomPanel({
                     type="button"
                     className="room-remove"
                     title="후보 삭제"
+                    disabled={isReady}
                     onClick={() => onRemoveCandidate(menu.id)}
                   >
                     ×
@@ -213,6 +226,7 @@ export default function LunchRoomPanel({
                 <button
                   type="button"
                   className={`room-veto${veto === menu.id ? ' is-active' : ''}`}
+                  disabled={isReady}
                   onClick={() => {
                     setVeto((prev) => (prev === menu.id ? null : menu.id))
                     setLikes((prev) => prev.filter((id) => id !== menu.id))
@@ -225,28 +239,57 @@ export default function LunchRoomPanel({
               </div>
             ))}
           </div>
+          <div className="room-ready-status">
+            <div>
+              <strong>{readyCount}/{room.members.length}명 준비 완료</strong>
+              <span>
+                {room.menus.length < 2
+                  ? '룰렛 후보를 2개 이상 추가해주세요.'
+                  : allReady
+                  ? '모두 준비됐어요. 방장이 최종 후보를 결정할 수 있어요.'
+                  : '선택을 마치면 준비 완료를 눌러주세요.'}
+              </span>
+            </div>
+            <div
+              className="room-ready-progress"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax={room.members.length}
+              aria-valuenow={readyCount}
+            >
+              <i
+                style={{
+                  width: `${room.members.length ? (readyCount / room.members.length) * 100 : 0}%`,
+                }}
+              />
+            </div>
+          </div>
           <div className="room-panel-actions">
             <button
               type="button"
-              className="btn primary"
+              className={`btn ${isReady ? 'ghost' : 'primary'}`}
               disabled={loading}
-              onClick={() => onVote(likes, veto)}
+              onClick={() => onSetReady(!isReady, likes, veto)}
             >
-              내 선택 저장
+              {isReady ? '준비 취소' : '준비 완료!'}
             </button>
             {session.isHost ? (
               <button
                 type="button"
-                className="btn ghost"
-                disabled={loading}
+                className="btn primary"
+                disabled={loading || !canFinalize}
                 onClick={onCloseVoting}
               >
-                투표 마감
+                {room.menus.length < 2
+                  ? '후보 2개 이상 필요'
+                  : allReady
+                    ? '최종 후보 결정'
+                    : `${readyCount}/${room.members.length}명 준비`}
               </button>
             ) : null}
           </div>
         </>
-      ) : room.status === 'VOTING_CLOSED' ? (
+      ) : room.status === 'VOTING_CLOSED' || room.status === 'SPINNING' ? (
         <div className="room-finalists">
           <span>최종 룰렛 후보</span>
           <div>
@@ -257,7 +300,9 @@ export default function LunchRoomPanel({
               ))}
           </div>
           <p>
-            {session.isHost
+            {room.status === 'SPINNING'
+              ? '모두의 화면에서 룰렛이 돌아가고 있어요!'
+              : session.isHost
               ? '이제 아래 룰렛을 돌려주세요!'
               : '방장이 룰렛을 돌리고 있어요. 결과를 기다려주세요.'}
           </p>
