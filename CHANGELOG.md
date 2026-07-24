@@ -8,6 +8,16 @@
 
 현재 다음 릴리스에 포함하기로 확정된 변경이 없습니다.
 
+## [0.6.0] - 2026-07-24
+
+### 추가
+
+- 당첨 항목 경계 안쪽의 무작위 지점에 정지하는 룰렛
+- 마지막 감속 중 경계를 살짝 넘었다가 결과로 돌아오는 긴장감 연출
+- 점심방 구성원이 같은 정지 지점을 재현하는 안정 난수
+- 모션 감소 환경의 짧고 안정적인 대체 애니메이션
+- 작은 세그먼트의 최종 정지 안전성을 확인하는 단위 테스트
+
 ## [0.5.0] - 2026-07-24
 
 ### 추가
@@ -81,7 +91,8 @@
 - Linux/Vercel 빌드 재현성과 Supabase migration 호환성
 - 점심방 모드 격리, 상태 표시와 동기화된 룰렛 유지
 
-[미출시]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.5.0...HEAD
+[미출시]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.2.0...v0.3.0

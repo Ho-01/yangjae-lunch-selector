@@ -12,8 +12,11 @@ import {
 } from '../../utils/wheelShareCard'
 import {
   buildSegments,
+  createSuspenseLanding,
   easeOutQuint,
   normalizeAngle,
+  stableSpinRandom,
+  suspenseRotationOffset,
 } from '../../utils/wheelMath'
 
 export default function LunchWheel({
@@ -135,7 +138,13 @@ export default function LunchWheel({
     }
   }, [])
 
-  function animateSpin(targetMenu, weatherSnapshot, segments, duration = 4300) {
+  function animateSpin(
+    targetMenu,
+    weatherSnapshot,
+    segments,
+    duration = 4300,
+    landingRandom = Math.random(),
+  ) {
     const seg = segments.find((item) => item.id === targetMenu.id)
     if (!seg) {
       setSpinning(false)
@@ -145,19 +154,32 @@ export default function LunchWheel({
     }
 
     const pointerAngle = -Math.PI / 2
+    const reducedMotion = window.matchMedia?.(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+    const landing = createSuspenseLanding(
+      seg,
+      landingRandom,
+      reducedMotion,
+    )
     const start = rotationRef.current
     const currentNorm = normalizeAngle(start)
-    const targetNorm = normalizeAngle(pointerAngle - seg.center)
+    const targetNorm = normalizeAngle(pointerAngle - landing.targetAngle)
     let delta = targetNorm - currentNorm
     if (delta < 0) delta += Math.PI * 2
 
-    const extraTurns = (6 + Math.floor(Math.random() * 3)) * Math.PI * 2
+    const extraTurns =
+      (reducedMotion ? 1 : 6 + Math.floor(Math.random() * 3)) * Math.PI * 2
     const end = start + delta + extraTurns
     const begin = performance.now()
+    const actualDuration = reducedMotion ? Math.min(duration, 700) : duration
 
     const frame = (now) => {
-      const p = Math.min(1, (now - begin) / duration)
-      const next = start + (end - start) * easeOutQuint(p)
+      const p = Math.min(1, (now - begin) / actualDuration)
+      const next =
+        start +
+        (end - start) * easeOutQuint(p) +
+        suspenseRotationOffset(p, landing.overshoot)
       setRotation(next)
       if (p < 1) {
         rafRef.current = requestAnimationFrame(frame)
@@ -285,7 +307,13 @@ export default function LunchWheel({
     let animationStarted = false
     const timer = setTimeout(() => {
       animationStarted = true
-      animateSpin(winner, null, segments, remaining)
+      animateSpin(
+        winner,
+        null,
+        segments,
+        remaining,
+        stableSpinRandom(key),
+      )
     }, delay)
     return () => {
       clearTimeout(timer)
