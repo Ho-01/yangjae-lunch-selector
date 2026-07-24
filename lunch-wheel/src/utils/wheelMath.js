@@ -64,29 +64,40 @@ export function createSuspenseLanding(segment, randomValue, reducedMotion = fals
     }
   }
 
-  const nearStart = random < 0.8
-  const sideProgress = nearStart
-    ? (random - 0.6) / 0.2
-    : (random - 0.8) / 0.2
+  const sideProgress = (random - 0.6) / 0.4
   const inset = arc * (0.05 + sideProgress * 0.07)
   return {
-    targetAngle: nearStart ? segment.start + inset : segment.end - inset,
+    targetAngle: segment.start + inset,
     mode: 'boundary',
-    // The wheel keeps rotating forward; only the physical pointer bends.
-    pointerDirection: nearStart ? 1 : -1,
+    pointerDirection: 1,
+    boundaryClearance: inset,
   }
 }
 
-export function pointerDeflectionDegrees(progress, landing) {
-  if (progress <= 0 || progress >= 1) return 0
+export function stepPointerSpring(
+  state,
+  deltaSeconds,
+  { target = 0, impulse = 0 } = {},
+) {
+  const dt = Math.max(0, Math.min(0.034, deltaSeconds))
+  const acceleration =
+    150 * (target - state.angle) - 18 * state.velocity
+  const velocity = state.velocity + acceleration * dt + impulse
+  return {
+    angle: state.angle + velocity * dt,
+    velocity,
+  }
+}
 
-  const fastClicks =
-    Math.sin(progress * Math.PI * 34) * Math.pow(1 - progress, 1.3) * 7
-  if (landing.mode !== 'boundary' || progress < 0.78) return fastClicks
-
-  const late = (progress - 0.78) / 0.22
-  const caughtOnPeg =
-    Math.sin(late * Math.PI) * 25 * landing.pointerDirection
-  const tremble = Math.sin(late * Math.PI * 5) * (1 - late) * 3
-  return caughtOnPeg + tremble
+export function wheelReboundOffset(progress, landing) {
+  if (landing.mode !== 'boundary' || progress <= 0.9 || progress >= 1) {
+    return 0
+  }
+  const reboundProgress = (progress - 0.9) / 0.1
+  const amplitude = Math.min(landing.boundaryClearance * 0.22, 0.012)
+  return (
+    -Math.sin(reboundProgress * Math.PI * 4) *
+    (1 - reboundProgress) *
+    amplitude
+  )
 }

@@ -2,8 +2,9 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   createSuspenseLanding,
-  pointerDeflectionDegrees,
+  stepPointerSpring,
   stableSpinRandom,
+  wheelReboundOffset,
 } from '../../src/utils/wheelMath.js'
 
 test('긴장감 정지 지점은 작은 세그먼트에서도 항상 경계 안쪽이다', () => {
@@ -31,13 +32,27 @@ test('중앙·일반·경계 직전 정지가 모두 발생한다', () => {
   assert.equal(createSuspenseLanding(segment, 0.7).mode, 'boundary')
 })
 
-test('경계 직전에는 포인터만 크게 휘고 최종 상태에서 복원된다', () => {
-  const landing = {
-    mode: 'boundary',
-    pointerDirection: 1,
+test('포인터 스프링은 충격 후 감쇠하며 원점으로 돌아온다', () => {
+  let state = stepPointerSpring(
+    { angle: 0, velocity: 0 },
+    1 / 60,
+    { impulse: 180 },
+  )
+  assert.ok(state.angle > 0)
+  for (let index = 0; index < 180; index += 1) {
+    state = stepPointerSpring(state, 1 / 60)
   }
-  assert.ok(Math.abs(pointerDeflectionDegrees(0.89, landing)) > 15)
-  assert.equal(pointerDeflectionDegrees(1, landing), 0)
+  assert.ok(Math.abs(state.angle) < 0.01)
+})
+
+test('경계 직전 정지에서만 바퀴의 작은 탄성 반동이 생긴다', () => {
+  const boundary = {
+    mode: 'boundary',
+    boundaryClearance: 0.1,
+  }
+  assert.notEqual(wheelReboundOffset(0.9125, boundary), 0)
+  assert.equal(wheelReboundOffset(1, boundary), 0)
+  assert.equal(wheelReboundOffset(0.925, { mode: 'center' }), 0)
 })
 
 test('점심방 정지 난수는 같은 키에서 재현된다', () => {

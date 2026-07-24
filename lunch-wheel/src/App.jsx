@@ -767,7 +767,7 @@ export default function App() {
           spinning={spinning}
           setSpinning={setSpinning}
           onToast={showToast}
-          onSpinComplete={handleRoomSpinComplete}
+          onSpinComplete={isRoom ? handleRoomSpinComplete : undefined}
           onRequestSpin={isRoom ? lunchRoom.startSpin : undefined}
           remoteSpin={
             isRoom && lunchRoom.room?.status === 'SPINNING'
