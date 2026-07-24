@@ -889,11 +889,12 @@ export default function App() {
           ) : null}
 
           <CollapsibleSidePanel
-            title="오늘 제외할 메뉴"
+            title={isNearby ? '추첨에서 뺄 식당' : '오늘 제외할 메뉴'}
             summary={`${excludedIds.size}개 제외`}
           >
           <MenuExclusionList
             menus={menus}
+            mode={mode}
             excludedIds={excludedIds}
             disabled={busy}
             onToggle={handleToggle}

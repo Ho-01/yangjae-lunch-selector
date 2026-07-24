@@ -88,7 +88,7 @@ export function placesToMenus(places) {
       category_display: {
         code: category.id,
         name: category.label,
-        icon_key: 'utensils',
+        icon_key: category.iconKey,
         color: '#f97316',
       },
       place_links: [

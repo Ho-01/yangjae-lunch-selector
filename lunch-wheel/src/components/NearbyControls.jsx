@@ -5,6 +5,7 @@ import {
   NEARBY_MIN_RATING_OPTIONS,
   NEARBY_RADIUS_OPTIONS,
 } from '../constants/app'
+import { getTypeIcon } from '../constants/icons'
 
 export default function NearbyControls({
   settings,
@@ -125,6 +126,7 @@ export default function NearbyControls({
           <div className="nearby-category-list">
             {categoryCounts.map((category) => {
               const selected = selectedCategoryIds.includes(category.id)
+              const CategoryIcon = getTypeIcon(category.iconKey)
               return (
                 <Button
                   key={category.id}
@@ -134,6 +136,7 @@ export default function NearbyControls({
                   disabled={disabled || loading || locating}
                   onClick={() => onToggleCategory(category.id)}
                 >
+                  <CategoryIcon className="ui-icon" aria-hidden />
                   {category.label} {category.count}
                 </Button>
               )

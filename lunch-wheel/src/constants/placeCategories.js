@@ -1,14 +1,14 @@
 export const PLACE_CATEGORY_DEFINITIONS = [
-  { id: 'korean', label: '한식' },
-  { id: 'chinese', label: '중식' },
-  { id: 'japanese', label: '일식' },
-  { id: 'western', label: '양식' },
-  { id: 'asian', label: '아시아 음식' },
-  { id: 'global', label: '세계 음식' },
-  { id: 'quick', label: '간편식' },
-  { id: 'cafe', label: '카페·디저트' },
-  { id: 'bar', label: '주점' },
-  { id: 'other', label: '기타' },
+  { id: 'korean', label: '한식', iconKey: 'bowl' },
+  { id: 'chinese', label: '중식', iconKey: 'cookingPot' },
+  { id: 'japanese', label: '일식', iconKey: 'fish' },
+  { id: 'western', label: '양식', iconKey: 'pizza' },
+  { id: 'asian', label: '아시아 음식', iconKey: 'wheat' },
+  { id: 'global', label: '세계 음식', iconKey: 'globe' },
+  { id: 'quick', label: '간편식', iconKey: 'sandwich' },
+  { id: 'cafe', label: '카페·디저트', iconKey: 'coffee' },
+  { id: 'bar', label: '주점', iconKey: 'beer' },
+  { id: 'other', label: '기타', iconKey: 'utensils' },
 ]
 
 // Google Places Table A의 Food and Drink 목록 스냅샷.
@@ -359,4 +359,3 @@ export const GOOGLE_TYPE_TO_PLACE_CATEGORY = {
   vegan_restaurant: 'other',
   vegetarian_restaurant: 'other',
 }
-

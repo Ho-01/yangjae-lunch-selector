@@ -14,6 +14,7 @@ export default function MenuExclusionList({
   onToggle,
   onBanAll,
   onClearAll,
+  mode = 'team',
 }) {
   const [query, setQuery] = useState('')
   const SearchIcon = UI_ICONS.search
@@ -31,9 +32,11 @@ export default function MenuExclusionList({
 
   return (
     <section className="card side-card">
-      <h2>오늘 제외할 메뉴</h2>
+      <h2>{mode === 'nearby' ? '추첨에서 뺄 식당' : '오늘 제외할 메뉴'}</h2>
       <p className="desc">
-        체크한 메뉴는 이번 돌림에서 완전히 빠집니다. 제외 상태는 팀에 공유됩니다.
+        {mode === 'nearby'
+          ? '체크한 식당은 현재 내 주변 돌림판에서 빠집니다.'
+          : '체크한 메뉴는 이번 돌림에서 완전히 빠집니다. 제외 상태는 팀에 공유됩니다.'}
       </p>
       <label className="menu-list-search">
         <span className="sr-only">메뉴 목록 검색</span>
@@ -41,7 +44,7 @@ export default function MenuExclusionList({
         <Input
           type="search"
           value={query}
-          placeholder="메뉴 또는 종류 검색"
+          placeholder={mode === 'nearby' ? '식당 또는 음식 종류 검색' : '메뉴 또는 성향 검색'}
           onChange={(event) => setQuery(event.target.value)}
         />
       </label>
@@ -88,6 +91,7 @@ export default function MenuExclusionList({
                   </span>
                   <TypeChip
                     menuType={menu.category_display || menu.menu_type}
+                    kind={menu.food_category ? 'food' : 'weather'}
                   />
                 </label>
                 <PlaceMeta

@@ -3147,3 +3147,261 @@ footer {
   gap: 0.5rem;
   margin-top: 0.75rem;
 }
+
+/* Shared type badges: weather behavior and food origin must not look alike. */
+.type-chip {
+  grid-template-columns: 22px minmax(0, auto);
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 8px 3px 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.15;
+}
+
+.type-chip > span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.type-chip small {
+  color: inherit;
+  font-size: 9px;
+  font-weight: 900;
+  opacity: 0.72;
+}
+
+.type-chip .ui-icon {
+  width: 22px;
+  height: 22px;
+  padding: 4px;
+  border: 0;
+  border-radius: 999px;
+}
+
+.type-chip.is-weather {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.type-chip.is-food {
+  border-color: color-mix(in oklch, var(--primary), transparent 65%);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.type-chip.is-food .ui-icon {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.nearby-category-list [data-slot='button'] {
+  min-height: 38px;
+  padding-inline: 10px;
+}
+
+/* Final mobile system overrides. Keep these together to avoid breakpoint drift. */
+@media (max-width: 640px) {
+  body {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .app {
+    padding-inline: max(12px, env(safe-area-inset-left));
+    padding-bottom: max(32px, env(safe-area-inset-bottom));
+  }
+
+  .title-row {
+    align-items: flex-start;
+  }
+
+  .title-row h1 {
+    font-size: clamp(28px, 8.5vw, 34px);
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  .title-location {
+    max-width: 100%;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .subtitle {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .mode-toggle {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .mode-toggle button,
+  [data-slot='button'] {
+    min-height: 44px;
+    height: auto;
+    line-height: 1.3;
+    white-space: normal;
+    text-wrap: balance;
+  }
+
+  .mode-toggle button {
+    padding: 8px 5px;
+    font-size: 12px;
+  }
+
+  .toolbar {
+    gap: 7px;
+  }
+
+  .toolbar .btn {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .card,
+  .side-card {
+    border-radius: 14px;
+  }
+
+  .side-card {
+    padding: 16px;
+  }
+
+  .side-card h2 {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .side-card .desc,
+  .nearby-hint,
+  .nearby-status,
+  .control-reason {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .side-collapse-toggle {
+    min-height: 56px;
+    padding: 10px 12px;
+  }
+
+  .side-collapse-toggle strong {
+    font-size: 14px;
+  }
+
+  .side-collapse-toggle small {
+    font-size: 11px;
+  }
+
+  .nearby-fields label,
+  .type-basic-grid label {
+    font-size: 13px;
+  }
+
+  .nearby-category-list {
+    gap: 7px;
+    margin-top: 10px;
+  }
+
+  .nearby-category-list [data-slot='button'] {
+    flex: 1 1 calc(50% - 7px);
+    justify-content: flex-start;
+    min-width: 0;
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .ban-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ban-actions button {
+    min-height: 44px;
+    font-size: 13px;
+  }
+
+  .ban-item-block {
+    padding: 10px 4px;
+  }
+
+  .ban-item {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 10px;
+    min-height: 48px;
+  }
+
+  .ban-name {
+    overflow: visible;
+    font-size: 14px;
+    line-height: 1.4;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .ban-item .type-chip {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .type-chip {
+    min-height: 30px;
+    font-size: 12px;
+  }
+
+  .type-chip small {
+    font-size: 10px;
+  }
+
+  .prob-row {
+    grid-template-columns: 24px minmax(0, 1fr) 46px;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .prob-label small {
+    font-size: 10px;
+  }
+
+  .recent-switch strong,
+  .recent-results-list strong {
+    font-size: 13px;
+  }
+
+  .recent-results-list span,
+  .recent-results-list time,
+  .place-link-address,
+  .place-link-rating {
+    font-size: 11px;
+  }
+
+  .modal-head h2 {
+    font-size: 20px;
+  }
+
+  .modal-body,
+  .room-panel,
+  .room-dialog {
+    font-size: 14px;
+  }
+
+  .weight-label,
+  .room-builder-section > strong {
+    font-size: 13px;
+  }
+
+  .weight-hint,
+  .room-source-grid span,
+  .room-builder-results span,
+  .room-search-results span {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+}
