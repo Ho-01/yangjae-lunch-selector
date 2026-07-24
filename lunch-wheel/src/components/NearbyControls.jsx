@@ -62,7 +62,19 @@ export default function NearbyControls({
           {locating ? '확인 중…' : '위치 다시 확인'}
         </button>
       </div>
-      {locateError ? <p className="nearby-error">{locateError}</p> : null}
+      {locateError ? (
+        <div className="inline-error" role="alert">
+          <span>{locateError}</span>
+          <button
+            type="button"
+            className="btn ghost"
+            disabled={disabled || locating || loading}
+            onClick={onLocate}
+          >
+            다시 시도
+          </button>
+        </div>
+      ) : null}
 
       <div className="nearby-fields">
         <label htmlFor="nearby-radius">
@@ -121,6 +133,11 @@ export default function NearbyControls({
           강제 새로고침
         </button>
       </div>
+      {!coords && !locating ? (
+        <p className="control-reason">
+          주변 식당을 불러오려면 먼저 위치를 확인해주세요.
+        </p>
+      ) : null}
 
       <p className="nearby-hint">
         위치가 안 되면: 사이트 위치 권한 허용, Windows 위치 서비스 ON,
@@ -128,7 +145,19 @@ export default function NearbyControls({
       </p>
 
       <div className="nearby-status">
-        {error ? <p className="nearby-error">{error}</p> : null}
+        {error ? (
+          <div className="inline-error" role="alert">
+            <span>{error}</span>
+            <button
+              type="button"
+              className="btn ghost"
+              disabled={disabled || loading || locating || !coords}
+              onClick={onLoad}
+            >
+              다시 시도
+            </button>
+          </div>
+        ) : null}
         <p>
           목록 {filteredCount}곳
           {rawCount !== filteredCount ? ` (필터 전 ${rawCount})` : ''}

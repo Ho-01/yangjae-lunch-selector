@@ -14,15 +14,15 @@ evidence changes. `Now` is committed next work; `Next` is planned; `Later` is ex
 
 ## Next — M1 UX reliability (`0.2.0`)
 
-- Add confirmation or undo for destructive actions and vote closing.
-- Explain why unavailable actions are disabled.
-- Provide recovery paths for denied location permission and network failures.
-- Collapse secondary mobile panels without hiding the primary decision flow.
-- Standardize loading, empty, success, and error states.
-- Separate restaurant search from direct name entry so users always understand
+- [x] Add confirmation or undo for destructive actions and vote closing.
+- [x] Explain why unavailable nearby actions are disabled.
+- [x] Provide recovery paths for denied location permission and network failures.
+- [x] Collapse secondary mobile panels without hiding the primary decision flow.
+- [ ] Standardize remaining loading, empty, success, and error states.
+- [x] Separate restaurant search from direct name entry so users always understand
   which source will be added. Use explicit tabs or sections, distinct labels, and
   source-specific empty/error states.
-- Complete keyboard and 320/390/768px browser checks.
+- [x] Complete automated keyboard and 320/390/desktop browser checks.
 
 ## Next — M2 decision quality (`0.3.0`)
 

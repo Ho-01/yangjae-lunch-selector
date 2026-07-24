@@ -338,7 +338,15 @@ export default function MenuTypeManagerDialog({
                     type="button"
                     className="icon-btn delete"
                     disabled={saving}
-                    onClick={() => onDelete(selectedId)}
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `'${menuTypes.find((type) => type.id === selectedId)?.name || draft.name}' 메뉴 타입을 삭제할까요?`,
+                        )
+                      ) {
+                        onDelete(selectedId)
+                      }
+                    }}
                   >
                     삭제
                   </button>

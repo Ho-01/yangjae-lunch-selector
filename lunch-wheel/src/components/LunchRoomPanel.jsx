@@ -26,8 +26,11 @@ export default function LunchRoomPanel({
   const [veto, setVeto] = useState(null)
   const [query, setQuery] = useState('')
   const [manualName, setManualName] = useState('')
+  const [candidateSource, setCandidateSource] = useState('search')
   const [searching, setSearching] = useState(false)
   const [searchResults, setSearchResults] = useState([])
+  const [searchError, setSearchError] = useState('')
+  const [searchAttempted, setSearchAttempted] = useState(false)
   const [clock, setClock] = useState(Date.now())
   const [renaming, setRenaming] = useState(false)
   const [nicknameDraft, setNicknameDraft] = useState('')
@@ -98,8 +101,13 @@ export default function LunchRoomPanel({
   }
 
   async function searchPlaces() {
-    if (query.trim().length < 2) return
+    if (query.trim().length < 2) {
+      setSearchError('식당 이름을 2자 이상 입력해주세요.')
+      return
+    }
     setSearching(true)
+    setSearchError('')
+    setSearchAttempted(true)
     try {
       setSearchResults(await searchGooglePlaces({
         query: query.trim(),
@@ -107,7 +115,7 @@ export default function LunchRoomPanel({
         longitude: room.longitude,
       }))
     } catch (err) {
-      onToast(err.message || '식당을 검색하지 못했어요.')
+      setSearchError(err.message || '식당을 검색하지 못했어요. 다시 시도해주세요.')
     } finally {
       setSearching(false)
     }
@@ -265,10 +273,38 @@ export default function LunchRoomPanel({
       {room.status === 'OPEN' ? (
         <>
           <div className="room-candidate-tools">
+            <div
+              className="candidate-source-tabs"
+              role="tablist"
+              aria-label="후보 추가 방법"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={candidateSource === 'search'}
+                className={candidateSource === 'search' ? 'is-active' : ''}
+                onClick={() => setCandidateSource('search')}
+              >
+                식당 검색
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={candidateSource === 'manual'}
+                className={candidateSource === 'manual' ? 'is-active' : ''}
+                onClick={() => setCandidateSource('manual')}
+              >
+                이름 직접 추가
+              </button>
+            </div>
+            {candidateSource === 'search' ? (
+              <div className="candidate-source-panel" role="tabpanel">
+                <p>Google 장소 검색 결과에서 식당을 후보로 추가합니다.</p>
               <div>
                 <input
                   value={query}
-                  placeholder="식당 검색해서 추가"
+                  aria-label="추가할 식당 검색"
+                  placeholder="예: 양재역 국밥"
                   disabled={isReady}
                   onChange={(event) => setQuery(event.target.value)}
                   onKeyDown={(event) => event.key === 'Enter' && searchPlaces()}
@@ -287,15 +323,35 @@ export default function LunchRoomPanel({
                   ))}
                 </div>
               ) : null}
+              {searchAttempted && !searching && !searchResults.length && !searchError ? (
+                <p className="candidate-empty">검색 결과가 없습니다. 다른 이름으로 검색해보세요.</p>
+              ) : null}
+              {searchError ? (
+                <div className="inline-error" role="alert">
+                  <span>{searchError}</span>
+                  {searchAttempted ? (
+                    <button type="button" className="btn ghost" onClick={searchPlaces}>
+                      다시 시도
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+              </div>
+            ) : (
+              <div className="candidate-source-panel" role="tabpanel">
+                <p>장소 정보 없이 원하는 메뉴나 식당 이름만 직접 추가합니다.</p>
               <div>
                 <input
                   value={manualName}
-                  placeholder="이름만 직접 추가"
+                  aria-label="직접 추가할 후보 이름"
+                  placeholder="예: 김치찌개"
                   disabled={isReady}
                   onChange={(event) => setManualName(event.target.value)}
                 />
                 <button type="button" className="btn ghost" disabled={isReady} onClick={addManual}>추가</button>
               </div>
+              </div>
+            )}
           </div>
           <div className="room-instruction">
             <strong>먹고 싶은 메뉴 최대 3개</strong>
@@ -319,7 +375,11 @@ export default function LunchRoomPanel({
                     className="room-remove"
                     title="후보 삭제"
                     disabled={isReady}
-                    onClick={() => onRemoveCandidate(menu.id)}
+                    onClick={() => {
+                      if (window.confirm(`'${menu.name}' 후보를 삭제할까요?`)) {
+                        onRemoveCandidate(menu.id)
+                      }
+                    }}
                   >
                     ×
                   </button>

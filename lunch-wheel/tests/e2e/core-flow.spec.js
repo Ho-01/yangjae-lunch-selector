@@ -78,3 +78,15 @@ test('keeps the primary page within the viewport', async ({ page }) => {
   const box = await spinButton.boundingBox()
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
 })
+
+test('keeps secondary panels collapsible on mobile', async ({ page }, testInfo) => {
+  test.skip((testInfo.project.use.viewport?.width || 1000) > 640)
+
+  const toggle = page
+    .getByRole('button')
+    .filter({ hasText: '오늘 제외할 메뉴' })
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.getByRole('searchbox', { name: '메뉴 목록 검색' })).toBeVisible()
+})

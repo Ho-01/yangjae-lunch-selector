@@ -4,6 +4,7 @@ import LunchWheel from './components/LunchWheel/LunchWheel'
 import LunchRoomDialog from './components/LunchRoomDialog'
 import LunchRoomPanel from './components/LunchRoomPanel'
 import LunchRoomStart from './components/LunchRoomStart'
+import CollapsibleSidePanel from './components/CollapsibleSidePanel'
 import MenuExclusionList from './components/MenuExclusionList'
 import MenuManagerDialog from './components/MenuManagerDialog'
 import MenuTypeManagerDialog from './components/MenuTypeManagerDialog'
@@ -595,6 +596,13 @@ export default function App() {
             }
           }}
           onCloseVoting={async () => {
+            if (
+              !window.confirm(
+                '투표를 마감하면 좋아요와 제외 선택을 더 이상 바꿀 수 없습니다. 최종 후보를 결정할까요?',
+              )
+            ) {
+              return
+            }
             try {
               await lunchRoom.close()
               showToast('투표를 마감하고 후보를 정했어요.')
@@ -681,6 +689,10 @@ export default function App() {
 
         {!isRoom ? (
         <aside className="side">
+          <CollapsibleSidePanel
+            title="날씨 가중치"
+            summary={weatherWeightEnabled ? '사용 중' : '사용 안 함'}
+          >
           <section className="card side-card weather-weight-control">
             <div>
               <h2>날씨 가중치</h2>
@@ -699,7 +711,13 @@ export default function App() {
               <strong>{weatherWeightEnabled ? 'ON' : 'OFF'}</strong>
             </label>
           </section>
+          </CollapsibleSidePanel>
           {isNearby ? (
+            <CollapsibleSidePanel
+              title="내 주변 설정"
+              summary={nearby.coords ? '위치 확인됨' : '위치 확인 필요'}
+              defaultMobileOpen={!nearby.menus.length}
+            >
             <NearbyControls
               settings={nearby.settings}
               onSettingsChange={nearby.setSettings}
@@ -721,8 +739,13 @@ export default function App() {
               onLoad={handleNearbyLoad}
               onForceRefresh={handleNearbyForceRefresh}
             />
+            </CollapsibleSidePanel>
           ) : null}
 
+          <CollapsibleSidePanel
+            title="오늘 제외할 메뉴"
+            summary={`${excludedIds.size}개 제외`}
+          >
           <MenuExclusionList
             menus={menus}
             excludedIds={excludedIds}
@@ -731,10 +754,16 @@ export default function App() {
             onBanAll={handleBanAll}
             onClearAll={handleClearAll}
           />
+          </CollapsibleSidePanel>
+          <CollapsibleSidePanel
+            title="현재 당첨 확률"
+            summary={`${weightedItems.length}개 후보`}
+          >
           <ProbabilityList
             items={weightedItems}
             weather={weatherWeightEnabled ? weather : null}
           />
+          </CollapsibleSidePanel>
         </aside>
         ) : null}
       </section>

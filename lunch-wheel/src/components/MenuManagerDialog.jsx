@@ -183,7 +183,11 @@ export default function MenuManagerDialog({
                       type="button"
                       className="icon-btn delete"
                       disabled={saving}
-                      onClick={() => onDelete(menu.id)}
+                      onClick={() => {
+                        if (window.confirm(`'${menu.name}' 메뉴를 삭제할까요?`)) {
+                          onDelete(menu.id)
+                        }
+                      }}
                     >
                       삭제
                     </button>
