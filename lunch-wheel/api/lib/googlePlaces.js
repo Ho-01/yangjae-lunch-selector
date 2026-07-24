@@ -20,6 +20,7 @@ const NEARBY_FIELD_MASK = [
   'places.userRatingCount',
   'places.googleMapsUri',
   'places.primaryType',
+  'places.types',
 ].join(',')
 
 export function getGooglePlacesApiKey() {
@@ -49,6 +50,7 @@ export function mapGooglePlace(place) {
     rating: place.rating ?? null,
     ratingCount: place.userRatingCount ?? null,
     primaryType: place.primaryType || null,
+    types: Array.isArray(place.types) ? place.types : [],
     url:
       place.googleMapsUri ||
       (placeId
@@ -159,6 +161,7 @@ const DETAILS_FIELD_MASK = [
   'googleMapsUri',
   'nationalPhoneNumber',
   'primaryType',
+  'types',
 ].join(',')
 
 export async function fetchPlaceDetails({ apiKey, placeId }) {

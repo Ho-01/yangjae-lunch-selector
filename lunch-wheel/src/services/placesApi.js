@@ -70,31 +70,39 @@ export async function searchNearbyGooglePlaces({
 
 /** Map Places results into lunch-wheel menu shape (equal weather weights). */
 export function placesToMenus(places) {
-  return places.map((place, index) => ({
-    id: `nearby-${place.placeId}`,
-    name: place.placeName,
-    sort_order: index + 1,
-    menu_type: {
-      id: 'nearby-general',
-      code: 'general',
-      name: '주변 식당',
-      icon_key: 'utensils',
-      color: '#f97316',
-      weather_weight_config: { base: 1 },
-    },
-    place_links: [
-      {
-        id: `link-${place.placeId}`,
-        provider: 'google',
-        url: place.url,
-        place_id: place.placeId,
-        place_name: place.placeName,
-        formatted_address: place.formattedAddress,
-        rating: place.rating,
-        rating_count: place.ratingCount,
-        photo_refs: [],
-        is_active: true,
+  return places.map((place, index) => {
+    const category = classifyGooglePlace(place)
+
+    return {
+      id: `nearby-${place.placeId}`,
+      name: place.placeName,
+      sort_order: index + 1,
+      place_category: category,
+      menu_type: {
+        id: `nearby-${category.id}`,
+        code: category.id,
+        name: category.label,
+        icon_key: 'utensils',
+        color: '#f97316',
+        weather_weight_config: { base: 1 },
       },
-    ],
-  }))
+      place_links: [
+        {
+          id: `link-${place.placeId}`,
+          provider: 'google',
+          url: place.url,
+          place_id: place.placeId,
+          place_name: place.placeName,
+          formatted_address: place.formattedAddress,
+          rating: place.rating,
+          rating_count: place.ratingCount,
+          primary_type: place.primaryType,
+          types: place.types || [],
+          photo_refs: [],
+          is_active: true,
+        },
+      ],
+    }
+  })
 }
+import { classifyGooglePlace } from '../utils/placeCategories.js'
