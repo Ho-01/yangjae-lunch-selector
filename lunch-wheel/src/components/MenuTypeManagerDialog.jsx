@@ -6,6 +6,7 @@ import {
   WEATHER_WEIGHT_FIELDS,
 } from '../constants/app'
 import { TYPE_ICON_MAP, UI_ICONS } from '../constants/icons'
+import StateMessage from './StateMessage'
 
 function slugifyCode(value) {
   return String(value || '')
@@ -200,7 +201,7 @@ export default function MenuTypeManagerDialog({
 
         <div className="type-edit-panel">
           {!menuTypes.length && !isCreating ? (
-            <p className="empty-hint">타입이 없습니다. 위에서 추가해주세요.</p>
+            <StateMessage compact title="메뉴 타입이 없습니다" description="새 타입 추가 버튼으로 첫 타입을 만들어주세요." />
           ) : (
             <>
               <div className="type-basic-grid">

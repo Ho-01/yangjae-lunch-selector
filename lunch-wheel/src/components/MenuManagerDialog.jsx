@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { UI_ICONS } from '../constants/icons'
 import PlaceLinkEditor from './PlaceLinkEditor'
+import StateMessage from './StateMessage'
 
 export default function MenuManagerDialog({
   open,
@@ -118,7 +119,7 @@ export default function MenuManagerDialog({
 
         <div className="menu-table">
           {!menus.length ? (
-            <div className="empty-hint">메뉴가 없습니다. 위에서 추가해주세요.</div>
+            <StateMessage compact title="메뉴가 없습니다" description="위 입력란에서 첫 메뉴를 추가해주세요." />
           ) : (
             menus.map((menu) => {
               const draft = drafts[menu.id] || {

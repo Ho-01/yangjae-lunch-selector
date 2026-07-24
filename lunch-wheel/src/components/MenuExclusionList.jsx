@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import TypeChip from './TypeChip'
 import PlaceMeta from './PlaceMeta'
 import { UI_ICONS } from '../constants/icons'
+import StateMessage from './StateMessage'
 
 export default function MenuExclusionList({
   menus,
@@ -60,9 +61,9 @@ export default function MenuExclusionList({
       </div>
       <div className="ban-list">
         {!menus.length ? (
-          <div className="empty-hint">등록된 메뉴가 없습니다.</div>
+          <StateMessage compact title="등록된 메뉴가 없습니다" description="메뉴 관리에서 후보를 추가해주세요." />
         ) : !filteredMenus.length ? (
-          <div className="empty-hint">검색 결과가 없습니다.</div>
+          <StateMessage compact title="검색 결과가 없습니다" description="다른 메뉴명이나 종류로 검색해보세요." />
         ) : (
           filteredMenus.map((menu) => {
             const banned = excludedIds.has(menu.id)

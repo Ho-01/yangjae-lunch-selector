@@ -18,12 +18,18 @@ All notable user-visible changes are recorded here. The format follows
 - Collapsible mobile side panels that keep the roulette flow prominent.
 - Explicit restaurant-search and direct-name tabs for room candidate entry.
 - Retry actions and nearby-control guidance for location and network failures.
+- Randomized result messages shared consistently across wheel results and room images.
+- Browser-local recent-result history with an explicit clear action.
+- An optional recent-result adjustment that lowers the last three matching menu weights.
+- Shared loading, empty, and error-state presentation for primary data surfaces.
 
 ### Changed
 
 - Mode controls now expose their toggle state with appropriate accessibility semantics.
 - Loading, error, and toast messages provide assistive-technology status feedback.
-- Public product naming is standardized as `점심룰렛`.
+- Public product naming is standardized as `식사가챠` across the app, metadata,
+  sharing, documentation, and package metadata.
+- Application package version advances to `0.3.0`.
 - Destructive menu removal, candidate removal, and vote closing now require confirmation.
 - Disabled nearby actions explain that location confirmation is required.
 

@@ -1,5 +1,7 @@
 # Product
 
+The public product name is **식사가챠**.
+
 ## Purpose
 
 The product helps one person or a group decide what to eat for lunch with minimal
@@ -18,6 +20,8 @@ discussion while keeping the outcome understandable and playful.
    filter locally, then spin with equal candidate probability.
 3. **Lunch room** — create or join a room, collect candidates, express preferences,
    mark readiness, and share one synchronized result.
+4. **Result memory** — keep up to 10 recent results in the current browser and
+   optionally reduce the probability of the three most recent menus.
 
 ## Product principles
 

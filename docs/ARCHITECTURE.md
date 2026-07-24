@@ -6,6 +6,7 @@
 React/Vite client
 ├─ Supabase JS → menus, menu types, exclusions, rooms, audit events
 ├─ Open-Meteo → weather used for team-menu weighting
+├─ localStorage → recent results and user-controlled weighting preferences
 └─ /api/places/* → server-side Google Places calls
                    └─ Supabase Storage → cached team-menu photos
 ```
@@ -32,6 +33,9 @@ belong in utilities.
 
 Menus and types come from Supabase. Daily exclusions remove candidates. Weather
 weights adjust the remaining menu probabilities immediately before a spin.
+The optional recent-result adjustment multiplies matching menu weights by `0.55`
+after weather calculation. Only the three newest results for the active mode are
+considered.
 
 ### Nearby
 
@@ -51,6 +55,8 @@ winner and animation timing. The host controls closing and spinning.
 - Browser-safe Supabase configuration uses the `VITE_` prefix.
 - Current anonymous RLS is temporary and is a production-readiness blocker.
 - Exact coordinates should not be persisted unless a documented feature requires it.
+- Recent results remain browser-local, contain only menu ID/name, mode, and time,
+  and are capped at 10 entries with an explicit clear action.
 - Audit records must not include secrets or unnecessary personal data.
 
 ## Cost controls

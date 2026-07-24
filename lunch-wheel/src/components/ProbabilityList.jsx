@@ -1,9 +1,17 @@
-export default function ProbabilityList({ items, weather }) {
+import StateMessage from './StateMessage'
+
+export default function ProbabilityList({ items, weather, reduceRecent }) {
   const total = items.reduce((sum, item) => sum + item.weight, 0)
 
   let body
   if (!items.length) {
-    body = <div className="empty-hint">활성 메뉴가 없습니다.</div>
+    body = (
+      <StateMessage
+        compact
+        title="추첨할 메뉴가 없습니다"
+        description="제외 메뉴를 해제하거나 새 메뉴를 추가해주세요."
+      />
+    )
   } else {
     const ranked = items
       .map((item) => ({ ...item, pct: (item.weight / total) * 100 }))
@@ -21,6 +29,7 @@ export default function ProbabilityList({ items, weather }) {
             <div>
               <div className="prob-label">
                 <strong>{item.name}</strong>
+                {item.recentPenalty ? <small>최근 결과 감산</small> : null}
               </div>
               <div className="bar">
                 <i style={{ width: `${((item.pct / max) * 100).toFixed(1)}%` }} />
@@ -38,9 +47,9 @@ export default function ProbabilityList({ items, weather }) {
       <h2>현재 당첨 확률</h2>
       <p className="desc">
         {weather
-          ? `날씨 가중치 반영 · 활성 메뉴 ${items.length}개 중 상위 8개`
+          ? `날씨 가중치${reduceRecent ? ' · 최근 결과 감산' : ''} 반영 · 활성 메뉴 ${items.length}개 중 상위 8개`
           : items.length
-            ? `기본 확률 · 활성 메뉴 ${items.length}개 중 상위 8개`
+            ? `${reduceRecent ? '최근 결과 감산 반영' : '기본 확률'} · 활성 메뉴 ${items.length}개 중 상위 8개`
             : '현재 날씨와 제외 목록을 기준으로 계산한 상위 메뉴입니다.'}
       </p>
       {body}

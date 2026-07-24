@@ -3,6 +3,7 @@ import PlaceMeta from './PlaceMeta'
 export default function ResultCard({
   visible,
   menuName,
+  message,
   reason,
   placeLinks,
   onShare,
@@ -11,6 +12,7 @@ export default function ResultCard({
     <div className={`result${visible ? ' show' : ''}`} aria-live="polite">
       <div className="small">선택 결과</div>
       <div className="menu">{menuName || '—'}</div>
+      {message ? <div className="result-message">{message}</div> : null}
       <div className="why">{reason}</div>
       {visible && onShare ? (
         <button type="button" className="btn ghost result-share" onClick={onShare}>

@@ -32,7 +32,7 @@ function drawCrown(ctx, x, y, size) {
   ctx.restore()
 }
 
-export async function createRoomResultImage(room) {
+export async function createRoomResultImage(room, resultMessage) {
   await document.fonts?.ready
   const canvas = document.createElement('canvas')
   canvas.width = 1080
@@ -50,7 +50,7 @@ export async function createRoomResultImage(room) {
 
   ctx.fillStyle = '#3c3c3c'
   ctx.font = '900 48px Pretendard, sans-serif'
-  ctx.fillText('점심룰렛', 72, 105)
+  ctx.fillText('식사가챠', 72, 105)
   ctx.fillStyle = '#58a700'
   ctx.font = '800 30px Pretendard, sans-serif'
   ctx.textAlign = 'right'
@@ -115,7 +115,11 @@ export async function createRoomResultImage(room) {
   ctx.fillStyle = '#58cc02'
   ctx.font = '900 29px Pretendard, sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText('결과에 승복하고 맛있게 먹으러 가요!', 540, 1280)
+  ctx.fillText(
+    fitText(ctx, resultMessage || '결과에 승복하고 맛있게 먹으러 가요!', 920),
+    540,
+    1280,
+  )
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(

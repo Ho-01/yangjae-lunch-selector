@@ -71,13 +71,22 @@ export function calculateMenuWeight(menuType, weather) {
  * @param {Set<string>|string[]} excludedIds
  * @param {object | null} weather
  */
-export function getWeightedMenus(menus, excludedIds, weather) {
+export function getWeightedMenus(
+  menus,
+  excludedIds,
+  weather,
+  { recentMenuIds = [], reduceRecent = false } = {},
+) {
   const banned = excludedIds instanceof Set ? excludedIds : new Set(excludedIds)
+  const recent = new Set(recentMenuIds)
   return menus
     .filter((menu) => !banned.has(menu.id))
     .map((menu) => ({
       ...menu,
-      weight: calculateMenuWeight(menu.menu_type, weather),
+      weight:
+        calculateMenuWeight(menu.menu_type, weather) *
+        (reduceRecent && recent.has(menu.id) ? 0.55 : 1),
+      recentPenalty: reduceRecent && recent.has(menu.id),
     }))
 }
 

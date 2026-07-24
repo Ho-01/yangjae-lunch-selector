@@ -32,7 +32,7 @@ test.beforeEach(async ({ page }) => {
     })
   })
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: '점심룰렛' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '식사가챠' })).toBeVisible()
 })
 
 test('switches between all decision modes', async ({ page }) => {
@@ -89,4 +89,21 @@ test('keeps secondary panels collapsible on mobile', async ({ page }, testInfo) 
   await toggle.click()
   await expect(toggle).toHaveAttribute('aria-expanded', 'true')
   await expect(page.getByRole('searchbox', { name: '메뉴 목록 검색' })).toBeVisible()
+})
+
+test('persists the recent-result weighting preference', async ({ page }, testInfo) => {
+  if ((testInfo.project.use.viewport?.width || 1000) <= 640) {
+    await page
+      .getByRole('button')
+      .filter({ hasText: '최근 결과' })
+      .click()
+  }
+
+  const preference = page.getByRole('checkbox', {
+    name: '최근 메뉴 덜 나오게',
+  })
+  await page.getByText('최근 메뉴 덜 나오게', { exact: true }).click()
+  await expect(preference).toBeChecked()
+  await page.reload()
+  await expect(preference).toBeChecked()
 })

@@ -6,6 +6,7 @@ import {
 } from '../utils/roomShareCard'
 import { UI_ICONS } from '../constants/icons'
 import { formatRoomEvent } from '../utils/roomEvents'
+import { pickResultMessage } from '../utils/resultMessages'
 
 export default function LunchRoomPanel({
   room,
@@ -36,6 +37,10 @@ export default function LunchRoomPanel({
   const [nicknameDraft, setNicknameDraft] = useState('')
 
   const winner = room.menus.find((menu) => menu.id === room.winnerMenuId)
+  const resultMessage = useMemo(
+    () => (winner ? pickResultMessage(winner.name) : ''),
+    [winner],
+  )
   const currentMember = room.members.find((member) => member.id === session.memberId)
   const isReady = Boolean(currentMember?.isReady)
   const readyCount = room.members.filter((member) => member.isReady).length
@@ -154,14 +159,14 @@ export default function LunchRoomPanel({
 
   async function shareResult() {
     try {
-      const blob = await createRoomResultImage(room)
+      const blob = await createRoomResultImage(room, resultMessage)
       const file = new File([blob], `오늘-점심-${room.code}.png`, {
         type: 'image/png',
       })
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           title: `오늘의 점심: ${winner?.name || ''}`,
-          text: '같이 고른 오늘의 점심 결과예요!',
+          text: resultMessage,
           files: [file],
         })
       } else {
@@ -175,7 +180,10 @@ export default function LunchRoomPanel({
 
   async function saveResult() {
     try {
-      downloadRoomResult(await createRoomResultImage(room), room.code)
+      downloadRoomResult(
+        await createRoomResultImage(room, resultMessage),
+        room.code,
+      )
       onToast('결과 이미지를 저장했어요.')
     } catch {
       onToast('결과 이미지를 만들지 못했어요.')
@@ -484,7 +492,7 @@ export default function LunchRoomPanel({
         <div className="room-winner">
           <span>오늘의 점심</span>
           <strong>{winner?.name || '결과 확인 중'}</strong>
-          <p>결과에 승복하고 맛있게 먹으러 가요!</p>
+          <p>{resultMessage || '결과에 승복하고 맛있게 먹으러 가요!'}</p>
           <div className="room-result-actions">
             <button type="button" className="btn primary" onClick={shareResult}>
               결과 공유

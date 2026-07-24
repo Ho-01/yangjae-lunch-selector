@@ -5,6 +5,7 @@ import ResultCard from '../ResultCard'
 import { UI_ICONS } from '../../constants/icons'
 import { getWeightedMenus, weatherReason } from '../../utils/weatherWeights'
 import { weightedPick } from '../../utils/weightedRandom'
+import { pickResultMessage } from '../../utils/resultMessages'
 import {
   buildSegments,
   easeOutQuint,
@@ -29,6 +30,9 @@ export default function LunchWheel({
   remoteSpin,
   ignoreWeather = false,
   weatherWeightEnabled = true,
+  recentMenuIds = [],
+  reduceRecent = false,
+  onResult,
   wheelMode = 'team',
   disabledLabel,
   disabledExtras,
@@ -46,11 +50,11 @@ export default function LunchWheel({
 
   async function handleShareResult() {
     if (!result) return
-    const text = `🎉 오늘의 점심은 '${result.name}'입니다.\n${result.reason}`
+    const text = `${result.message}\n${result.reason}`
     try {
       if (navigator.share) {
         await navigator.share({
-          title: '점심룰렛 결과',
+          title: '식사가챠 결과',
           text,
           url: window.location.href,
         })
@@ -81,8 +85,17 @@ export default function LunchWheel({
         orderedMenus,
         excludedIds,
         ignoreWeather || !weatherWeightEnabled ? null : weather,
+        { recentMenuIds, reduceRecent },
       ),
-    [orderedMenus, excludedIds, weather, ignoreWeather, weatherWeightEnabled],
+    [
+      orderedMenus,
+      excludedIds,
+      weather,
+      ignoreWeather,
+      weatherWeightEnabled,
+      recentMenuIds,
+      reduceRecent,
+    ],
   )
   weightedItemsRef.current = weightedItems
 
@@ -140,13 +153,24 @@ export default function LunchWheel({
         setSpinning(false)
         setItemsOverride(null)
         setSpinLabel('다시 돌리기')
+        const resultMessage = pickResultMessage(targetMenu.name)
+        const resultReason =
+          !weatherSnapshot && reduceRecent
+            ? '날씨 가중치 없이 최근 3개 결과의 확률을 낮춰 추첨했어요.'
+            : `${weatherReason(targetMenu, weatherSnapshot)}${
+                reduceRecent
+                  ? ' 최근 선택된 메뉴의 확률도 낮춰 공정하게 추첨했어요.'
+                  : ''
+              }`
         setResult({
           name: targetMenu.name,
+          message: resultMessage,
           reason: ignoreWeather
             ? '함께 고른 최종 후보 중 룰렛이 선택했어요.'
-            : weatherReason(targetMenu, weatherSnapshot),
+            : resultReason,
           place_links: targetMenu.place_links || [],
         })
+        onResult?.(targetMenu)
         onSpinComplete?.(targetMenu)
         if (navigator.vibrate) navigator.vibrate([60, 45, 90])
       }
@@ -186,7 +210,10 @@ export default function LunchWheel({
     const latestWeather = ignoreWeather || !weatherWeightEnabled
       ? null
       : await onRefreshWeather({ quiet: true })
-    const items = getWeightedMenus(orderedMenus, excludedIds, latestWeather)
+    const items = getWeightedMenus(orderedMenus, excludedIds, latestWeather, {
+      recentMenuIds,
+      reduceRecent,
+    })
 
     if (!items.length) {
       setSpinning(false)
@@ -305,6 +332,7 @@ export default function LunchWheel({
       <ResultCard
         visible={Boolean(result)}
         menuName={result?.name}
+        message={result?.message}
         reason={result?.reason}
         placeLinks={result?.place_links}
         onShare={handleShareResult}

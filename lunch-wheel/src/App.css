@@ -1660,6 +1660,149 @@ canvas {
   margin-top: 12px;
 }
 
+.result-message {
+  margin: 8px 14px 0;
+  border-radius: 9px;
+  padding: 9px 10px;
+  background: #f3f8ef;
+  color: var(--primary-shadow);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.prob-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.prob-label small {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 2px 5px;
+  background: #fff4dc;
+  color: #9a6412;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.recent-results-head {
+  display: grid;
+  gap: 10px;
+}
+
+.recent-switch {
+  justify-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 8px 9px;
+  background: var(--surface-1);
+}
+
+.recent-switch strong {
+  min-width: 0;
+  font-size: 11px;
+}
+
+.recent-results-list {
+  display: grid;
+  gap: 0;
+  margin: 10px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recent-results-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  padding: 8px 2px;
+}
+
+.recent-results-list li > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.recent-results-list strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-results-list span,
+.recent-results-list time {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.recent-results-list time {
+  flex: 0 0 auto;
+}
+
+.recent-clear {
+  justify-content: center;
+  width: 100%;
+}
+
+.state-message {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  width: min(520px, calc(100% - 24px));
+  margin: clamp(32px, 12vh, 120px) auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  background: var(--surface-1);
+  color: var(--ink);
+  text-align: center;
+}
+
+.state-message strong {
+  font-size: 16px;
+}
+
+.state-message p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.state-message.is-error {
+  border-color: rgba(255, 75, 75, 0.3);
+  background: #fff5f5;
+}
+
+.state-message.is-loading strong::after {
+  content: '…';
+  animation: loadingPulse 1s infinite alternate;
+}
+
+.state-message.is-compact {
+  width: 100%;
+  margin: 10px 0 0;
+  padding: 14px;
+}
+
+.state-message.is-compact strong {
+  font-size: 12px;
+}
+
+@keyframes loadingPulse {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
 .nearby-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;

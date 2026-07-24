@@ -10,6 +10,8 @@ import MenuManagerDialog from './components/MenuManagerDialog'
 import MenuTypeManagerDialog from './components/MenuTypeManagerDialog'
 import NearbyControls from './components/NearbyControls'
 import ProbabilityList from './components/ProbabilityList'
+import RecentResultsPanel from './components/RecentResultsPanel'
+import StateMessage from './components/StateMessage'
 import { UI_ICONS } from './constants/icons'
 import { useMenus } from './hooks/useMenus'
 import { useDailyExclusions } from './hooks/useDailyExclusions'
@@ -101,6 +103,23 @@ export default function App() {
       return true
     }
   })
+  const [recentResults, setRecentResults] = useState(() => {
+    try {
+      const stored = JSON.parse(
+        window.localStorage.getItem('siksa-gacha-recent-results') || '[]',
+      )
+      return Array.isArray(stored) ? stored.slice(0, 10) : []
+    } catch {
+      return []
+    }
+  })
+  const [reduceRecent, setReduceRecent] = useState(() => {
+    try {
+      return window.localStorage.getItem('siksa-gacha-reduce-recent') === 'true'
+    } catch {
+      return false
+    }
+  })
   const [toast, setToast] = useState('')
   const toastTimer = useRef(0)
   const lastRoomEventId = useRef(null)
@@ -124,8 +143,23 @@ export default function App() {
         menus,
         excludedIds,
         weatherWeightEnabled ? weather : null,
+        {
+          recentMenuIds: recentResults
+            .filter((result) => result.mode === mode)
+            .slice(0, 3)
+            .map((result) => result.menuId),
+          reduceRecent,
+        },
       ),
-    [menus, excludedIds, weather, weatherWeightEnabled],
+    [
+      menus,
+      excludedIds,
+      weather,
+      weatherWeightEnabled,
+      recentResults,
+      mode,
+      reduceRecent,
+    ],
   )
 
   function handleWeatherWeightToggle(event) {
@@ -139,8 +173,62 @@ export default function App() {
     showToast(
       enabled
         ? '날씨 가중치를 적용합니다.'
-        : '날씨 가중치를 끄고 동일한 기본 확률을 사용합니다.',
+        : `날씨 가중치를 끕니다.${reduceRecent ? ' 최근 결과 감산은 유지됩니다.' : ' 동일한 기본 확률을 사용합니다.'}`,
     )
+  }
+
+  function handleResult(menu) {
+    const entry = {
+      id:
+        window.crypto?.randomUUID?.() ||
+        `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      menuId: menu.id,
+      name: menu.name,
+      mode,
+      createdAt: new Date().toISOString(),
+    }
+    setRecentResults((current) => {
+      const next = [entry, ...current].slice(0, 10)
+      try {
+        window.localStorage.setItem(
+          'siksa-gacha-recent-results',
+          JSON.stringify(next),
+        )
+      } catch {
+        // Keep the current-session history when storage is unavailable.
+      }
+      return next
+    })
+  }
+
+  function handleReduceRecent(enabled) {
+    setReduceRecent(enabled)
+    try {
+      window.localStorage.setItem(
+        'siksa-gacha-reduce-recent',
+        String(enabled),
+      )
+    } catch {
+      // Keep the current-session preference when storage is unavailable.
+    }
+    showToast(
+      enabled
+        ? '최근 3개 결과의 당첨 확률을 낮춥니다.'
+        : '최근 결과 감산을 사용하지 않습니다.',
+    )
+  }
+
+  function handleClearRecent() {
+    if (!window.confirm('이 브라우저에 저장된 최근 결과를 모두 삭제할까요?')) {
+      return
+    }
+    setRecentResults([])
+    try {
+      window.localStorage.removeItem('siksa-gacha-recent-results')
+    } catch {
+      // The in-memory history has still been cleared.
+    }
+    showToast('최근 결과를 삭제했습니다.')
   }
 
   const roomCandidateMenus = useMemo(() => {
@@ -434,9 +522,11 @@ export default function App() {
   if (loading) {
     return (
       <main className="app" aria-busy="true">
-        <p className="sr-only" role="status">
-          점심 메뉴를 불러오는 중입니다.
-        </p>
+        <StateMessage
+          type="loading"
+          title="메뉴를 준비하고 있어요"
+          description="잠시만 기다려주세요."
+        />
       </main>
     )
   }
@@ -444,14 +534,13 @@ export default function App() {
   if (dataError || !team) {
     return (
       <main className="app">
-        <div className="state-panel error" role="alert">
-          <strong>Supabase 연결 실패</strong>
-          <p>{dataError || '팀 데이터를 찾을 수 없습니다.'}</p>
-          <p className="hint">
-            마이그레이션과 seed SQL을 실행했는지, 환경변수가 올바른지
-            확인해주세요.
-          </p>
-        </div>
+        <StateMessage
+          type="error"
+          title="메뉴를 불러오지 못했어요"
+          description={dataError || '팀 데이터를 찾을 수 없습니다.'}
+          actionLabel="다시 시도"
+          onAction={() => window.location.reload()}
+        />
       </main>
     )
   }
@@ -464,7 +553,7 @@ export default function App() {
       <header className="topbar" id="primary-content" tabIndex="-1">
         <div>
           <div className="title-row">
-            <h1>점심룰렛</h1>
+            <h1>식사가챠</h1>
             <span className="title-location">{locationLabel}</span>
           </div>
           {isNearby ? (
@@ -499,7 +588,7 @@ export default function App() {
             {isRoom
               ? '함께 고른 최종 후보를 동일한 확률로 결정합니다.'
               : isNearby
-              ? '내 주변 식당으로 돌림판을 구성합니다. 후보 간 확률은 동일합니다.'
+              ? `내 주변 식당으로 돌림판을 구성합니다.${reduceRecent ? ' 최근 결과는 당첨 확률을 낮춥니다.' : ' 후보 간 확률은 동일합니다.'}`
               : '현재 날씨와 메뉴 성격을 반영해 후보별 확률을 조정합니다.'}
           </p>
           <div className="mode-toggle" role="group" aria-label="돌림판 모드">
@@ -664,6 +753,12 @@ export default function App() {
           }
           ignoreWeather={isRoom}
           weatherWeightEnabled={weatherWeightEnabled}
+          recentMenuIds={recentResults
+            .filter((result) => result.mode === mode)
+            .slice(0, 3)
+            .map((result) => result.menuId)}
+          reduceRecent={!isRoom && reduceRecent}
+          onResult={handleResult}
           wheelMode={mode}
           disabledLabel={
             isRoom && lunchRoom.room?.status === 'COMPLETED'
@@ -762,7 +857,20 @@ export default function App() {
           <ProbabilityList
             items={weightedItems}
             weather={weatherWeightEnabled ? weather : null}
+            reduceRecent={reduceRecent}
           />
+          </CollapsibleSidePanel>
+          <CollapsibleSidePanel
+            title="최근 결과"
+            summary={`${recentResults.length}개 기록`}
+          >
+            <RecentResultsPanel
+              results={recentResults}
+              reduceRecent={reduceRecent}
+              disabled={busy}
+              onToggleReduce={handleReduceRecent}
+              onClear={handleClearRecent}
+            />
           </CollapsibleSidePanel>
         </aside>
         ) : null}
