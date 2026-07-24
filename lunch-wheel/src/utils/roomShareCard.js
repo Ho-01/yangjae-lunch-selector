@@ -25,7 +25,7 @@ function drawCrown(ctx, x, y, size) {
   ctx.lineTo(26, 26)
   ctx.lineTo(6, 26)
   ctx.closePath()
-  ctx.strokeStyle = '#a3a3a3'
+  ctx.strokeStyle = '#f97316'
   ctx.lineWidth = 2.5
   ctx.lineJoin = 'round'
   ctx.stroke()
@@ -43,15 +43,15 @@ export async function createRoomResultImage(room, resultMessage) {
   const finalists = room.menus.filter((menu) => finalistIds.has(menu.id))
   const probability = finalists.length ? 100 / finalists.length : 0
 
-  ctx.fillStyle = '#fafafa'
+  ctx.fillStyle = '#fafaf9'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#f97316'
   ctx.fillRect(0, 0, canvas.width, 28)
 
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#292524'
   ctx.font = '900 48px Pretendard, sans-serif'
   ctx.fillText('식사가챠', 72, 105)
-  ctx.fillStyle = '#262626'
+  ctx.fillStyle = '#44403c'
   ctx.font = '800 30px Pretendard, sans-serif'
   ctx.textAlign = 'right'
   ctx.fillText(room.locationLabel || '같이 고른 점심', 1008, 104)
@@ -67,10 +67,10 @@ export async function createRoomResultImage(room, resultMessage) {
   ctx.font = '800 28px Pretendard, sans-serif'
   ctx.textAlign = 'center'
   ctx.fillText('오늘의 점심은', 540, 235)
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#292524'
   ctx.font = '900 82px Pretendard, sans-serif'
   ctx.fillText(fitText(ctx, winner?.name || '결과 확인 중', 850), 540, 345)
-  ctx.fillStyle = '#262626'
+  ctx.fillStyle = '#44403c'
   ctx.font = '800 27px Pretendard, sans-serif'
   ctx.fillText(`${room.members.length}명이 함께 결정했어요`, 540, 420)
   ctx.fillStyle = '#999999'
@@ -78,21 +78,21 @@ export async function createRoomResultImage(room, resultMessage) {
   ctx.fillText(`방 코드 ${room.code}`, 540, 465)
   ctx.textAlign = 'left'
 
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#292524'
   ctx.font = '900 34px Pretendard, sans-serif'
   ctx.fillText('최종 후보', 72, 575)
 
   finalists.forEach((menu, index) => {
     const y = 615 + index * 145
-    ctx.fillStyle = menu.id === winner?.id ? '#f5f5f5' : '#ffffff'
+    ctx.fillStyle = menu.id === winner?.id ? '#ffedd5' : '#ffffff'
     roundedRect(ctx, 60, y, 960, 118, 24)
-    ctx.fillStyle = menu.id === winner?.id ? '#262626' : '#171717'
+    ctx.fillStyle = menu.id === winner?.id ? '#9a3412' : '#292524'
     ctx.font = '900 34px Pretendard, sans-serif'
     ctx.fillText(fitText(ctx, menu.name, 570), 92, y + 48)
     ctx.fillStyle = '#777777'
     ctx.font = '700 22px Pretendard, sans-serif'
     ctx.fillText(`좋아요 ${menu.likeCount} · 제외 ${menu.vetoCount}`, 92, y + 86)
-    ctx.fillStyle = '#737373'
+    ctx.fillStyle = '#78716c'
     ctx.font = '900 30px Pretendard, sans-serif'
     ctx.textAlign = 'right'
     ctx.fillText(`${probability.toFixed(finalists.length === 3 ? 1 : 0)}%`, 978, y + 70)
@@ -100,7 +100,7 @@ export async function createRoomResultImage(room, resultMessage) {
   })
 
   const memberY = 615 + Math.max(3, finalists.length) * 145 + 35
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#292524'
   ctx.font = '900 32px Pretendard, sans-serif'
   ctx.fillText('함께 고른 사람들', 72, memberY)
   ctx.fillStyle = '#777777'
@@ -112,7 +112,7 @@ export async function createRoomResultImage(room, resultMessage) {
   if (host) drawCrown(ctx, 72, memberY + 17, 28)
   ctx.fillText(fitText(ctx, memberNames, 890), host ? 110 : 72, memberY + 50)
 
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#292524'
   ctx.font = '900 29px Pretendard, sans-serif'
   ctx.textAlign = 'center'
   ctx.fillText(

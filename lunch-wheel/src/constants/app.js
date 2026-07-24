@@ -1,12 +1,12 @@
 export const TEAM_SLUG = 'yangjae-lunch'
 
 export const WHEEL_COLORS = [
-  '#171717',
-  '#404040',
-  '#525252',
-  '#737373',
-  '#a3a3a3',
-  '#d4d4d4',
+  '#c2410c',
+  '#ea580c',
+  '#f97316',
+  '#fb923c',
+  '#fdba74',
+  '#fed7aa',
 ]
 
 export const WEIGHT_MIN = 0.18
@@ -104,10 +104,10 @@ export const MENU_TYPE_ICON_OPTIONS = [
 ]
 
 export const MENU_TYPE_COLOR_PRESETS = [
-  '#171717',
-  '#404040',
-  '#525252',
-  '#737373',
-  '#a3a3a3',
-  '#d4d4d4',
+  '#c2410c',
+  '#ea580c',
+  '#f97316',
+  '#fb923c',
+  '#fdba74',
+  '#fed7aa',
 ]

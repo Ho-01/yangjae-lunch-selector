@@ -79,7 +79,7 @@ export function placesToMenus(places) {
       code: 'general',
       name: '주변 식당',
       icon_key: 'utensils',
-      color: '#737373',
+      color: '#f97316',
       weather_weight_config: { base: 1 },
     },
     place_links: [

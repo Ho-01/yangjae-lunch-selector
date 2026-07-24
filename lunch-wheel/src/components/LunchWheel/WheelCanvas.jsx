@@ -28,9 +28,9 @@ function drawWheel(canvas, items, rotation, onSegments) {
   if (!items.length) {
     ctx.beginPath()
     ctx.arc(0, 0, radius, 0, Math.PI * 2)
-    ctx.fillStyle = '#d4d4d4'
+    ctx.fillStyle = '#e7e5e4'
     ctx.fill()
-    ctx.fillStyle = '#737373'
+    ctx.fillStyle = '#78716c'
     ctx.font = `800 ${24 * dpr}px system-ui`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
@@ -65,7 +65,7 @@ function drawWheel(canvas, items, rotation, onSegments) {
 
     const fontSize = Math.max(9, Math.min(15, arcSize * 110)) * dpr
     ctx.font = `900 ${fontSize}px Pretendard, system-ui, sans-serif`
-    ctx.fillStyle = '#171717'
+    ctx.fillStyle = '#292524'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
 

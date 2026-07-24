@@ -9,8 +9,8 @@
 - 결정에 직접 영향을 주지 않는 설정과 기술 설명은 핵심 흐름에 넣지 않는다.
 - 기본 버튼·입력·선택·체크·스위치·대화상자는 `lunch-wheel/src/components/ui/`의
   shadcn/ui 컴포넌트를 우선 사용한다. 화면에서 동일한 기본 컨트롤을 직접 만들지 않는다.
-- 색상과 기본 상태 표현은 shadcn/ui의 Neutral 기본 토큰을 사용한다. 별도 브랜드
-  팔레트나 화면별 버튼 색상을 만들지 않는다.
+- 색상과 기본 상태 표현은 `DESIGN.md`에 정의한 shadcn/ui Stone + Orange 의미
+  토큰을 사용한다. 화면별 버튼 색상이나 임의 색상을 만들지 않는다.
 - 제품 고유 컴포넌트는 shadcn/ui 프리미티브를 조합한다. 공통 변형은 화면별 CSS가
   아니라 `components/ui/` 계층에 추가한다.
 
@@ -33,6 +33,7 @@ npm run build
 - 설치·스크립트·환경변수: `lunch-wheel/README.md` 갱신
 - 구조 또는 데이터 흐름: `docs/ARCHITECTURE.md` 갱신
 - 장기간 유지할 기술 결정: `docs/decisions/`에 ADR 추가
+- UI 규칙과 색상 사용 원칙: `DESIGN.md` 갱신
 
 별도 개발 일지는 만들지 않는다. 구현 기록은 커밋과 PR, 사용자 변경 기록은
 `CHANGELOG.md`로 관리한다.

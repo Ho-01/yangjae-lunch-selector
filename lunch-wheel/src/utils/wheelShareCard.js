@@ -57,15 +57,15 @@ export async function createWheelResultImage({
     .sort((a, b) => b.probability - a.probability)
     .slice(0, 5)
 
-  ctx.fillStyle = '#fafafa'
+  ctx.fillStyle = '#fafaf9'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#f97316'
   ctx.fillRect(0, 0, canvas.width, 28)
 
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#292524'
   ctx.font = '900 48px Pretendard, sans-serif'
   ctx.fillText('식사가챠', 72, 105)
-  ctx.fillStyle = '#262626'
+  ctx.fillStyle = '#44403c'
   ctx.font = '800 30px Pretendard, sans-serif'
   ctx.textAlign = 'right'
   ctx.fillText(fitText(ctx, locationLabel || modeLabel(mode), 480), 1008, 104)
@@ -81,10 +81,10 @@ export async function createWheelResultImage({
   ctx.font = '800 28px Pretendard, sans-serif'
   ctx.textAlign = 'center'
   ctx.fillText('오늘의 점심은', 540, 235)
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#292524'
   ctx.font = '900 82px Pretendard, sans-serif'
   ctx.fillText(fitText(ctx, result.name, 850), 540, 345)
-  ctx.fillStyle = '#262626'
+  ctx.fillStyle = '#44403c'
   ctx.font = '800 25px Pretendard, sans-serif'
   wrapText(ctx, result.message, 540, 420, 850, 36, 2)
   ctx.fillStyle = '#999999'
@@ -92,18 +92,18 @@ export async function createWheelResultImage({
   ctx.fillText(`${modeLabel(mode)} · 후보 ${items.length}개`, 540, 510)
   ctx.textAlign = 'left'
 
-  ctx.fillStyle = '#171717'
+  ctx.fillStyle = '#292524'
   ctx.font = '900 34px Pretendard, sans-serif'
   ctx.fillText('당첨 확률', 72, 615)
 
   ranked.forEach((item, index) => {
     const y = 655 + index * 108
-    ctx.fillStyle = item.id === result.id ? '#f5f5f5' : '#ffffff'
+    ctx.fillStyle = item.id === result.id ? '#ffedd5' : '#ffffff'
     roundedRect(ctx, 60, y, 960, 86, 20)
-    ctx.fillStyle = item.id === result.id ? '#262626' : '#171717'
+    ctx.fillStyle = item.id === result.id ? '#9a3412' : '#292524'
     ctx.font = '900 29px Pretendard, sans-serif'
     ctx.fillText(fitText(ctx, item.name, 650), 92, y + 53)
-    ctx.fillStyle = '#737373'
+    ctx.fillStyle = '#78716c'
     ctx.font = '900 27px Pretendard, sans-serif'
     ctx.textAlign = 'right'
     ctx.fillText(`${item.probability.toFixed(1)}%`, 978, y + 53)

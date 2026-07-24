@@ -135,7 +135,7 @@ export default function MenuTypeManagerDialog({
       name,
       code,
       iconKey: draft.icon_key,
-      color: draft.color || '#737373',
+      color: draft.color || '#f97316',
       weatherWeightConfig: normalizeWeights(draft.weather_weight_config),
     }
 
@@ -267,7 +267,7 @@ export default function MenuTypeManagerDialog({
                     <Input
                       id="type-color"
                       type="color"
-                      value={draft.color || '#737373'}
+                      value={draft.color || '#f97316'}
                       onChange={(event) =>
                         setDraft((prev) => ({
                           ...prev,
