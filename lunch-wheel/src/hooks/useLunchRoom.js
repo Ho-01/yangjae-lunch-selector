@@ -9,6 +9,9 @@ const {
   fetchRoom,
   joinRoom,
   loadRoomSession,
+  fetchRecentRooms,
+  removeRecentRoomSession,
+  resumeRoom,
   saveVotes,
   addRoomCandidates,
   removeRoomCandidate,
@@ -20,10 +23,30 @@ const {
 
 export function useLunchRoom(teamId) {
   const [session, setSession] = useState(loadRoomSession)
+  const [sessionValidated, setSessionValidated] = useState(
+    () => !loadRoomSession(),
+  )
   const [room, setRoom] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [recentRooms, setRecentRooms] = useState([])
+  const [recentLoading, setRecentLoading] = useState(false)
   const channelRef = useRef(null)
+
+  const refreshRecentRooms = useCallback(async () => {
+    setRecentLoading(true)
+    try {
+      const next = await fetchRecentRooms()
+      setRecentRooms(next)
+      return next
+    } finally {
+      setRecentLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    refreshRecentRooms()
+  }, [refreshRecentRooms])
 
   const refresh = useCallback(async () => {
     if (!session?.code) return null
@@ -39,7 +62,29 @@ export function useLunchRoom(teamId) {
   }, [session?.code])
 
   useEffect(() => {
-    if (!session?.code) return undefined
+    if (!session?.code || sessionValidated) return undefined
+    let active = true
+    resumeRoom(session)
+      .then((next) => {
+        if (!active) return
+        setSession(next)
+        setSessionValidated(true)
+      })
+      .catch((err) => {
+        if (!active) return
+        clearRoomSession()
+        setSession(null)
+        setRoom(null)
+        setError(err.message)
+        setSessionValidated(true)
+      })
+    return () => {
+      active = false
+    }
+  }, [session, sessionValidated])
+
+  useEffect(() => {
+    if (!session?.code || !sessionValidated) return undefined
     refresh()
     const subscription = backend.roomRealtime.subscribe(session.code, refresh)
     channelRef.current = subscription
@@ -50,7 +95,7 @@ export function useLunchRoom(teamId) {
       channelRef.current = null
       subscription.close()
     }
-  }, [session?.code, refresh])
+  }, [session?.code, sessionValidated, refresh])
 
   function notifyRoomChanged(type) {
     const channel = channelRef.current
@@ -75,7 +120,9 @@ export function useLunchRoom(teamId) {
     run(async () => {
       const next = await createRoom(teamId, nickname, setup)
       setSession(next)
+      setSessionValidated(true)
       setRoom(await fetchRoom(next.code))
+      await refreshRecentRooms()
       return next
     })
 
@@ -83,10 +130,32 @@ export function useLunchRoom(teamId) {
     run(async () => {
       const next = await joinRoom(code, nickname)
       setSession(next)
+      setSessionValidated(true)
       setRoom(await fetchRoom(next.code))
       notifyRoomChanged('member_joined')
+      await refreshRecentRooms()
       return next
     })
+
+  const resume = (savedSession) =>
+    run(async () => {
+      const next = await resumeRoom(savedSession)
+      setSession(next)
+      setSessionValidated(true)
+      setRoom(await fetchRoom(next.code))
+      await refreshRecentRooms()
+      return next
+    })
+
+  const forget = async (code) => {
+    removeRecentRoomSession(code)
+    if (session?.code === code) {
+      setSession(null)
+      setSessionValidated(true)
+      setRoom(null)
+    }
+    await refreshRecentRooms()
+  }
 
   const vote = (likes, veto) =>
     run(async () => {
@@ -163,6 +232,7 @@ export function useLunchRoom(teamId) {
   function leave() {
     clearRoomSession()
     setSession(null)
+    setSessionValidated(true)
     setRoom(null)
     setError(null)
   }
@@ -172,8 +242,12 @@ export function useLunchRoom(teamId) {
     room,
     loading,
     error,
+    recentRooms,
+    recentLoading,
     create,
     join,
+    resume,
+    forget,
     vote,
     setReady,
     close,

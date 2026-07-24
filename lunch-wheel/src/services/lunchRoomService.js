@@ -3,6 +3,8 @@ import { resolveRoomNickname } from '../utils/roomNickname'
 
 const CLIENT_ID_KEY = 'lunch-wheel-room-client-id'
 const SESSION_KEY = 'lunch-wheel-room-session'
+const RECENT_SESSIONS_KEY = 'siksa-gacha-recent-room-sessions-v1'
+const MAX_RECENT_ROOMS = 10
 
 export function getRoomClientId() {
   let id = localStorage.getItem(CLIENT_ID_KEY)
@@ -21,12 +23,56 @@ export function loadRoomSession() {
   }
 }
 
-export function saveRoomSession(session) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+export function loadRecentRoomSessions() {
+  try {
+    const recent = JSON.parse(localStorage.getItem(RECENT_SESSIONS_KEY) || '[]')
+    const legacy = loadRoomSession()
+    const sessions = Array.isArray(recent) ? recent : []
+    if (legacy?.code && !sessions.some((item) => item.code === legacy.code)) {
+      sessions.unshift({
+        ...legacy,
+        joinedAt: new Date().toISOString(),
+        lastVisitedAt: new Date().toISOString(),
+      })
+      localStorage.setItem(
+        RECENT_SESSIONS_KEY,
+        JSON.stringify(sessions.slice(0, MAX_RECENT_ROOMS)),
+      )
+    }
+    return sessions.slice(0, MAX_RECENT_ROOMS)
+  } catch {
+    return []
+  }
+}
+
+export function saveRoomSession(session, metadata = {}) {
+  const now = new Date().toISOString()
+  const next = {
+    ...session,
+    ...metadata,
+    joinedAt: session.joinedAt || metadata.joinedAt || now,
+    lastVisitedAt: now,
+  }
+  localStorage.setItem(SESSION_KEY, JSON.stringify(next))
+  const recent = loadRecentRoomSessions().filter(
+    (item) => item.code !== next.code,
+  )
+  localStorage.setItem(
+    RECENT_SESSIONS_KEY,
+    JSON.stringify([next, ...recent].slice(0, MAX_RECENT_ROOMS)),
+  )
+  return next
 }
 
 export function clearRoomSession() {
   localStorage.removeItem(SESSION_KEY)
+}
+
+export function removeRecentRoomSession(code) {
+  const recent = loadRecentRoomSessions().filter((item) => item.code !== code)
+  localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(recent))
+  if (loadRoomSession()?.code === code) clearRoomSession()
+  return recent
 }
 
 async function rpc(name, params) {
@@ -43,8 +89,7 @@ export async function createRoom(teamId, nickname, setup) {
       p_nickname: resolvedNickname,
       p_client_id: getRoomClientId(),
     })
-    saveRoomSession(session)
-    return session
+    return saveRoomSession(session, { nickname: resolvedNickname })
   }
   const session = await rpc('create_lunch_room_v2', {
     p_team_id: teamId,
@@ -57,8 +102,7 @@ export async function createRoom(teamId, nickname, setup) {
     p_radius_meters: setup.radiusMeters || null,
     p_candidates: setup.candidates,
   })
-  saveRoomSession(session)
-  return session
+  return saveRoomSession(session, { nickname: resolvedNickname })
 }
 
 export async function joinRoom(code, nickname) {
@@ -68,8 +112,50 @@ export async function joinRoom(code, nickname) {
     p_nickname: resolvedNickname,
     p_client_id: getRoomClientId(),
   })
-  saveRoomSession(session)
-  return session
+  return saveRoomSession(session, { nickname: resolvedNickname })
+}
+
+export async function resumeRoom(savedSession) {
+  const summary = await rpc('resume_lunch_room', {
+    p_code: savedSession.code,
+    p_member_id: savedSession.memberId,
+    p_token: savedSession.token,
+  })
+  return saveRoomSession(
+    {
+      ...savedSession,
+      ...summary,
+      token: savedSession.token,
+    },
+    summary,
+  )
+}
+
+export async function fetchRecentRooms() {
+  const sessions = loadRecentRoomSessions()
+  return Promise.all(
+    sessions.map(async (savedSession) => {
+      try {
+        const summary = await rpc('resume_lunch_room', {
+          p_code: savedSession.code,
+          p_member_id: savedSession.memberId,
+          p_token: savedSession.token,
+        })
+        return { ...savedSession, ...summary, available: true }
+      } catch (error) {
+        const message = error?.message || '방 정보를 확인하지 못했습니다.'
+        return {
+          ...savedSession,
+          available: false,
+          unavailableReason: message.includes('ROOM_EXPIRED')
+            ? '만료된 방'
+            : message.includes('ROOM_SESSION_INVALID')
+              ? '재입장 정보 만료'
+              : '확인할 수 없는 방',
+        }
+      }
+    }),
+  )
 }
 
 export function renameRoomMember(session, nickname) {

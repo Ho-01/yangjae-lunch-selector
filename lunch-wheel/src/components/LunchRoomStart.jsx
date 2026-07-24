@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import RecentRooms from './RecentRooms'
 
 function teamCandidates(menus) {
   return menus.map((menu, index) => ({
@@ -45,6 +46,10 @@ export default function LunchRoomStart({
   loading,
   onCreate,
   onOpenJoin,
+  recentRooms,
+  recentLoading,
+  onResume,
+  onForget,
 }) {
   const [nickname, setNickname] = useState('')
   const [source, setSource] = useState('TEAM')
@@ -79,6 +84,14 @@ export default function LunchRoomStart({
   }
 
   return (
+    <>
+    <RecentRooms
+      rooms={recentRooms}
+      loading={recentLoading}
+      disabled={loading}
+      onResume={onResume}
+      onForget={onForget}
+    />
     <section className="room-start card">
       <div className="room-start-head">
         <div>
@@ -144,5 +157,6 @@ export default function LunchRoomStart({
         </button>
       </div>
     </section>
+    </>
   )
 }

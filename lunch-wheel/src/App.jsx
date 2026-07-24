@@ -668,6 +668,17 @@ export default function App() {
           loading={lunchRoom.loading}
           onCreate={handleCreateRoom}
           onOpenJoin={() => setRoomDialogOpen(true)}
+          recentRooms={lunchRoom.recentRooms}
+          recentLoading={lunchRoom.recentLoading}
+          onResume={async (savedSession) => {
+            try {
+              await lunchRoom.resume(savedSession)
+              showToast(`${savedSession.code} 방에 다시 들어왔어요.`)
+            } catch (err) {
+              showToast(err?.message || '방에 다시 들어가지 못했어요.')
+            }
+          }}
+          onForget={lunchRoom.forget}
         />
       ) : null}
 
