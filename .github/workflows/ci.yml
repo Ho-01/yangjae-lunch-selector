@@ -1,0 +1,104 @@
+name: App quality
+
+on:
+  pull_request:
+    paths:
+      - 'lunch-wheel/**'
+      - 'AGENTS.md'
+      - 'CHANGELOG.md'
+      - 'ROADMAP.md'
+      - 'docs/**'
+      - '.github/workflows/ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'lunch-wheel/**'
+      - 'AGENTS.md'
+      - 'CHANGELOG.md'
+      - 'ROADMAP.md'
+      - 'docs/**'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: lunch-wheel
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lunch-wheel/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  e2e:
+    name: Browser flows
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+    defaults:
+      run:
+        working-directory: lunch-wheel
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lunch-wheel/package-lock.json
+
+      - name: Install dependencies
+        if: env.VITE_SUPABASE_URL != '' && env.VITE_SUPABASE_PUBLISHABLE_KEY != ''
+        run: npm ci
+
+      - name: Install Chromium
+        if: env.VITE_SUPABASE_URL != '' && env.VITE_SUPABASE_PUBLISHABLE_KEY != ''
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser tests
+        if: env.VITE_SUPABASE_URL != '' && env.VITE_SUPABASE_PUBLISHABLE_KEY != ''
+        run: npm run test:e2e
+
+      - name: Explain skipped browser tests
+        if: env.VITE_SUPABASE_URL == '' || env.VITE_SUPABASE_PUBLISHABLE_KEY == ''
+        run: echo "E2E skipped because VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY is not configured."
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: lunch-wheel/playwright-report/
+          retention-days: 14

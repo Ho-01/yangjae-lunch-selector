@@ -19,7 +19,16 @@ import { getWeightedMenus } from './utils/weatherWeights'
 import { formatRoomEvent } from './utils/roomEvents'
 
 function Toast({ message }) {
-  return <div className={`toast${message ? ' show' : ''}`}>{message}</div>
+  return (
+    <div
+      className={`toast${message ? ' show' : ''}`}
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {message}
+    </div>
+  )
 }
 
 export default function App() {
@@ -395,13 +404,19 @@ export default function App() {
       : team?.location_name || '양재역'
 
   if (loading) {
-    return <main className="app" aria-busy="true" />
+    return (
+      <main className="app" aria-busy="true">
+        <p className="sr-only" role="status">
+          점심 메뉴를 불러오는 중입니다.
+        </p>
+      </main>
+    )
   }
 
   if (dataError || !team) {
     return (
       <main className="app">
-        <div className="state-panel error">
+        <div className="state-panel error" role="alert">
           <strong>Supabase 연결 실패</strong>
           <p>{dataError || '팀 데이터를 찾을 수 없습니다.'}</p>
           <p className="hint">
@@ -415,10 +430,13 @@ export default function App() {
 
   return (
     <main className="app">
-      <header className="topbar">
+      <a className="skip-link" href="#primary-content">
+        주요 콘텐츠로 건너뛰기
+      </a>
+      <header className="topbar" id="primary-content" tabIndex="-1">
         <div>
           <div className="title-row">
-            <h1>오늘 뭐 먹지?</h1>
+            <h1>점심룰렛</h1>
             <span className="title-location">{locationLabel}</span>
           </div>
           {isNearby ? (
@@ -456,11 +474,10 @@ export default function App() {
               ? '내 주변 식당으로 돌림판을 구성합니다. 후보 간 확률은 동일합니다.'
               : '현재 날씨와 메뉴 성격을 반영해 후보별 확률을 조정합니다.'}
           </p>
-          <div className="mode-toggle" role="tablist" aria-label="돌림판 모드">
+          <div className="mode-toggle" role="group" aria-label="돌림판 모드">
             <button
               type="button"
-              role="tab"
-              aria-selected={!isNearby && !isRoom}
+              aria-pressed={!isNearby && !isRoom}
               className={!isNearby && !isRoom ? 'is-active' : ''}
               disabled={busy}
               onClick={() => setMode('team')}
@@ -469,8 +486,7 @@ export default function App() {
             </button>
             <button
               type="button"
-              role="tab"
-              aria-selected={isRoom}
+              aria-pressed={isRoom}
               className={isRoom ? 'is-active' : ''}
               disabled={busy}
               onClick={() => setMode('room')}
@@ -479,8 +495,7 @@ export default function App() {
             </button>
             <button
               type="button"
-              role="tab"
-              aria-selected={isNearby}
+              aria-pressed={isNearby}
               className={isNearby ? 'is-active' : ''}
               disabled={busy}
               onClick={() => setMode('nearby')}

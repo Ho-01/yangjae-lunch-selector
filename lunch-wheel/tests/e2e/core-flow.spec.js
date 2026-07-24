@@ -1,0 +1,80 @@
+import { expect, test } from '@playwright/test'
+
+async function expectNoHorizontalOverflow(page) {
+  const dimensions = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }))
+
+  expect(
+    dimensions.scrollWidth,
+    `horizontal overflow: ${dimensions.scrollWidth}px > ${dimensions.clientWidth}px`,
+  ).toBeLessThanOrEqual(dimensions.clientWidth + 1)
+}
+
+test.beforeEach(async ({ page }) => {
+  await page.route('https://api.open-meteo.com/**', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        current: {
+          temperature_2m: 24,
+          apparent_temperature: 25,
+          relative_humidity_2m: 55,
+          precipitation: 0,
+          rain: 0,
+          snowfall: 0,
+          weather_code: 1,
+          wind_speed_10m: 6,
+          time: '2026-07-24T12:00',
+        },
+      }),
+    })
+  })
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: '점심룰렛' })).toBeVisible()
+})
+
+test('switches between all decision modes', async ({ page }) => {
+  const teamMode = page.getByRole('button', { name: '양재역 주변' })
+  const roomMode = page.getByRole('button', { name: '같이 고르기' })
+  const nearbyMode = page.getByRole('button', { name: '내 주변', exact: true })
+
+  await expect(teamMode).toHaveAttribute('aria-pressed', 'true')
+
+  await roomMode.click()
+  await expect(roomMode).toHaveAttribute('aria-pressed', 'true')
+  await expect(
+    page.getByRole('heading', { name: '어디를 기준으로 고를까요?' }),
+  ).toBeVisible()
+
+  await nearbyMode.click()
+  await expect(nearbyMode).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('heading', { name: '내 주변 설정' })).toBeVisible()
+
+  await teamMode.click()
+  await expect(teamMode).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('opens and closes the menu manager with the keyboard', async ({ page }) => {
+  const manageButton = page.getByRole('button', { name: '메뉴 관리' })
+  await manageButton.focus()
+  await page.keyboard.press('Enter')
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('heading', { name: '메뉴 관리' })).toBeVisible()
+
+  await page.keyboard.press('Escape')
+  await expect(dialog).not.toBeVisible()
+})
+
+test('keeps the primary page within the viewport', async ({ page }) => {
+  await expectNoHorizontalOverflow(page)
+
+  const spinButton = page.getByRole('button', { name: /돌림판 돌리기|다시 돌리기/ })
+  await expect(spinButton).toBeVisible()
+
+  const box = await spinButton.boundingBox()
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
+})

@@ -50,7 +50,7 @@ export async function createRoomResultImage(room) {
 
   ctx.fillStyle = '#3c3c3c'
   ctx.font = '900 48px Pretendard, sans-serif'
-  ctx.fillText('오늘 뭐 먹지?', 72, 105)
+  ctx.fillText('점심룰렛', 72, 105)
   ctx.fillStyle = '#58a700'
   ctx.font = '800 30px Pretendard, sans-serif'
   ctx.textAlign = 'right'
