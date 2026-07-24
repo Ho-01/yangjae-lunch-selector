@@ -22,6 +22,17 @@ export function normalizeAngle(rad) {
   return ((rad % full) + full) % full
 }
 
+export function findSegmentAtPointer(segments, pointerAngle, rotation) {
+  const localAngle = normalizeAngle(pointerAngle - rotation)
+  return segments.find((segment) => {
+    const start = normalizeAngle(segment.start)
+    const end = normalizeAngle(segment.end)
+    return start <= end
+      ? localAngle >= start && localAngle < end
+      : localAngle >= start || localAngle < end
+  })
+}
+
 export function easeOutQuint(t) {
   return 1 - Math.pow(1 - t, 5)
 }

@@ -1903,6 +1903,54 @@ canvas {
   text-align: center;
 }
 
+.celebration-burst {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.celebration-burst i {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--confetti-color);
+  opacity: 0;
+  animation: confettiBurst var(--confetti-duration) ease-out
+    var(--confetti-delay) forwards;
+}
+
+@keyframes confettiBurst {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0) rotate(var(--confetti-rotate)) scale(0.8);
+  }
+  55% {
+    opacity: 1;
+    transform:
+      translate(
+        calc(-50% + var(--confetti-x)),
+        calc(22vh + var(--confetti-drift))
+      )
+      rotate(calc(var(--confetti-rotate) + 320deg))
+      scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(
+        calc(-50% + var(--confetti-x) + var(--confetti-drift)),
+        72vh
+      )
+      rotate(calc(var(--confetti-rotate) + 720deg))
+      scale(0.75);
+  }
+}
+
 .result-message .ui-icon,
 .room-result-message .ui-icon {
   flex: 0 0 auto;

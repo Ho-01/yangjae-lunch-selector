@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   createSuspenseLanding,
+  findSegmentAtPointer,
   stableSpinRandom,
 } from '../../src/utils/wheelMath.js'
 
@@ -34,4 +35,13 @@ test('점심방 정지 난수는 같은 키에서 재현된다', () => {
   const key = 'winner-id:2026-07-24T12:00:00Z'
   assert.equal(stableSpinRandom(key), stableSpinRandom(key))
   assert.notEqual(stableSpinRandom(key), stableSpinRandom(`${key}:other`))
+})
+
+test('포인터가 가리키는 세그먼트 변경을 감지한다', () => {
+  const segments = [
+    { id: 'a', start: 0, end: Math.PI },
+    { id: 'b', start: Math.PI, end: Math.PI * 2 },
+  ]
+  assert.equal(findSegmentAtPointer(segments, 0, 0)?.id, 'a')
+  assert.equal(findSegmentAtPointer(segments, 0, Math.PI)?.id, 'b')
 })

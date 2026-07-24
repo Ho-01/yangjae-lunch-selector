@@ -8,6 +8,14 @@
 
 현재 다음 릴리스에 포함하기로 확정된 변경이 없습니다.
 
+## [0.7.0] - 2026-07-24
+
+### 추가
+
+- 룰렛이 세그먼트 경계를 지날 때 속도에 맞춰 재생되는 틱 효과음
+- 당첨 시 짧은 완료음과 색종이 폭죽 효과
+- 모션 감소 설정에서는 폭죽을 표시하지 않는 접근성 처리
+
 ## [0.6.0] - 2026-07-24
 
 ### 추가
@@ -93,7 +101,8 @@
 - Linux/Vercel 빌드 재현성과 Supabase migration 호환성
 - 점심방 모드 격리, 상태 표시와 동기화된 룰렛 유지
 
-[미출시]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.6.0...HEAD
+[미출시]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.3.0...v0.4.0

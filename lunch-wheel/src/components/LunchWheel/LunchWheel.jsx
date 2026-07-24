@@ -15,9 +15,15 @@ import {
   createSuspenseLanding,
   easeOutCubic,
   easeOutQuint,
+  findSegmentAtPointer,
   normalizeAngle,
   stableSpinRandom,
 } from '../../utils/wheelMath'
+import {
+  playBoundaryTick,
+  playWinnerSound,
+  primeRouletteAudio,
+} from '../../utils/rouletteAudio'
 
 export default function LunchWheel({
   team,
@@ -173,13 +179,32 @@ export default function LunchWheel({
     const end = start + delta + extraTurns
     const begin = performance.now()
     const actualDuration = reducedMotion ? Math.min(duration, 700) : duration
+    let previousFrameTime = begin
+    let previousRotation = start
+    let previousSegmentId = null
 
     const frame = (now) => {
       const p = Math.min(1, (now - begin) / actualDuration)
       const next =
         start +
         (end - start) * (reducedMotion ? easeOutQuint(p) : easeOutCubic(p))
+      const dt = Math.max(0.001, (now - previousFrameTime) / 1000)
+      const currentSegment = findSegmentAtPointer(
+        segments,
+        pointerAngle,
+        next,
+      )
+      if (
+        !reducedMotion &&
+        previousSegmentId &&
+        currentSegment?.id !== previousSegmentId
+      ) {
+        playBoundaryTick(Math.abs(next - previousRotation) / dt)
+      }
       setRotation(next)
+      previousFrameTime = now
+      previousRotation = next
+      previousSegmentId = currentSegment?.id || previousSegmentId
       if (p < 1) {
         rafRef.current = requestAnimationFrame(frame)
       } else {
@@ -213,6 +238,7 @@ export default function LunchWheel({
         })
         onResult?.(targetMenu)
         onSpinComplete?.(targetMenu)
+        playWinnerSound()
         if (navigator.vibrate) navigator.vibrate([60, 45, 90])
       }
     }
@@ -230,6 +256,8 @@ export default function LunchWheel({
       )
       return
     }
+
+    primeRouletteAudio()
 
     if (onRequestSpin) {
       try {

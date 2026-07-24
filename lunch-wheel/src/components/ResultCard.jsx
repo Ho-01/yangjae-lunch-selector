@@ -1,5 +1,6 @@
 import PlaceMeta from './PlaceMeta'
 import { getResultIcon } from '../constants/icons'
+import CelebrationBurst from './CelebrationBurst'
 
 export default function ResultCard({
   visible,
@@ -14,6 +15,7 @@ export default function ResultCard({
 
   return (
     <div className={`result${visible ? ' show' : ''}`} aria-live="polite">
+      <CelebrationBurst active={visible} burstKey={menuName || 'result'} />
       <div className="small">선택 결과</div>
       <div className="menu">{menuName || '—'}</div>
       {message ? (
