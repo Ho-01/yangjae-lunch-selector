@@ -107,3 +107,16 @@ test('persists the recent-result weighting preference', async ({ page }, testInf
   await page.reload()
   await expect(preference).toBeChecked()
 })
+
+test('downloads an image card when file sharing is unavailable', async ({ page }, testInfo) => {
+  test.skip((testInfo.project.use.viewport?.width || 0) <= 640)
+
+  await page.getByRole('button', { name: '돌림판 돌리기' }).click()
+  const shareButton = page.getByRole('button', { name: '결과 공유하기' })
+  await expect(shareButton).toBeVisible({ timeout: 10000 })
+
+  const downloadPromise = page.waitForEvent('download')
+  await shareButton.click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toMatch(/^식사가챠-결과-\d{4}-\d{2}-\d{2}\.png$/)
+})

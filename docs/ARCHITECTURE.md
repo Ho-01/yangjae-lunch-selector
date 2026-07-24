@@ -27,6 +27,11 @@ Components should not call Supabase directly. Data access belongs in services;
 cross-component state and side effects belong in hooks; deterministic calculations
 belong in utilities.
 
+Both individual/nearby results and collaborative-room results are rendered to
+1080×1350 PNG canvases in browser-side sharing utilities. Supported mobile
+browsers receive the PNG through the Web Share API; other browsers download the
+same image without uploading it.
+
 ## Decision modes
 
 ### Team

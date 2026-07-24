@@ -759,6 +759,7 @@ export default function App() {
             .map((result) => result.menuId)}
           reduceRecent={!isRoom && reduceRecent}
           onResult={handleResult}
+          shareLocationLabel={locationLabel}
           wheelMode={mode}
           disabledLabel={
             isRoom && lunchRoom.room?.status === 'COMPLETED'

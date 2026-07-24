@@ -7,6 +7,10 @@ import { getWeightedMenus, weatherReason } from '../../utils/weatherWeights'
 import { weightedPick } from '../../utils/weightedRandom'
 import { pickResultMessage } from '../../utils/resultMessages'
 import {
+  createWheelResultImage,
+  downloadWheelResult,
+} from '../../utils/wheelShareCard'
+import {
   buildSegments,
   easeOutQuint,
   normalizeAngle,
@@ -33,6 +37,7 @@ export default function LunchWheel({
   recentMenuIds = [],
   reduceRecent = false,
   onResult,
+  shareLocationLabel,
   wheelMode = 'team',
   disabledLabel,
   disabledExtras,
@@ -50,21 +55,29 @@ export default function LunchWheel({
 
   async function handleShareResult() {
     if (!result) return
-    const text = `${result.message}\n${result.reason}`
     try {
-      if (navigator.share) {
+      const blob = await createWheelResultImage({
+        result,
+        items: result.items,
+        mode: wheelMode,
+        locationLabel: shareLocationLabel || team?.location_name || team?.name,
+      })
+      const file = new File([blob], '식사가챠-결과.png', {
+        type: 'image/png',
+      })
+      if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           title: '식사가챠 결과',
-          text,
-          url: window.location.href,
+          text: result.message,
+          files: [file],
         })
         return
       }
-      await navigator.clipboard.writeText(`${text}\n${window.location.href}`)
-      onToast('룰렛 결과를 클립보드에 복사했어요.')
+      downloadWheelResult(blob)
+      onToast('공유 대신 결과 이미지를 저장했어요.')
     } catch (err) {
       if (err?.name !== 'AbortError') {
-        onToast('결과를 공유하지 못했어요.')
+        onToast('결과 이미지를 공유하지 못했어요.')
       }
     }
   }
@@ -163,12 +176,18 @@ export default function LunchWheel({
                   : ''
               }`
         setResult({
+          id: targetMenu.id,
           name: targetMenu.name,
           message: resultMessage,
           reason: ignoreWeather
             ? '함께 고른 최종 후보 중 룰렛이 선택했어요.'
             : resultReason,
           place_links: targetMenu.place_links || [],
+          items: segments.map(({ id, name, weight }) => ({
+            id,
+            name,
+            weight,
+          })),
         })
         onResult?.(targetMenu)
         onSpinComplete?.(targetMenu)

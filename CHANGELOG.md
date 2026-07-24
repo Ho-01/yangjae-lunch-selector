@@ -22,6 +22,8 @@ All notable user-visible changes are recorded here. The format follows
 - Browser-local recent-result history with an explicit clear action.
 - An optional recent-result adjustment that lowers the last three matching menu weights.
 - Shared loading, empty, and error-state presentation for primary data surfaces.
+- Image-card sharing for individual and nearby roulette results, matching the
+  collaborative-room sharing experience.
 
 ### Changed
 
