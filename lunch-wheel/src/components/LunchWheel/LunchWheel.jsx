@@ -394,6 +394,7 @@ export default function LunchWheel({
         </Button>
         <Button
           type="button"
+          variant="outline"
           className="mini-btn"
           title={onRequestSpin ? '점심방에서는 모두 같은 순서를 사용해요' : '돌림판 메뉴 순서 섞기'}
           aria-label={onRequestSpin ? '점심방 공통 순서 사용 중' : '돌림판 메뉴 순서 섞기'}

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-const COLORS = ['#ef476f', '#ffd166', '#3b82f6', '#65a84a', '#9b5de5']
+const COLORS = ['#171717', '#404040', '#737373', '#a3a3a3', '#d4d4d4']
 
 export default function CelebrationBurst({ active, burstKey }) {
   const particles = useMemo(

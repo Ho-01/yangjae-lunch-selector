@@ -1,35 +1,12 @@
 export const TEAM_SLUG = 'yangjae-lunch'
 
-export const colors = {
-  primary: '#58CC02',
-  onPrimary: '#FFFFFF',
-  primaryHover: '#49AD00',
-  primaryShadow: '#58A700',
-  secondary: '#1CB0F6',
-  accentYellow: '#FFC800',
-  accentRed: '#FF4B4B',
-  accentPurple: '#CE82FF',
-  ink: '#3C3C3C',
-  inkMuted: '#777777',
-  canvas: '#FFFFFF',
-  surface1: '#F7F7F7',
-  surface2: '#EBEBEB',
-  border: '#E5E5E5',
-}
-
 export const WHEEL_COLORS = [
-  '#58CC02',
-  '#1CB0F6',
-  '#FFC800',
-  '#FF4B4B',
-  '#CE82FF',
-  '#FF9600',
-  '#89E219',
-  '#84D8FF',
-  '#FFD900',
-  '#FF8A8A',
-  '#D7A8FF',
-  '#72D92B',
+  '#171717',
+  '#404040',
+  '#525252',
+  '#737373',
+  '#a3a3a3',
+  '#d4d4d4',
 ]
 
 export const WEIGHT_MIN = 0.18
@@ -127,10 +104,10 @@ export const MENU_TYPE_ICON_OPTIONS = [
 ]
 
 export const MENU_TYPE_COLOR_PRESETS = [
-  '#D86B1F',
-  '#168FC7',
-  '#826000',
-  '#4D8A28',
-  '#D23F3F',
-  '#6A5B85',
+  '#171717',
+  '#404040',
+  '#525252',
+  '#737373',
+  '#a3a3a3',
+  '#d4d4d4',
 ]

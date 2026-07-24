@@ -246,7 +246,7 @@ export default function App() {
           code: 'general',
           name: '점심방 후보',
           icon_key: 'utensils',
-          color: '#6A5B85',
+          color: '#737373',
           weather_weight_config: { base: 1 },
         },
         place_links: [],
