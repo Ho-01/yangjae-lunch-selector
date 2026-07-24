@@ -1,5 +1,7 @@
 import {
   LuCloud,
+  LuChevronDown,
+  LuChevronUp,
   LuCloudDrizzle,
   LuCloudFog,
   LuCloudLightning,
@@ -76,6 +78,8 @@ export const UI_ICONS = {
   close: LuX,
   crown: LuCrown,
   pencil: LuPencil,
+  chevronDown: LuChevronDown,
+  chevronUp: LuChevronUp,
 }
 
 export const RESULT_ICON_MAP = {

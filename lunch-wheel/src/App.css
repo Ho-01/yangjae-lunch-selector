@@ -297,35 +297,49 @@ body {
 
 .room-chat {
   display: grid;
-  gap: 10px;
   margin: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 12px;
   background: var(--canvas);
 }
 
-.room-chat-head {
+.room-chat-toggle {
   display: flex;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 9px 12px;
+  color: var(--ink);
+  text-align: left;
+  white-space: normal;
 }
 
-.room-chat-head h3,
-.room-chat-head p {
+.room-chat-toggle > div {
+  display: grid;
+  gap: 1px;
+}
+
+.room-chat-toggle h3,
+.room-chat-toggle p {
   margin: 0;
 }
 
-.room-chat-head h3 {
+.room-chat-toggle h3 {
   font-size: 14px;
 }
 
-.room-chat-head p,
-.room-chat-head small {
-  margin-top: 2px;
+.room-chat-toggle p {
   color: var(--muted-foreground);
-  font-size: 10px;
+  font-size: 11px;
+}
+
+.room-chat-content {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding: 10px 12px 12px;
 }
 
 .room-chat-messages {
@@ -513,7 +527,7 @@ body {
 
 .room-menu-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 44px 52px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -553,7 +567,7 @@ body {
 }
 
 .room-veto {
-  min-width: 48px;
+  min-width: 52px;
   border-left: 1px solid var(--line);
   color: var(--muted-foreground);
   font-size: 9px;
@@ -718,24 +732,70 @@ body {
     padding: 10px 12px 0;
   }
 
+  .room-chat {
+    margin: 10px 0 0;
+    border-inline: 0;
+    border-radius: 0;
+  }
+
+  .room-chat-content {
+    padding: 8px 12px 12px;
+  }
+
+  .room-chat-messages {
+    max-height: 168px;
+    padding-block: 2px;
+  }
+
+  .room-chat-empty {
+    padding: 12px 8px;
+  }
+
+  .room-chat-form {
+    grid-template-columns: minmax(0, 1fr) 72px;
+  }
+
   .room-instruction {
-    padding: 11px 12px;
+    gap: 4px;
+    padding: 14px 12px 9px;
   }
 
   .room-menu-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     max-height: 280px;
     padding: 0 12px 12px;
   }
 
+  .room-like {
+    min-height: 54px;
+    padding: 8px 12px;
+  }
+
+  .room-like strong {
+    font-size: 14px;
+  }
+
+  .room-like span,
+  .room-veto {
+    font-size: 11px;
+  }
+
   .room-panel-actions {
+    position: sticky;
+    z-index: 5;
+    bottom: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    padding: 0 12px 12px;
+    gap: 8px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: color-mix(in oklch, var(--canvas), transparent 4%);
+    box-shadow: 0 -8px 20px color-mix(in oklch, var(--foreground), transparent 94%);
   }
 
   .room-ready-status {
-    margin-inline: 12px;
+    margin: 0 12px 10px;
+    padding: 10px 11px;
   }
 
   .room-activity {
@@ -757,6 +817,10 @@ body {
 
   .room-panel-actions .btn {
     justify-content: center;
+    min-width: 0;
+    min-height: 48px;
+    padding-inline: 8px;
+    white-space: normal;
   }
 
   .room-result-actions {
@@ -773,6 +837,14 @@ body {
   .room-head-actions .btn {
     min-height: 34px;
     padding-block: 5px;
+  }
+
+  .room-menu-item {
+    grid-template-columns: minmax(0, 1fr) 44px 48px;
+  }
+
+  .room-chat-form {
+    grid-template-columns: minmax(0, 1fr) 64px;
   }
 
   .room-menu-grid {
@@ -1009,7 +1081,20 @@ body {
 .room-search-results button { display: grid; gap: 2px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--canvas); color: var(--ink); text-align: left; }
 .room-search-results span { overflow: hidden; color: var(--muted-foreground); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .room-menu-item { position: relative; }
-.room-remove { position: absolute; top: 2px; right: 2px; z-index: 2; width: 22px; height: 22px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); color: var(--destructive); font-weight: 900; }
+.room-remove {
+  position: static;
+  width: 44px;
+  height: auto;
+  min-height: 44px;
+  border-width: 0 0 0 1px;
+  border-color: var(--line);
+  border-radius: 0;
+  color: var(--destructive);
+}
+
+.room-menu-item:not(:has(.room-remove)) {
+  grid-template-columns: minmax(0, 1fr) 52px;
+}
 
 @media (max-width: 640px) {
   .mode-toggle { grid-template-columns: repeat(3, 1fr); }
@@ -1023,7 +1108,18 @@ body {
   .room-radius { grid-template-columns: auto 1fr; }
   .room-radius small { grid-column: 1 / -1; }
   .room-start-create .btn { justify-content: center; }
-  .room-candidate-tools { margin-inline: 12px; }
+  .room-candidate-tools {
+    gap: 10px;
+    margin-inline: 0;
+    padding: 12px;
+    border-inline: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .room-candidate-tools > .candidate-source-panel > div:not(.inline-error) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
 }
 
 @media (max-width: 380px) {
@@ -1691,6 +1787,10 @@ canvas {
 
   .candidate-source-panel > div:not(.inline-error) {
     grid-template-columns: 1fr;
+  }
+
+  .room-candidate-tools > .candidate-source-panel > div:not(.inline-error) {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .inline-error {

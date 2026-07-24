@@ -29,6 +29,7 @@ export default function LunchRoomPanel({
 }) {
   const CrownIcon = UI_ICONS.crown
   const PencilIcon = UI_ICONS.pencil
+  const CloseIcon = UI_ICONS.close
   const [likes, setLikes] = useState([])
   const [veto, setVeto] = useState(null)
   const [query, setQuery] = useState('')
@@ -415,8 +416,11 @@ export default function LunchRoomPanel({
                 {session.isHost ? (
                   <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     className="room-remove"
                     title="후보 삭제"
+                    aria-label={`${menu.name} 후보 삭제`}
                     disabled={isReady}
                     onClick={() => {
                       if (window.confirm(`'${menu.name}' 후보를 삭제할까요?`)) {
@@ -424,7 +428,7 @@ export default function LunchRoomPanel({
                       }
                     }}
                   >
-                    ×
+                    <CloseIcon aria-hidden />
                   </Button>
                 ) : null}
                 <Button
