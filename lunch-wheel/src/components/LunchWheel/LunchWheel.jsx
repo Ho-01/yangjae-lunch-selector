@@ -178,7 +178,8 @@ export default function LunchWheel({
         setResult({
           id: targetMenu.id,
           name: targetMenu.name,
-          message: resultMessage,
+          message: resultMessage.text,
+          messageIconKey: resultMessage.iconKey,
           reason: ignoreWeather
             ? '함께 고른 최종 후보 중 룰렛이 선택했어요.'
             : resultReason,
@@ -352,6 +353,7 @@ export default function LunchWheel({
         visible={Boolean(result)}
         menuName={result?.name}
         message={result?.message}
+        messageIconKey={result?.messageIconKey}
         reason={result?.reason}
         placeLinks={result?.place_links}
         onShare={handleShareResult}

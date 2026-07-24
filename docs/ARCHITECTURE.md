@@ -1,78 +1,74 @@
-# Architecture
+# 시스템 구조
 
-## System overview
+## 전체 구성
 
 ```text
-React/Vite client
-├─ Supabase JS → menus, menu types, exclusions, rooms, audit events
-├─ Open-Meteo → weather used for team-menu weighting
-├─ localStorage → recent results and user-controlled weighting preferences
-└─ /api/places/* → server-side Google Places calls
-                   └─ Supabase Storage → cached team-menu photos
+React/Vite 클라이언트
+├─ Supabase JS → 메뉴, 종류, 제외 목록, 점심방, 활동 기록
+├─ Open-Meteo → 팀 메뉴 가중치에 사용하는 날씨
+├─ localStorage → 최근 결과와 사용자 가중치 설정
+└─ /api/places/* → 서버에서 Google Places 호출
+                   └─ Supabase Storage → 팀 메뉴 사진 캐시
 ```
 
-The Vite application lives in `lunch-wheel/`. Vercel-compatible server functions
-live under `lunch-wheel/api/`. Supabase schema changes are append-only migrations
-under `lunch-wheel/supabase/migrations/`.
+Vite 앱은 `lunch-wheel/`, Vercel 서버 함수는 `lunch-wheel/api/`, Supabase의
+추가 전용 마이그레이션은 `lunch-wheel/supabase/migrations/`에 둔다.
 
-## Application layers
+## 애플리케이션 계층
 
-- `src/components/`: UI and user interactions.
-- `src/hooks/`: stateful orchestration for menus, weather, nearby places, and rooms.
-- `src/services/`: Supabase and HTTP access.
-- `src/utils/`: deterministic wheel, weighting, date, sharing, and room helpers.
-- `src/constants/`: shared configuration and icon mappings.
+- `src/backend/`: 백엔드 포트, 구현체 선택과 공급자별 실시간 어댑터
+- `src/components/`: 화면과 사용자 상호작용
+- `src/hooks/`: 메뉴·날씨·주변 식당·점심방 상태 조정
+- `src/services/`: Supabase와 HTTP 접근
+- `src/utils/`: 룰렛·가중치·날짜·공유·점심방 순수 로직
+- `src/constants/`: 공통 설정과 아이콘 연결
 
-Components should not call Supabase directly. Data access belongs in services;
-cross-component state and side effects belong in hooks; deterministic calculations
-belong in utilities.
+컴포넌트와 훅에서 Supabase를 직접 호출하지 않는다. 훅은 `src/backend/index.js`의
+조립된 포트에만 의존한다. 현재 `services/`와 `backend/adapters/supabase/`가
+Supabase 구현체이며 향후 같은 계약의 Spring 어댑터로 교체한다. 데이터 접근은
+어댑터, 여러 컴포넌트에 걸친 상태와 부수효과는 훅, 결정적인 계산은 유틸리티에 둔다.
 
-Both individual/nearby results and collaborative-room results are rendered to
-1080×1350 PNG canvases in browser-side sharing utilities. Supported mobile
-browsers receive the PNG through the Web Share API; other browsers download the
-same image without uploading it.
+백엔드 전환 규칙과 데이터 이관 절차는 `docs/SPRING_MIGRATION.md`, 결정 배경은
+`docs/decisions/0004-backend-ports-and-adapters.md`에 기록한다.
 
-## Decision modes
+일반·내 주변·점심방 결과는 브라우저에서 1080×1350 PNG로 생성한다.
+지원되는 모바일에서는 Web Share API로 전달하고, 그 외에는 같은 이미지를 내려받는다.
 
-### Team
+## 결정 모드
 
-Menus and types come from Supabase. Daily exclusions remove candidates. Weather
-weights adjust the remaining menu probabilities immediately before a spin.
-The optional recent-result adjustment multiplies matching menu weights by `0.55`
-after weather calculation. Only the three newest results for the active mode are
-considered.
+### 팀
 
-### Nearby
+Supabase 메뉴와 종류를 사용한다. 오늘 제외 항목을 제거하고 날씨 가중치를 적용한다.
+최근 결과 조정을 켜면 날씨 계산 후 현재 모드의 최근 3개 메뉴에 `0.55배`를 적용한다.
 
-The browser supplies coordinates. Google Places is called only after an explicit
-load or refresh action. Results are cached for 30 minutes and rating filtering is
-local. Nearby candidates are equally weighted.
+### 내 주변
 
-### Lunch room
+브라우저 좌표를 사용하며 사용자가 불러오기 또는 새로고침을 눌렀을 때만 Places를
+호출한다. 결과는 30분 캐시하고 별점 필터는 로컬에서 수행한다.
 
-Supabase stores the room, members, candidates, preferences, readiness, activity,
-and shared spin state. Clients subscribe to room changes and render the same
-winner and animation timing. The host controls closing and spinning.
+### 점심방
 
-## Security and privacy
+Supabase에 방, 구성원, 후보, 선호, 준비 상태, 활동과 공유 룰렛 상태를 저장한다.
+클라이언트는 변경을 구독해 같은 당첨 메뉴와 애니메이션 시점을 표시한다.
 
-- Google Places credentials stay in server-side environment variables.
-- Browser-safe Supabase configuration uses the `VITE_` prefix.
-- Current anonymous RLS is temporary and is a production-readiness blocker.
-- Exact coordinates should not be persisted unless a documented feature requires it.
-- Recent results remain browser-local, contain only menu ID/name, mode, and time,
-  and are capped at 10 entries with an explicit clear action.
-- Audit records must not include secrets or unnecessary personal data.
+## 보안과 개인정보
 
-## Cost controls
+- Google Places 인증 정보는 서버 환경변수에만 둔다.
+- 브라우저에서 안전한 Supabase 설정만 `VITE_` 접두사를 사용한다.
+- 현재 익명 RLS는 임시이며 `1.0.0` 전에 인증과 구성원 정책으로 교체한다.
+- 문서화된 기능이 요구하지 않는 한 정확한 좌표를 저장하지 않는다.
+- 최근 결과는 메뉴 ID·이름·모드·시간만 포함해 브라우저에 최대 10개 보관한다.
+- 감사 기록에는 비밀값이나 불필요한 개인정보를 남기지 않는다.
 
-- Nearby Places calls require an explicit user action.
-- Nearby results are cached and spins do not trigger Places calls.
-- Photo fields are omitted from nearby searches.
-- Team-place photos are copied to Supabase Storage and refreshed periodically.
+## 비용 통제
 
-## Verification
+- 내 주변 Places 호출에는 명시적인 사용자 행동이 필요하다.
+- 결과를 캐시하며 룰렛 실행은 Places 호출을 만들지 않는다.
+- 내 주변 검색에서는 사진 필드를 요청하지 않는다.
+- 팀 메뉴 사진은 Supabase Storage에 저장하고 주기적으로 갱신한다.
 
-- Static quality: `npm run lint`
-- Production bundle: `npm run build`
-- Browser flows: `npm run test:e2e`
+## 검증 명령
+
+- 정적 검사: `npm run lint`
+- 프로덕션 빌드: `npm run build`
+- 브라우저 흐름: `npm run test:e2e`

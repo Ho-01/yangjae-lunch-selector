@@ -9,12 +9,6 @@ on:
       - 'lunch-wheel/supabase/config.toml'
       - '.github/workflows/deploy-supabase.yml'
   workflow_dispatch:
-    inputs:
-      repair_manually_applied_room_migrations:
-        description: 'One-time: mark the verified 2026-07-23/24 room migrations as applied'
-        required: false
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -38,7 +32,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
@@ -67,22 +61,6 @@ jobs:
 
       - name: Link production project
         run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
-
-      - name: Repair verified manually applied room migration history
-        if: >-
-          github.event_name == 'workflow_dispatch' &&
-          inputs.repair_manually_applied_room_migrations
-        run: |
-          supabase migration repair \
-            20260723090000 \
-            20260723130000 \
-            20260723150000 \
-            20260723170000 \
-            20260724150000 \
-            20260724170000 \
-            20260724190000 \
-            --status applied \
-            --linked
 
       - name: Show migration status
         run: supabase migration list --linked

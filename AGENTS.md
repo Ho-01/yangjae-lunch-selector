@@ -1,55 +1,55 @@
-# Repository instructions
+# 저장소 작업 규칙
 
-These instructions apply to the entire repository.
+이 규칙은 저장소 전체에 적용한다.
 
-## Product principles
+## 제품 원칙
 
-- Optimize for making a lunch decision quickly and confidently.
-- Keep the primary flow obvious: choose a mode, review candidates, spin, understand the result.
-- Do not add settings or technical detail to the primary flow unless they change the user's decision.
-- Follow `lunch-wheel/UX_CHECKLIST.md` for UI work.
+- 사용자가 빠르고 확신 있게 점심을 결정하도록 최적화한다.
+- `모드 선택 → 후보 확인 → 돌리기 → 결과 이해`의 핵심 흐름을 명확하게 유지한다.
+- 결정에 직접 영향을 주지 않는 설정과 기술 설명은 핵심 흐름에 넣지 않는다.
+- UI 작업은 `lunch-wheel/UX_CHECKLIST.md`를 따른다.
 
-## Required checks
+## 필수 검사
 
-Run from `lunch-wheel/` after code changes:
+코드를 변경한 뒤 `lunch-wheel/`에서 실행한다.
 
 ```bash
 npm run lint
 npm run build
 ```
 
-Run `npm run test:e2e` when changing user flows, layout, accessibility, routing,
-browser APIs, or dialogs. If a check cannot run, record the reason in the handoff.
+사용자 흐름, 레이아웃, 접근성, 라우팅, 브라우저 API, 대화상자를 변경하면
+`npm run test:e2e`도 실행한다. 실행하지 못하면 인계 내용에 이유를 남긴다.
 
-## Documentation
+## 문서
 
-- User-visible behavior: update `CHANGELOG.md` under `Unreleased`.
-- Product scope or priority: update `ROADMAP.md`.
-- Setup, scripts, or environment variables: update `lunch-wheel/README.md`.
-- Architecture or data-flow changes: update `docs/ARCHITECTURE.md`.
-- A durable technical decision: add an ADR under `docs/decisions/`.
+- 사용자에게 보이는 변경: `CHANGELOG.md`의 `미출시` 갱신
+- 제품 범위 또는 우선순위: `ROADMAP.md` 갱신
+- 설치·스크립트·환경변수: `lunch-wheel/README.md` 갱신
+- 구조 또는 데이터 흐름: `docs/ARCHITECTURE.md` 갱신
+- 장기간 유지할 기술 결정: `docs/decisions/`에 ADR 추가
 
-Do not maintain a separate development diary. Commits and pull requests preserve
-implementation history; `CHANGELOG.md` preserves user-visible history.
+별도 개발 일지는 만들지 않는다. 구현 기록은 커밋과 PR, 사용자 변경 기록은
+`CHANGELOG.md`로 관리한다.
 
-## Database and secrets
+## 데이터베이스와 비밀값
 
-- Never edit an already deployed Supabase migration. Add a new migration.
-- Never expose service-role keys, database passwords, or Google Places keys to Vite.
-- Only browser-safe values may use the `VITE_` prefix.
-- Preserve the cost controls documented for Google Places.
+- 배포된 Supabase 마이그레이션은 수정하지 않고 새 파일을 추가한다.
+- service role 키, DB 비밀번호, Places 키를 Vite에 노출하지 않는다.
+- 브라우저에 안전한 값만 `VITE_` 접두사를 사용한다.
+- 문서화된 Google Places 비용 통제를 유지한다.
 
-## Git and releases
+## Git과 릴리스
 
-- Use Conventional Commits: `feat`, `fix`, `refactor`, `test`, `docs`, `ci`, `chore`.
-- Keep changes focused and do not overwrite unrelated user edits.
-- Use Semantic Versioning while the product is pre-1.0.
-- Follow `docs/RELEASE.md` for releases.
+- Conventional Commits 형식인 `feat`, `fix`, `refactor`, `test`, `docs`, `ci`, `chore`를 사용한다.
+- 변경 범위를 집중시키고 관련 없는 사용자 수정은 덮어쓰지 않는다.
+- 1.0 이전에도 유의적 버전 규칙을 사용한다.
+- 릴리스는 `docs/RELEASE.md`를 따른다.
 
-## Definition of done
+## 완료 기준
 
-- The requested behavior works and failure/empty/loading states are handled.
-- Relevant checks pass.
-- No horizontal overflow at 320px for UI changes.
-- Keyboard focus remains visible and primary controls are at least 44px on mobile.
-- Required documentation is updated in the same change.
+- 요청 기능과 실패·빈 상태·로딩 상태가 동작한다.
+- 관련 검사를 통과한다.
+- UI 변경 후 320px에서 가로 스크롤이 없다.
+- 키보드 포커스가 보이고 모바일 주요 조작 영역이 최소 44px다.
+- 필요한 문서를 같은 변경에서 갱신한다.

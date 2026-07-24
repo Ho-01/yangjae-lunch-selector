@@ -1661,6 +1661,10 @@ canvas {
 }
 
 .result-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   margin: 8px 14px 0;
   border-radius: 9px;
   padding: 9px 10px;
@@ -1670,6 +1674,20 @@ canvas {
   font-weight: 850;
   line-height: 1.55;
   text-align: center;
+}
+
+.result-message .ui-icon,
+.room-result-message .ui-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+}
+
+.room-result-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
 }
 
 .prob-label {

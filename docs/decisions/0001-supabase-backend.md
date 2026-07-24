@@ -1,21 +1,18 @@
-# ADR 0001: Supabase as the shared backend
+# ADR 0001: 공용 백엔드로 Supabase 사용
 
-- Status: Accepted
-- Date: 2026-07-22
+- 상태: 승인
+- 날짜: 2026-07-22
 
-## Context
+## 배경
 
-Menus, daily exclusions, collaborative rooms, realtime updates, audit events, and
-cached photos require shared persistence with minimal backend infrastructure.
+메뉴, 오늘 제외, 점심방, 실시간 갱신, 감사 기록과 사진 캐시에 공용 저장소가 필요하다.
 
-## Decision
+## 결정
 
-Use Supabase PostgreSQL, Realtime, Storage, and RLS. Schema changes are append-only
-SQL migrations. Browser clients use a publishable key; privileged credentials are
-never exposed to Vite.
+Supabase PostgreSQL, Realtime, Storage와 RLS를 사용한다. 스키마 변경은 추가 전용
+SQL 마이그레이션으로 관리한다. 브라우저는 publishable key만 사용한다.
 
-## Consequences
+## 결과
 
-Realtime group behavior is straightforward and operations stay compact. Anonymous
-RLS is acceptable only during the prototype phase; authentication and membership
-policies remain mandatory before `1.0.0`.
+실시간 그룹 기능과 운영 구성이 단순해진다. 익명 RLS는 프로토타입에서만 허용하며
+`1.0.0` 전까지 인증과 구성원 권한 정책을 도입해야 한다.

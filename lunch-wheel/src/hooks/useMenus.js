@@ -1,32 +1,33 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchActiveTeamBySlug } from '../services/teamService'
-import {
+import { backend } from '../backend'
+
+const { fetchActiveTeamBySlug } = backend.teams
+const {
   countActiveMenusForType,
   createMenuType,
   deactivateMenuType,
   fetchActiveMenuTypes,
   updateMenuType,
-} from '../services/menuTypeService'
-import {
+} = backend.menuTypes
+const {
   createMenu,
   deactivateMenu,
   fetchActiveMenus,
   updateMenu,
-} from '../services/menuService'
-import { fetchExclusions } from '../services/exclusionService'
-import {
+} = backend.menus
+const { fetchExclusions } = backend.exclusions
+const {
   deactivateGoogleLinksForMenu,
   deactivatePlaceLink,
   fetchPlaceLinks,
   upsertGooglePlaceLink,
-} from '../services/placeLinkService'
-import {
+} = backend.placeLinks
+const {
   cachePlacePhotosForLink,
   refreshStalePlaceLinks,
-} from '../services/placePhotoCache'
+} = backend.placePhotos
 import { getKoreaDateString } from '../utils/koreaDate'
 import { TEAM_SLUG } from '../constants/app'
-import { isSupabaseConfigured } from '../lib/supabase'
 
 function attachLinks(menus, links) {
   const byMenu = new Map()
@@ -63,7 +64,7 @@ export function useMenus() {
     setError(null)
 
     try {
-      if (!isSupabaseConfigured()) {
+      if (!backend.isConfigured()) {
         throw new Error('Supabase 환경변수가 설정되지 않았습니다.')
       }
 

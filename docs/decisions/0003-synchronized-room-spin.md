@@ -1,19 +1,19 @@
-# ADR 0003: Persist synchronized lunch-room spins
+# ADR 0003: 동기화된 점심방 룰렛 상태 저장
 
-- Status: Accepted
-- Date: 2026-07-24
+- 상태: 승인
+- 날짜: 2026-07-24
 
-## Context
+## 배경
 
-Each room participant must see the same winner and a comparable animation even
-when messages arrive at different times or a client reconnects.
+메시지 도착 시점이 다르거나 다시 연결되더라도 모든 구성원이 같은 결과와 비슷한
+애니메이션을 봐야 한다.
 
-## Decision
+## 결정
 
-Persist the winner, start time, and duration as shared room state. Clients derive
-animation progress from that state rather than selecting or timing independently.
+당첨 메뉴, 시작 시각, 지속 시간을 공용 방 상태로 저장한다. 각 클라이언트는 독립적으로
+선택하지 않고 이 상태에서 애니메이션 진행도를 계산한다.
 
-## Consequences
+## 결과
 
-The host remains the authority for starting a spin, reconnecting clients can
-recover the result, and UI code must tolerate receiving an already-started spin.
+방장이 룰렛 시작 권한을 유지하고 다시 연결한 클라이언트도 결과를 복구할 수 있다.
+UI는 이미 시작된 룰렛 상태를 받아도 처리할 수 있어야 한다.

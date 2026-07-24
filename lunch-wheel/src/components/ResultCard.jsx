@@ -1,18 +1,27 @@
 import PlaceMeta from './PlaceMeta'
+import { getResultIcon } from '../constants/icons'
 
 export default function ResultCard({
   visible,
   menuName,
   message,
+  messageIconKey,
   reason,
   placeLinks,
   onShare,
 }) {
+  const MessageIcon = getResultIcon(messageIconKey)
+
   return (
     <div className={`result${visible ? ' show' : ''}`} aria-live="polite">
       <div className="small">선택 결과</div>
       <div className="menu">{menuName || '—'}</div>
-      {message ? <div className="result-message">{message}</div> : null}
+      {message ? (
+        <div className="result-message">
+          <MessageIcon className="ui-icon" aria-hidden />
+          <span>{message}</span>
+        </div>
+      ) : null}
       <div className="why">{reason}</div>
       {visible && onShare ? (
         <button type="button" className="btn ghost result-share" onClick={onShare}>

@@ -6,6 +6,9 @@ import {
   LuCloudRain,
   LuCloudSun,
   LuCrown,
+  LuPartyPopper,
+  LuGlasses,
+  LuSkull,
   LuFlame,
   LuLeaf,
   LuListPlus,
@@ -57,6 +60,18 @@ export const UI_ICONS = {
   close: LuX,
   crown: LuCrown,
   pencil: LuPencil,
+}
+
+export const RESULT_ICON_MAP = {
+  celebration: LuPartyPopper,
+  soup: LuSoup,
+  cool: LuGlasses,
+  skull: LuSkull,
+  flame: LuFlame,
+}
+
+export function getResultIcon(iconKey) {
+  return RESULT_ICON_MAP[iconKey] || LuUtensils
 }
 
 export function getTypeIcon(iconKey) {

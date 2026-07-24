@@ -1,57 +1,60 @@
-# Changelog
+# 변경 기록
 
-All notable user-visible changes are recorded here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow
-[Semantic Versioning](https://semver.org/).
+사용자에게 보이는 주요 변경을 기록한다. 형식은
+[Keep a Changelog](https://keepachangelog.com/ko/1.1.0/), 버전은
+[유의적 버전](https://semver.org/lang/ko/)을 따른다.
 
-## [Unreleased]
+## [미출시]
 
-### Added
+### 추가
 
-- Repository UX checklist and keyboard-accessibility baseline.
-- Product, architecture, roadmap, release, and agent workflow documentation.
-- Browser end-to-end test foundation for core desktop and mobile flows.
-- Supabase deployment preflight, dry-run, status reporting, and one-time history repair.
-- Basic roulette result sharing with native mobile sharing and clipboard fallback.
-- Search filtering for the right-side menu exclusion list.
-- A persistent weather-weight toggle for equal-probability spins.
-- Collapsible mobile side panels that keep the roulette flow prominent.
-- Explicit restaurant-search and direct-name tabs for room candidate entry.
-- Retry actions and nearby-control guidance for location and network failures.
-- Randomized result messages shared consistently across wheel results and room images.
-- Browser-local recent-result history with an explicit clear action.
-- An optional recent-result adjustment that lowers the last three matching menu weights.
-- Shared loading, empty, and error-state presentation for primary data surfaces.
-- Image-card sharing for individual and nearby roulette results, matching the
-  collaborative-room sharing experience.
+- UX 검증표와 키보드 접근성 기준
+- 제품·구조·로드맵·릴리스·에이전트 작업 문서
+- 데스크톱·모바일 핵심 흐름 브라우저 E2E 테스트
+- Supabase 배포 사전 검사, dry-run, 상태 확인과 일회성 기록 복구
+- 기본 룰렛 결과의 모바일 공유와 클립보드 대체 동작
+- 오른쪽 제외 메뉴 목록 검색
+- 동일 확률 추첨을 선택할 수 있는 날씨 가중치 ON/OFF
+- 룰렛 흐름을 우선하는 모바일 보조 패널 접기
+- 점심방 후보의 식당 검색과 이름 직접 입력 분리
+- 위치·네트워크 실패의 재시도와 안내
+- 일반 결과와 점심방 공유 이미지에서 일관된 무작위 결과 멘트
+- 브라우저에 저장되는 최근 결과와 전체 삭제
+- 최근 3개 메뉴의 가중치를 선택적으로 낮추는 기능
+- 주요 데이터 화면의 공통 로딩·빈 상태·오류 표현
+- 일반·내 주변·점심방 결과의 이미지 카드 공유
 
-### Changed
+### 변경
 
-- Mode controls now expose their toggle state with appropriate accessibility semantics.
-- Loading, error, and toast messages provide assistive-technology status feedback.
-- Public product naming is standardized as `식사가챠` across the app, metadata,
-  sharing, documentation, and package metadata.
-- Application package version advances to `0.3.0`.
-- Destructive menu removal, candidate removal, and vote closing now require confirmation.
-- Disabled nearby actions explain that location confirmation is required.
+- 화면과 도메인 훅에서 Supabase 구현을 분리하는 백엔드 포트·어댑터 구조 도입
+- 향후 Spring·PostgreSQL 이전을 위한 API 계약과 데이터 이관 원칙 문서화
+- Supabase 점심방 마이그레이션 기록 복구를 완료하고 일회성 repair 옵션 제거
+- GitHub Actions checkout을 Node 24 기반 버전으로 갱신
+- 모드 버튼에 접근 가능한 선택 상태 제공
+- 로딩·오류·알림을 보조 기술에 전달
+- 앱·메타데이터·공유·문서·패키지의 공개 이름을 `식사가챠`로 통일
+- 패키지 버전을 `0.3.0`으로 변경
+- 메뉴·후보 삭제와 투표 마감에 확인 절차 추가
+- 내 주변 버튼이 비활성화된 이유 안내
+- 결과 멘트의 장식 문자를 `react-icons` SVG 아이콘 키 방식으로 정의
 
 ## [0.1.0] - 2026-07-24
 
-### Added
+### 추가
 
-- Weather-weighted team menu wheel with daily exclusions.
-- Menu and menu-type management with configurable weather weights.
-- Google Places links, ratings, photos, and Supabase Storage photo caching.
-- Nearby restaurant mode using browser location, rating filters, and a 30-minute cache.
-- Collaborative lunch rooms with candidate creation, likes, vetoes, readiness, and host-controlled spins.
-- Synchronized room wheel animation, activity history, nudges, editable nicknames, and result sharing.
-- Responsive mobile layouts and Supabase audit logging.
+- 날씨 가중치와 오늘 제외 목록을 지원하는 팀 메뉴 룰렛
+- 메뉴·메뉴 종류와 날씨 가중치 관리
+- Google Places 연결, 별점, 사진과 Supabase Storage 사진 캐시
+- 브라우저 위치, 별점 필터, 30분 캐시를 사용하는 내 주변 모드
+- 후보·좋아요·거부권·준비 상태·방장 룰렛을 지원하는 점심방
+- 동기화된 룰렛, 활동 기록, 재촉 알림, 닉네임 수정과 결과 공유
+- 모바일 반응형 화면과 Supabase 감사 기록
 
-### Fixed
+### 수정
 
-- Clear nearby-search failure messages and separate location lookup from Places calls.
-- Linux/Vercel build reproducibility and Supabase migration compatibility.
-- Lunch-room mode isolation, room status labels, and synchronized spin preservation.
+- 내 주변 검색 실패 안내와 위치 확인·Places 호출 분리
+- Linux/Vercel 빌드 재현성과 Supabase 마이그레이션 호환성
+- 점심방 모드 격리, 상태 표시와 동기화된 룰렛 유지
 
-[Unreleased]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.1.0...HEAD
+[미출시]: https://github.com/Ho-01/yangjae-lunch-selector/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/Ho-01/yangjae-lunch-selector/releases/tag/v0.1.0

@@ -1,20 +1,19 @@
-# ADR 0002: Explicit and cached Google Places usage
+# ADR 0002: 명시적이고 캐시되는 Google Places 사용
 
-- Status: Accepted
-- Date: 2026-07-22
+- 상태: 승인
+- 날짜: 2026-07-22
 
-## Context
+## 배경
 
-Nearby restaurants and place photos improve decisions, but uncontrolled Places
-requests create cost and quota risk.
+주변 식당과 사진은 결정에 도움을 주지만 통제되지 않은 호출은 비용과 할당량 위험을 만든다.
 
-## Decision
+## 결정
 
-Route Places requests through server functions. Require explicit nearby load and
-refresh actions, cache nearby results for 30 minutes, omit nearby photos, and keep
-rating filtering local. Cache linked team-menu photos in Supabase Storage.
+서버 함수를 통해 Places를 호출한다. 사용자가 직접 불러오기·새로고침을 실행해야 하며
+결과는 30분 캐시하고 주변 사진은 제외한다. 별점은 로컬에서 필터링하고 팀 메뉴 사진은
+Supabase Storage에 캐시한다.
 
-## Consequences
+## 결과
 
-Some information can be stale for a short period and refresh is user-driven. The
-cost model stays observable and spinning never creates an unexpected Places call.
+일부 정보가 잠시 오래될 수 있고 사용자가 갱신해야 한다. 대신 비용을 예측할 수 있으며
+룰렛 실행이 예상하지 못한 Places 호출을 만들지 않는다.

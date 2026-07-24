@@ -5,6 +5,7 @@ import {
   downloadRoomResult,
 } from '../utils/roomShareCard'
 import { UI_ICONS } from '../constants/icons'
+import { getResultIcon } from '../constants/icons'
 import { formatRoomEvent } from '../utils/roomEvents'
 import { pickResultMessage } from '../utils/resultMessages'
 
@@ -38,9 +39,10 @@ export default function LunchRoomPanel({
 
   const winner = room.menus.find((menu) => menu.id === room.winnerMenuId)
   const resultMessage = useMemo(
-    () => (winner ? pickResultMessage(winner.name) : ''),
+    () => (winner ? pickResultMessage(winner.name) : null),
     [winner],
   )
+  const ResultIcon = getResultIcon(resultMessage?.iconKey)
   const currentMember = room.members.find((member) => member.id === session.memberId)
   const isReady = Boolean(currentMember?.isReady)
   const readyCount = room.members.filter((member) => member.isReady).length
@@ -159,14 +161,14 @@ export default function LunchRoomPanel({
 
   async function shareResult() {
     try {
-      const blob = await createRoomResultImage(room, resultMessage)
+      const blob = await createRoomResultImage(room, resultMessage?.text)
       const file = new File([blob], `오늘-점심-${room.code}.png`, {
         type: 'image/png',
       })
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           title: `오늘의 점심: ${winner?.name || ''}`,
-          text: resultMessage,
+          text: resultMessage?.text,
           files: [file],
         })
       } else {
@@ -181,7 +183,7 @@ export default function LunchRoomPanel({
   async function saveResult() {
     try {
       downloadRoomResult(
-        await createRoomResultImage(room, resultMessage),
+        await createRoomResultImage(room, resultMessage?.text),
         room.code,
       )
       onToast('결과 이미지를 저장했어요.')
@@ -492,7 +494,16 @@ export default function LunchRoomPanel({
         <div className="room-winner">
           <span>오늘의 점심</span>
           <strong>{winner?.name || '결과 확인 중'}</strong>
-          <p>{resultMessage || '결과에 승복하고 맛있게 먹으러 가요!'}</p>
+          <p className="room-result-message">
+            {resultMessage ? (
+              <>
+                <ResultIcon className="ui-icon" aria-hidden />
+                <span>{resultMessage.text}</span>
+              </>
+            ) : (
+              '결과에 승복하고 맛있게 먹으러 가요!'
+            )}
+          </p>
           <div className="room-result-actions">
             <button type="button" className="btn primary" onClick={shareResult}>
               결과 공유

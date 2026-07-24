@@ -1,88 +1,81 @@
-# Product roadmap
+# 제품 로드맵
 
-The roadmap is ordered by user value and risk reduction. Items may move as usage
-evidence changes. `Now` is committed next work; `Next` is planned; `Later` is exploratory.
+사용자 가치와 위험 감소 효과를 기준으로 정렬한다. 실제 사용 결과에 따라 순서는
+변경할 수 있다. `진행 예정`은 다음 개발 범위, `후속`은 계획된 범위,
+`장기`는 검증이 필요한 범위다.
 
-## Now — M0 foundation (`0.1.x`)
+## 완료 — M0 기반 구축 (`0.1.x`)
 
-- [x] Document current product capabilities and architecture.
-- [x] Establish agent, changelog, release, and UX rules.
-- [x] Add lint and production-build CI.
-- [x] Add Playwright coverage for core desktop and mobile flows.
-- [x] Connect the repository to the final GitHub URL in changelog links.
-- [x] Establish the initial public product name as `점심룰렛`.
+- [x] 현재 제품 기능과 구조 문서화
+- [x] 에이전트 작업, 변경 기록, 릴리스, UX 규칙 수립
+- [x] 린트와 프로덕션 빌드 CI 추가
+- [x] 데스크톱·모바일 핵심 흐름 Playwright 테스트 추가
+- [x] 변경 기록에 최종 GitHub 주소 연결
 
-## Completed — M1 UX reliability (`0.2.0`)
+## 완료 — M1 UX 안정화 (`0.2.0`)
 
-- [x] Add confirmation or undo for destructive actions and vote closing.
-- [x] Explain why unavailable nearby actions are disabled.
-- [x] Provide recovery paths for denied location permission and network failures.
-- [x] Collapse secondary mobile panels without hiding the primary decision flow.
-- [x] Standardize loading, empty, success, and error states on primary data surfaces.
-- [x] Separate restaurant search from direct name entry so users always understand
-  which source will be added. Use explicit tabs or sections, distinct labels, and
-  source-specific empty/error states.
-- [x] Complete automated keyboard and 320/390/desktop browser checks.
+- [x] 삭제와 투표 마감 등 되돌리기 어려운 작업에 확인 절차 추가
+- [x] 내 주변 기능을 사용할 수 없을 때 이유 표시
+- [x] 위치 권한 거부와 네트워크 오류 복구 경로 제공
+- [x] 모바일에서 보조 패널을 접을 수 있게 개선
+- [x] 주요 데이터 화면의 로딩·빈 상태·성공·오류 표현 통일
+- [x] 식당 검색과 이름 직접 추가 영역 분리
+- [x] 키보드와 320px·390px·데스크톱 브라우저 자동 검증
 
-## Completed — M2 decision quality (`0.3.0`)
+## 완료 — M2 결정 품질 (`0.3.0`)
 
-- [x] Rebrand the public product from `점심룰렛` to `식사가챠` across the app shell,
-  metadata, share cards, documentation, and deployment-facing copy while preserving
-  existing local-storage keys and data compatibility.
-- [x] Support a randomized result-message pool while keeping the selected menu prominent
-  and accessible. Initial tone examples:
-  - `🎉 축하합니다! 오늘의 희생 메뉴는 '{메뉴}'입니다.`
-  - `🍜 운명이 {메뉴}를 선택했습니다. 항의는 받지 않습니다.`
-  - `😎 룰렛이 책임집니다. 맛있게 드세요.`
-  - `💀 다시 돌리기? 그건 비겁한 선택입니다.`
-  - `🔥 오늘의 점심은 이미 정해져 있었다.`
-- [x] Define message variants that include the selected menu, avoid
-  repeating the same line consecutively, and preserve a reduced-motion/plain-copy
-  fallback where needed.
-- [x] Record up to 10 recent results in the current browser.
-- [x] Optionally reduce the three most recently selected menus to `0.55×`.
-- [x] Let users reset history and show adjusted menus in the probability list.
-- [x] Keep history local with menu ID/name, mode, and time only; do not sync remotely
-  until authentication, retention, and privacy requirements are defined.
+- [x] 공개 제품명을 `식사가챠`로 통일
+- [x] 선택 메뉴가 명확하게 읽히는 무작위 결과 멘트 제공
+- [x] 결과 멘트의 장식은 이모지 문자가 아니라 `react-icons` SVG 아이콘으로 표현
+  - `celebration`: 축하합니다! 오늘의 희생 메뉴는 ‘{메뉴}’입니다.
+  - `soup`: 운명이 {메뉴}를 선택했습니다. 항의는 받지 않습니다.
+  - `cool`: 룰렛이 책임집니다. 맛있게 드세요.
+  - `skull`: 다시 돌리기? 그건 비겁한 선택입니다.
+  - `flame`: 오늘의 점심은 이미 정해져 있었다.
+- [x] 같은 멘트의 연속 출현 방지와 모션 감소 환경의 단순 표현 지원
+- [x] 현재 브라우저에 최근 결과 최대 10개 저장
+- [x] 최근 선택된 메뉴 3개의 확률을 선택적으로 `0.55배` 조정
+- [x] 기록 초기화와 확률 조정 대상 표시
+- [x] 로그인·보존·개인정보 정책 수립 전까지 기록을 서버로 전송하지 않음
 
-## Next — M3 collaborative rooms (`0.4.0`)
+## 진행 예정 — M3 점심방 지속성 (`0.4.0`)
 
-- Restore active rooms after refresh or browser restart using the existing member
-  session, and clearly distinguish re-entry from joining as a new member.
-- Add a `내 방` list for active/recent rooms, showing room name or code, status,
-  member count, last activity, expiration, and an explicit `다시 들어가기` action.
-- Add lightweight room chat with realtime delivery, timestamps, sender identity,
-  empty/loading/error states, message length limits, and room-expiration handling.
-- Keep chat visually separate from restaurant search and direct candidate-name entry
-  so messages can never be mistaken for candidate additions.
-- Define retention, abuse controls, and RLS rules before persisting chat messages.
-- Improve expired-room recovery and explain when a room can no longer be re-entered.
-- Support host transfer and clearer member identity.
-- Add dietary restrictions and allergies without exposing sensitive details unnecessarily.
-- Explain how likes and vetoes affected the final candidate list.
+- [ ] 새로고침하거나 브라우저를 다시 열어도 기존 구성원 세션으로 방 다시 들어가기
+- [ ] 활성·최근 방을 확인하는 `내 방` 목록
+  - 방 이름 또는 코드, 상태, 인원, 최근 활동, 만료 시간 표시
+  - 각 항목에 명확한 `다시 들어가기` 버튼 제공
+- [ ] 만료된 방을 다시 들어갈 수 없는 이유와 다음 행동 안내
+- [ ] 방장 위임과 구성원 식별 개선
+- [ ] 좋아요와 거부권이 최종 후보에 미친 영향 설명
 
-## Later — M4 restaurant context (`0.5.0`)
+## 후속 — M4 점심방 채팅 (`0.5.0`)
 
-- Let nearby users narrow or add restaurants by food category, starting with
-  `한식`, `중식`, `일식`, and `양식`.
-- Define category behavior for single/multiple selection, uncategorized restaurants,
-  and manual overrides when Google Places categories are ambiguous.
-- Prefer local filtering of already loaded results; only make another Places request
-  when the selected category cannot be satisfied locally, and explain the API/cost
-  impact before refreshing.
-- Show distance or walking-time context.
-- Evaluate open-now and price information against Places cost and freshness.
-- Improve map handoff while retaining explicit API-call controls.
+- [ ] 방을 만들거나 참여하면 사용할 수 있는 실시간 채팅
+- [ ] 보낸 사람, 전송 시각, 로딩·빈 상태·오류 상태 표시
+- [ ] 메시지 길이 제한, 전송 중 중복 방지, 방 만료 처리
+- [ ] 채팅과 식당 검색·후보 직접 추가 UI를 명확히 분리
+- [ ] 저장 전 메시지 보존 기간, 신고·도배 방지, RLS 정책 정의
+- [ ] 식이 제한과 알레르기를 불필요하게 노출하지 않는 공유 방식 검토
 
-## Later — M5 production readiness (`1.0.0`)
+## 후속 — M5 내 주변 카테고리 (`0.6.0`)
 
-- Add Supabase Auth, teams, memberships, and restrictive RLS.
-- Add application error monitoring and operational alerts.
-- Document backup, recovery, data retention, and location privacy.
-- Complete performance, security, and accessibility release audits.
+- [ ] 내 주변 식당을 `한식`, `중식`, `일식`, `양식` 카테고리로 골라 추가
+- [ ] 단일·복수 선택, 분류되지 않은 식당, Google 분류가 모호할 때의 직접 수정 규칙 정의
+- [ ] 이미 불러온 결과는 로컬에서 우선 필터링
+- [ ] 로컬 결과가 부족해 Places를 다시 호출할 때 비용 영향을 사전에 안내
+- [ ] 거리 또는 도보 시간 표시
+- [ ] 영업 중·가격 정보의 비용과 최신성 검토
+- [ ] 명시적인 API 호출 제어를 유지하면서 지도 연결 개선
 
-## Not planned without evidence
+## 장기 — M6 운영 준비 (`1.0.0`)
 
-- Social feeds, public profiles, badges, or broad gamification.
-- Complex personalization settings before recent-result behavior is validated.
-- Automatic high-frequency Places refreshes that weaken cost controls.
+- [ ] Supabase Auth, 팀, 구성원 권한과 제한적인 RLS 도입
+- [ ] 애플리케이션 오류 모니터링과 운영 알림
+- [ ] 백업·복구·데이터 보존·위치 개인정보 정책 문서화
+- [ ] 성능·보안·접근성 릴리스 점검 완료
+
+## 사용 근거 없이는 개발하지 않을 항목
+
+- 소셜 피드, 공개 프로필, 배지와 과도한 게임화
+- 최근 결과 조정 효과를 검증하기 전의 복잡한 개인화 설정
+- 비용 통제를 약화하는 자동·고빈도 Places 새로고침

@@ -1,10 +1,12 @@
 import { useCallback, useRef, useState } from 'react'
-import {
+import { backend } from '../backend'
+
+const {
   addExclusion,
   clearExclusions,
   excludeAllMenus,
   removeExclusion,
-} from '../services/exclusionService'
+} = backend.exclusions
 import { getKoreaDateString } from '../utils/koreaDate'
 
 export function useDailyExclusions({

@@ -1,41 +1,38 @@
-# Product
+# 제품 정의
 
-The public product name is **식사가챠**.
+공개 제품명은 **식사가챠**다.
 
-## Purpose
+## 목적
 
-The product helps one person or a group decide what to eat for lunch with minimal
-discussion while keeping the outcome understandable and playful.
+개인이나 그룹이 긴 논의 없이 점심 메뉴를 정하면서도 결과의 근거를 이해하고
+즐길 수 있게 한다.
 
-## Primary users
+## 주요 사용자
 
-- A team choosing from a maintained menu list near its workplace.
-- An individual choosing from restaurants near their current location.
-- A group collecting and narrowing candidates together in a temporary lunch room.
+- 회사 근처의 관리된 메뉴 목록에서 고르는 팀
+- 현재 위치 주변 식당에서 고르는 개인
+- 임시 점심방에서 후보를 모으고 함께 추리는 그룹
 
-## Core flows
+## 핵심 흐름
 
-1. **Team wheel** — use managed menus, daily exclusions, and weather weighting.
-2. **Nearby wheel** — request location explicitly, load nearby restaurants explicitly,
-   filter locally, then spin with equal candidate probability.
-3. **Lunch room** — create or join a room, collect candidates, express preferences,
-   mark readiness, and share one synchronized result.
-4. **Result memory** — keep up to 10 recent results in the current browser and
-   optionally reduce the probability of the three most recent menus.
+1. **팀 룰렛** — 관리된 메뉴, 오늘 제외 목록, 날씨 가중치 사용
+2. **내 주변 룰렛** — 위치 확인과 식당 불러오기를 명시적으로 실행한 뒤 로컬 필터링
+3. **점심방** — 방 생성·참여, 후보 수집, 선호 표시, 준비 완료, 동기화된 결과 공유
+4. **최근 결과** — 브라우저에 최대 10개를 보관하고 최근 메뉴의 확률을 선택적으로 낮춤
 
-## Product principles
+## 제품 원칙
 
-- The fastest path to a decision stays visually dominant.
-- Probability-changing behavior is explainable.
-- External API calls are explicit and cost-aware.
-- Location and group identity are collected only when required by the active flow.
-- Errors preserve user input and offer a next action.
-- Playfulness supports the decision; it does not obscure status or control.
+- 결정까지 가장 빠른 경로가 시각적으로 가장 중요해야 한다.
+- 확률을 바꾸는 동작은 사용자가 이해할 수 있어야 한다.
+- 외부 API 호출은 명시적이고 비용을 예측할 수 있어야 한다.
+- 위치와 그룹 식별 정보는 현재 기능에 필요할 때만 수집한다.
+- 오류가 발생해도 입력을 보존하고 다음 행동을 제시한다.
+- 재미 요소가 상태나 조작 방법을 가리지 않아야 한다.
 
-## Success signals
+## 성공 기준
 
-- A new user can complete a decision without instructions.
-- Most sessions reach a result without reloading or abandoning the flow.
-- Location denial and network failure can be recovered from.
-- Group members see the same candidates, readiness, and final result.
-- Mobile users can complete every core flow at 320px width.
+- 처음 방문한 사용자도 설명 없이 결과까지 도달한다.
+- 대부분의 세션이 새로고침이나 이탈 없이 결과를 만든다.
+- 위치 거부와 네트워크 실패에서 복구할 수 있다.
+- 모든 방 구성원이 같은 후보·준비 상태·최종 결과를 본다.
+- 320px 너비 모바일에서도 모든 핵심 기능을 완료할 수 있다.

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getSupabase } from '../lib/supabase'
-import {
+import { backend } from '../backend'
+
+const {
   clearRoomSession,
   closeVoting,
   completeRoom,
@@ -15,7 +16,7 @@ import {
   startRoomSpin,
   sendRoomNudge,
   renameRoomMember,
-} from '../services/lunchRoomService'
+} = backend.rooms
 
 export function useLunchRoom(teamId) {
   const [session, setSession] = useState(loadRoomSession)
@@ -40,38 +41,21 @@ export function useLunchRoom(teamId) {
   useEffect(() => {
     if (!session?.code) return undefined
     refresh()
-    const supabase = getSupabase()
-    const channel = supabase
-      .channel(`lunch-room:${session.code}`)
-      .on('broadcast', { event: 'room_changed' }, refresh)
-      .subscribe((status) => {
-        if (status !== 'SUBSCRIBED') return
-        refresh()
-        channel
-          .send({
-            type: 'broadcast',
-            event: 'room_changed',
-            payload: { type: 'member_connected' },
-          })
-          .catch(() => {})
-      })
-    channelRef.current = channel
+    const subscription = backend.roomRealtime.subscribe(session.code, refresh)
+    channelRef.current = subscription
+    subscription.notify('member_connected').catch(() => {})
     const timer = setInterval(refresh, 15000)
     return () => {
       clearInterval(timer)
       channelRef.current = null
-      supabase.removeChannel(channel)
+      subscription.close()
     }
   }, [session?.code, refresh])
 
   function notifyRoomChanged(type) {
     const channel = channelRef.current
     if (!channel) return
-    channel.send({
-      type: 'broadcast',
-      event: 'room_changed',
-      payload: { type },
-    }).catch(() => {})
+    channel.notify(type).catch(() => {})
   }
 
   async function run(action) {
