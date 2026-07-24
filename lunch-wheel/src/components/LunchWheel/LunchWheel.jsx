@@ -28,6 +28,7 @@ export default function LunchWheel({
   onRequestSpin,
   remoteSpin,
   ignoreWeather = false,
+  weatherWeightEnabled = true,
   wheelMode = 'team',
   disabledLabel,
   disabledExtras,
@@ -43,6 +44,27 @@ export default function LunchWheel({
   const weightedItemsRef = useRef([])
   const ShuffleIcon = UI_ICONS.shuffle
 
+  async function handleShareResult() {
+    if (!result) return
+    const text = `🎉 오늘의 점심은 '${result.name}'입니다.\n${result.reason}`
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: '점심룰렛 결과',
+          text,
+          url: window.location.href,
+        })
+        return
+      }
+      await navigator.clipboard.writeText(`${text}\n${window.location.href}`)
+      onToast('룰렛 결과를 클립보드에 복사했어요.')
+    } catch (err) {
+      if (err?.name !== 'AbortError') {
+        onToast('결과를 공유하지 못했어요.')
+      }
+    }
+  }
+
   const orderedMenus = useMemo(() => {
     if (!displayOrder.length) return menus
     const byId = new Map(menus.map((menu) => [menu.id, menu]))
@@ -54,8 +76,13 @@ export default function LunchWheel({
   }, [menus, displayOrder])
 
   const weightedItems = useMemo(
-    () => getWeightedMenus(orderedMenus, excludedIds, ignoreWeather ? null : weather),
-    [orderedMenus, excludedIds, weather, ignoreWeather],
+    () =>
+      getWeightedMenus(
+        orderedMenus,
+        excludedIds,
+        ignoreWeather || !weatherWeightEnabled ? null : weather,
+      ),
+    [orderedMenus, excludedIds, weather, ignoreWeather, weatherWeightEnabled],
   )
   weightedItemsRef.current = weightedItems
 
@@ -150,9 +177,13 @@ export default function LunchWheel({
 
     setSpinning(true)
     setResult(null)
-    setSpinLabel(ignoreWeather ? '룰렛 준비 중…' : '현재 날씨 확인 중…')
+    setSpinLabel(
+      ignoreWeather || !weatherWeightEnabled
+        ? '룰렛 준비 중…'
+        : '현재 날씨 확인 중…',
+    )
 
-    const latestWeather = ignoreWeather
+    const latestWeather = ignoreWeather || !weatherWeightEnabled
       ? null
       : await onRefreshWeather({ quiet: true })
     const items = getWeightedMenus(orderedMenus, excludedIds, latestWeather)
@@ -276,6 +307,7 @@ export default function LunchWheel({
         menuName={result?.name}
         reason={result?.reason}
         placeLinks={result?.place_links}
+        onShare={handleShareResult}
       />
     </article>
   )

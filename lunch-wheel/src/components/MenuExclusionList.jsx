@@ -1,5 +1,7 @@
+import { useMemo, useState } from 'react'
 import TypeChip from './TypeChip'
 import PlaceMeta from './PlaceMeta'
+import { UI_ICONS } from '../constants/icons'
 
 export default function MenuExclusionList({
   menus,
@@ -9,12 +11,35 @@ export default function MenuExclusionList({
   onBanAll,
   onClearAll,
 }) {
+  const [query, setQuery] = useState('')
+  const SearchIcon = UI_ICONS.search
+  const filteredMenus = useMemo(() => {
+    const normalized = query.trim().toLocaleLowerCase('ko')
+    if (!normalized) return menus
+    return menus.filter((menu) => {
+      const typeName = menu.menu_type?.name || ''
+      return `${menu.name} ${typeName}`
+        .toLocaleLowerCase('ko')
+        .includes(normalized)
+    })
+  }, [menus, query])
+
   return (
     <section className="card side-card">
       <h2>오늘 제외할 메뉴</h2>
       <p className="desc">
         체크한 메뉴는 이번 돌림에서 완전히 빠집니다. 제외 상태는 팀에 공유됩니다.
       </p>
+      <label className="menu-list-search">
+        <span className="sr-only">메뉴 목록 검색</span>
+        <SearchIcon className="ui-icon" aria-hidden />
+        <input
+          type="search"
+          value={query}
+          placeholder="메뉴 또는 종류 검색"
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </label>
       <div className="ban-actions">
         <button
           type="button"
@@ -36,8 +61,10 @@ export default function MenuExclusionList({
       <div className="ban-list">
         {!menus.length ? (
           <div className="empty-hint">등록된 메뉴가 없습니다.</div>
+        ) : !filteredMenus.length ? (
+          <div className="empty-hint">검색 결과가 없습니다.</div>
         ) : (
-          menus.map((menu) => {
+          filteredMenus.map((menu) => {
             const banned = excludedIds.has(menu.id)
             return (
               <div

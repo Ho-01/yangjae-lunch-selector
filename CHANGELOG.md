@@ -12,6 +12,9 @@ All notable user-visible changes are recorded here. The format follows
 - Product, architecture, roadmap, release, and agent workflow documentation.
 - Browser end-to-end test foundation for core desktop and mobile flows.
 - Supabase deployment preflight, dry-run, status reporting, and one-time history repair.
+- Basic roulette result sharing with native mobile sharing and clipboard fallback.
+- Search filtering for the right-side menu exclusion list.
+- A persistent weather-weight toggle for equal-probability spins.
 
 ### Changed
 

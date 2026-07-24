@@ -12,6 +12,8 @@ import {
   LuLoader,
   LuPencil,
   LuRefreshCw,
+  LuSearch,
+  LuShare2,
   LuShuffle,
   LuSnowflake,
   LuSoup,
@@ -48,6 +50,8 @@ export const WEATHER_ICON_MAP = {
 
 export const UI_ICONS = {
   refresh: LuRefreshCw,
+  search: LuSearch,
+  share: LuShare2,
   listPlus: LuListPlus,
   shuffle: LuShuffle,
   close: LuX,

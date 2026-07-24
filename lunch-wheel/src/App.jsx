@@ -93,6 +93,13 @@ export default function App() {
   )
   const [roomDialogOpen, setRoomDialogOpen] = useState(Boolean(roomInviteCode))
   const [spinning, setSpinning] = useState(false)
+  const [weatherWeightEnabled, setWeatherWeightEnabled] = useState(() => {
+    try {
+      return window.localStorage.getItem('weather-weight-enabled') !== 'false'
+    } catch {
+      return true
+    }
+  })
   const [toast, setToast] = useState('')
   const toastTimer = useRef(0)
   const lastRoomEventId = useRef(null)
@@ -111,9 +118,29 @@ export default function App() {
   }, [weatherLocation, refreshWeather])
 
   const weightedItems = useMemo(
-    () => getWeightedMenus(menus, excludedIds, weather),
-    [menus, excludedIds, weather],
+    () =>
+      getWeightedMenus(
+        menus,
+        excludedIds,
+        weatherWeightEnabled ? weather : null,
+      ),
+    [menus, excludedIds, weather, weatherWeightEnabled],
   )
+
+  function handleWeatherWeightToggle(event) {
+    const enabled = event.target.checked
+    setWeatherWeightEnabled(enabled)
+    try {
+      window.localStorage.setItem('weather-weight-enabled', String(enabled))
+    } catch {
+      // The preference still works for the current session.
+    }
+    showToast(
+      enabled
+        ? '날씨 가중치를 적용합니다.'
+        : '날씨 가중치를 끄고 동일한 기본 확률을 사용합니다.',
+    )
+  }
 
   const roomCandidateMenus = useMemo(() => {
     if (!lunchRoom.room || lunchRoom.room.status === 'OPEN') return null
@@ -628,6 +655,7 @@ export default function App() {
               : null
           }
           ignoreWeather={isRoom}
+          weatherWeightEnabled={weatherWeightEnabled}
           wheelMode={mode}
           disabledLabel={
             isRoom && lunchRoom.room?.status === 'COMPLETED'
@@ -653,6 +681,24 @@ export default function App() {
 
         {!isRoom ? (
         <aside className="side">
+          <section className="card side-card weather-weight-control">
+            <div>
+              <h2>날씨 가중치</h2>
+              <p className="desc">
+                끄면 날씨와 관계없이 모든 활성 메뉴를 같은 확률로 돌립니다.
+              </p>
+            </div>
+            <label className="switch-control">
+              <input
+                type="checkbox"
+                checked={weatherWeightEnabled}
+                disabled={busy}
+                onChange={handleWeatherWeightToggle}
+              />
+              <span aria-hidden />
+              <strong>{weatherWeightEnabled ? 'ON' : 'OFF'}</strong>
+            </label>
+          </section>
           {isNearby ? (
             <NearbyControls
               settings={nearby.settings}
@@ -685,7 +731,10 @@ export default function App() {
             onBanAll={handleBanAll}
             onClearAll={handleClearAll}
           />
-          <ProbabilityList items={weightedItems} weather={weather} />
+          <ProbabilityList
+            items={weightedItems}
+            weather={weatherWeightEnabled ? weather : null}
+          />
         </aside>
         ) : null}
       </section>
