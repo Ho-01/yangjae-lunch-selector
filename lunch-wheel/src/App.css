@@ -1396,8 +1396,6 @@ h1 {
   border-right: 17px solid transparent;
   border-top: 34px solid var(--accent-red);
   filter: drop-shadow(0 3px 0 #d83a3a);
-  transform-origin: 50% 0;
-  will-change: transform;
 }
 
 .canvas-shell {

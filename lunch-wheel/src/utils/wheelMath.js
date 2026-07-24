@@ -73,31 +73,3 @@ export function createSuspenseLanding(segment, randomValue, reducedMotion = fals
     boundaryClearance: inset,
   }
 }
-
-export function stepPointerSpring(
-  state,
-  deltaSeconds,
-  { target = 0, impulse = 0 } = {},
-) {
-  const dt = Math.max(0, Math.min(0.034, deltaSeconds))
-  const acceleration =
-    150 * (target - state.angle) - 18 * state.velocity
-  const velocity = state.velocity + acceleration * dt + impulse
-  return {
-    angle: state.angle + velocity * dt,
-    velocity,
-  }
-}
-
-export function wheelReboundOffset(progress, landing) {
-  if (landing.mode !== 'boundary' || progress <= 0.9 || progress >= 1) {
-    return 0
-  }
-  const reboundProgress = (progress - 0.9) / 0.1
-  const amplitude = Math.min(landing.boundaryClearance * 0.22, 0.012)
-  return (
-    -Math.sin(reboundProgress * Math.PI * 4) *
-    (1 - reboundProgress) *
-    amplitude
-  )
-}

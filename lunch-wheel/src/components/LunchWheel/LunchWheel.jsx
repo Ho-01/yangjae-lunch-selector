@@ -15,9 +15,7 @@ import {
   createSuspenseLanding,
   easeOutQuint,
   normalizeAngle,
-  stepPointerSpring,
   stableSpinRandom,
-  wheelReboundOffset,
 } from '../../utils/wheelMath'
 
 export default function LunchWheel({
@@ -50,7 +48,6 @@ export default function LunchWheel({
   const [result, setResult] = useState(null)
   const [spinLabel, setSpinLabel] = useState('돌림판 돌리기')
   const [itemsOverride, setItemsOverride] = useState(null)
-  const [pointerDeflection, setPointerDeflection] = useState(0)
   const segmentsRef = useRef([])
   const rotationRef = useRef(0)
   const rafRef = useRef(0)
@@ -151,7 +148,6 @@ export default function LunchWheel({
     if (!seg) {
       setSpinning(false)
       setItemsOverride(null)
-      setPointerDeflection(0)
       setSpinLabel('돌림판 돌리기')
       return
     }
@@ -176,56 +172,15 @@ export default function LunchWheel({
     const end = start + delta + extraTurns
     const begin = performance.now()
     const actualDuration = reducedMotion ? Math.min(duration, 700) : duration
-    let previousFrameTime = begin
-    let previousRotation = start
-    let previousSegmentId = null
-    let pointerSpring = { angle: 0, velocity: 0 }
 
     const frame = (now) => {
       const p = Math.min(1, (now - begin) / actualDuration)
-      const baseRotation = start + (end - start) * easeOutQuint(p)
-      const next =
-        baseRotation +
-        (reducedMotion ? 0 : wheelReboundOffset(p, landing))
-      const dt = Math.max(
-        0.001,
-        Math.min(0.034, (now - previousFrameTime) / 1000),
-      )
-      const angularSpeed = Math.abs(next - previousRotation) / dt
-      const pointerLocalAngle = normalizeAngle(pointerAngle - next)
-      const currentSegment = segments.find((item) => {
-        const startAngle = normalizeAngle(item.start)
-        const endAngle = normalizeAngle(item.end)
-        return startAngle <= endAngle
-          ? pointerLocalAngle >= startAngle && pointerLocalAngle < endAngle
-          : pointerLocalAngle >= startAngle || pointerLocalAngle < endAngle
-      })
-      const crossedBoundary =
-        previousSegmentId && currentSegment?.id !== previousSegmentId
-      const impulse =
-        crossedBoundary && !reducedMotion
-          ? Math.min(260, angularSpeed * 13)
-          : 0
-      const contactProgress =
-        landing.mode === 'boundary' && p > 0.78
-          ? Math.min(1, (p - 0.78) / 0.1)
-          : 0
-      const contactRelease =
-        p < 0.88 ? contactProgress : Math.max(0, (0.98 - p) / 0.1)
-      pointerSpring = stepPointerSpring(pointerSpring, dt, {
-        target: reducedMotion ? 0 : contactRelease * 22,
-        impulse,
-      })
+      const next = start + (end - start) * easeOutQuint(p)
       setRotation(next)
-      setPointerDeflection(reducedMotion ? 0 : pointerSpring.angle)
-      previousFrameTime = now
-      previousRotation = next
-      previousSegmentId = currentSegment?.id || previousSegmentId
       if (p < 1) {
         rafRef.current = requestAnimationFrame(frame)
       } else {
         setRotation(normalizeAngle(end))
-        setPointerDeflection(0)
         setSpinning(false)
         setItemsOverride(null)
         setSpinLabel('다시 돌리기')
@@ -362,7 +317,6 @@ export default function LunchWheel({
         remoteSpinRef.current = ''
         setSpinning(false)
         setItemsOverride(null)
-        setPointerDeflection(0)
       }
     }
     // animateSpin reads the latest refs and stable state setters.
@@ -386,11 +340,7 @@ export default function LunchWheel({
 
       <div className="wheel-wrap">
         <div className="wheel-aura" />
-        <div
-          className="pointer"
-          style={{ transform: `rotate(${pointerDeflection}deg)` }}
-          aria-hidden
-        />
+        <div className="pointer" aria-hidden />
         <WheelCanvas
           items={canvasItems}
           rotation={rotation}
