@@ -15,8 +15,8 @@ import {
   createSuspenseLanding,
   easeOutQuint,
   normalizeAngle,
+  pointerDeflectionDegrees,
   stableSpinRandom,
-  suspenseRotationOffset,
 } from '../../utils/wheelMath'
 
 export default function LunchWheel({
@@ -49,6 +49,7 @@ export default function LunchWheel({
   const [result, setResult] = useState(null)
   const [spinLabel, setSpinLabel] = useState('돌림판 돌리기')
   const [itemsOverride, setItemsOverride] = useState(null)
+  const [pointerDeflection, setPointerDeflection] = useState(0)
   const segmentsRef = useRef([])
   const rotationRef = useRef(0)
   const rafRef = useRef(0)
@@ -149,6 +150,7 @@ export default function LunchWheel({
     if (!seg) {
       setSpinning(false)
       setItemsOverride(null)
+      setPointerDeflection(0)
       setSpinLabel('돌림판 돌리기')
       return
     }
@@ -176,15 +178,16 @@ export default function LunchWheel({
 
     const frame = (now) => {
       const p = Math.min(1, (now - begin) / actualDuration)
-      const next =
-        start +
-        (end - start) * easeOutQuint(p) +
-        suspenseRotationOffset(p, landing.overshoot)
+      const next = start + (end - start) * easeOutQuint(p)
       setRotation(next)
+      setPointerDeflection(
+        reducedMotion ? 0 : pointerDeflectionDegrees(p, landing),
+      )
       if (p < 1) {
         rafRef.current = requestAnimationFrame(frame)
       } else {
         setRotation(normalizeAngle(end))
+        setPointerDeflection(0)
         setSpinning(false)
         setItemsOverride(null)
         setSpinLabel('다시 돌리기')
@@ -321,6 +324,7 @@ export default function LunchWheel({
         remoteSpinRef.current = ''
         setSpinning(false)
         setItemsOverride(null)
+        setPointerDeflection(0)
       }
     }
     // animateSpin reads the latest refs and stable state setters.
@@ -344,7 +348,11 @@ export default function LunchWheel({
 
       <div className="wheel-wrap">
         <div className="wheel-aura" />
-        <div className="pointer" aria-hidden />
+        <div
+          className="pointer"
+          style={{ transform: `rotate(${pointerDeflection}deg)` }}
+          aria-hidden
+        />
         <WheelCanvas
           items={canvasItems}
           rotation={rotation}

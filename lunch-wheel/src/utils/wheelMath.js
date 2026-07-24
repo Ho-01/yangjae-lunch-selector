@@ -40,27 +40,53 @@ export function createSuspenseLanding(segment, randomValue, reducedMotion = fals
   if (reducedMotion || arc === 0) {
     return {
       targetAngle: segment.center,
-      overshoot: 0,
+      mode: 'center',
+      pointerDirection: 0,
     }
   }
 
   const random = Math.max(0, Math.min(0.999999, randomValue))
-  const nearStart = random < 0.5
-  const variation = (random * 2) % 1
-  const inset = arc * (0.07 + variation * 0.09)
-  const targetAngle = nearStart
-    ? segment.start + inset
-    : segment.end - inset
+  if (random < 0.3) {
+    const centerJitter = ((random / 0.3) - 0.5) * arc * 0.18
+    return {
+      targetAngle: segment.center + centerJitter,
+      mode: 'center',
+      pointerDirection: 0,
+    }
+  }
 
+  if (random < 0.6) {
+    const position = 0.28 + ((random - 0.3) / 0.3) * 0.44
+    return {
+      targetAngle: segment.start + arc * position,
+      mode: 'regular',
+      pointerDirection: 0,
+    }
+  }
+
+  const nearStart = random < 0.8
+  const sideProgress = nearStart
+    ? (random - 0.6) / 0.2
+    : (random - 0.8) / 0.2
+  const inset = arc * (0.05 + sideProgress * 0.07)
   return {
-    targetAngle,
-    // Positive rotation moves the pointer toward the segment start.
-    overshoot: (nearStart ? 1 : -1) * (inset + Math.min(arc * 0.035, 0.018)),
+    targetAngle: nearStart ? segment.start + inset : segment.end - inset,
+    mode: 'boundary',
+    // The wheel keeps rotating forward; only the physical pointer bends.
+    pointerDirection: nearStart ? 1 : -1,
   }
 }
 
-export function suspenseRotationOffset(progress, overshoot) {
-  if (!overshoot || progress <= 0.84 || progress >= 1) return 0
-  const lateProgress = (progress - 0.84) / 0.16
-  return Math.sin(lateProgress * Math.PI) * overshoot
+export function pointerDeflectionDegrees(progress, landing) {
+  if (progress <= 0 || progress >= 1) return 0
+
+  const fastClicks =
+    Math.sin(progress * Math.PI * 34) * Math.pow(1 - progress, 1.3) * 7
+  if (landing.mode !== 'boundary' || progress < 0.78) return fastClicks
+
+  const late = (progress - 0.78) / 0.22
+  const caughtOnPeg =
+    Math.sin(late * Math.PI) * 25 * landing.pointerDirection
+  const tremble = Math.sin(late * Math.PI * 5) * (1 - late) * 3
+  return caughtOnPeg + tremble
 }
