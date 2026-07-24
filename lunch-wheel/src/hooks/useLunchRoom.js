@@ -19,6 +19,9 @@ const {
   startRoomSpin,
   sendRoomNudge,
   renameRoomMember,
+  transferRoomHost,
+  sendRoomMessage,
+  fetchRoomMessages,
 } = backend.rooms
 
 export function useLunchRoom(teamId) {
@@ -51,15 +54,35 @@ export function useLunchRoom(teamId) {
   const refresh = useCallback(async () => {
     if (!session?.code) return null
     try {
-      const next = await fetchRoom(session.code)
-      setRoom(next)
+      const [next, messages] = await Promise.all([
+        fetchRoom(session.code),
+        fetchRoomMessages({
+          code: session.code,
+          memberId: session.memberId,
+          token: session.token,
+        }).catch(() => []),
+      ])
+      setRoom({ ...next, messages })
+      const me = next.members?.find((member) => member.id === session.memberId)
+      if (me) {
+        setSession((current) =>
+          current.isHost === Boolean(me.isHost) &&
+          current.nickname === me.nickname
+            ? current
+            : {
+                ...current,
+                isHost: Boolean(me.isHost),
+                nickname: me.nickname,
+              },
+        )
+      }
       setError(null)
       return next
     } catch (err) {
       setError(err.message)
       return null
     }
-  }, [session?.code])
+  }, [session?.code, session?.memberId, session?.token])
 
   useEffect(() => {
     if (!session?.code || sessionValidated) return undefined
@@ -229,6 +252,23 @@ export function useLunchRoom(teamId) {
       return next
     })
 
+  const transferHost = (targetMemberId) =>
+    run(async () => {
+      await transferRoomHost(session, targetMemberId)
+      const next = await refresh()
+      setSession((current) => ({ ...current, isHost: false }))
+      notifyRoomChanged('host_transferred')
+      return next
+    })
+
+  const sendMessage = (body) =>
+    run(async () => {
+      await sendRoomMessage(session, body)
+      const next = await refresh()
+      notifyRoomChanged('chat_message')
+      return next
+    })
+
   function leave() {
     clearRoomSession()
     setSession(null)
@@ -257,6 +297,8 @@ export function useLunchRoom(teamId) {
     complete,
     addCandidates,
     removeCandidate,
+    transferHost,
+    sendMessage,
     leave,
     refresh,
   }

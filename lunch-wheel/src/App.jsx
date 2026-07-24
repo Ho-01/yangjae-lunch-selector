@@ -731,6 +731,22 @@ export default function App() {
               return false
             }
           }}
+          onTransferHost={async (memberId) => {
+            try {
+              await lunchRoom.transferHost(memberId)
+              showToast('방장 권한을 넘겼어요.')
+            } catch (err) {
+              showToast(err?.message || '방장 권한을 넘기지 못했어요.')
+            }
+          }}
+          onSendMessage={async (body) => {
+            try {
+              await lunchRoom.sendMessage(body)
+            } catch (err) {
+              showToast(err?.message || '메시지를 보내지 못했어요.')
+              throw err
+            }
+          }}
           onToast={showToast}
         />
       ) : null}

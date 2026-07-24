@@ -249,3 +249,29 @@ export function removeRoomCandidate(session, candidateId) {
     p_candidate_id: candidateId,
   })
 }
+
+export function transferRoomHost(session, targetMemberId) {
+  return rpc('transfer_lunch_room_host', {
+    p_code: session.code,
+    p_member_id: session.memberId,
+    p_token: session.token,
+    p_target_member_id: targetMemberId,
+  })
+}
+
+export function sendRoomMessage(session, body) {
+  return rpc('send_lunch_room_message', {
+    p_code: session.code,
+    p_member_id: session.memberId,
+    p_token: session.token,
+    p_body: body,
+  })
+}
+
+export function fetchRoomMessages(session) {
+  return rpc('get_lunch_room_messages', {
+    p_code: session.code,
+    p_member_id: session.memberId,
+    p_token: session.token,
+  })
+}

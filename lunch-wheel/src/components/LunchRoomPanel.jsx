@@ -8,6 +8,7 @@ import { UI_ICONS } from '../constants/icons'
 import { getResultIcon } from '../constants/icons'
 import { formatRoomEvent } from '../utils/roomEvents'
 import { pickResultMessage } from '../utils/resultMessages'
+import RoomChat from './RoomChat'
 
 export default function LunchRoomPanel({
   room,
@@ -20,6 +21,8 @@ export default function LunchRoomPanel({
   onRemoveCandidate,
   onNudge,
   onRename,
+  onTransferHost,
+  onSendMessage,
   onToast,
 }) {
   const CrownIcon = UI_ICONS.crown
@@ -213,11 +216,32 @@ export default function LunchRoomPanel({
         {room.members.map((member) => (
           <span
             key={member.id}
-            className={member.isReady ? 'is-ready' : ''}
+            className={`${member.isReady ? 'is-ready' : ''}${
+              member.id === session.memberId ? ' is-current' : ''
+            }`}
           >
             {member.isHost ? <CrownIcon className="room-host-icon" aria-label="방장" /> : null}
             {member.nickname}
+            {member.id === session.memberId ? <small>나</small> : null}
             {member.isReady ? <small>준비</small> : null}
+            {session.isHost && member.id !== session.memberId ? (
+              <button
+                type="button"
+                className="room-transfer-host"
+                disabled={loading}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `${member.nickname}님에게 방장 권한을 넘길까요?`,
+                    )
+                  ) {
+                    onTransferHost(member.id)
+                  }
+                }}
+              >
+                방장 넘기기
+              </button>
+            ) : null}
           </span>
         ))}
       </div>
@@ -279,6 +303,13 @@ export default function LunchRoomPanel({
           </div>
         </div>
       ) : null}
+
+      <RoomChat
+        messages={room.messages}
+        currentMemberId={session.memberId}
+        disabled={loading}
+        onSend={onSendMessage}
+      />
 
       {room.status === 'OPEN' ? (
         <>

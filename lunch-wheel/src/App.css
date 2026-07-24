@@ -285,6 +285,129 @@ body {
   color: #43652f;
 }
 
+.room-members span.is-current {
+  border-color: var(--primary);
+}
+
+.room-transfer-host {
+  border: 0;
+  padding: 2px 4px;
+  background: transparent;
+  color: var(--primary-shadow);
+  font-size: 10px;
+  font-weight: 850;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.room-transfer-host:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.room-chat {
+  display: grid;
+  gap: 10px;
+  margin: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--canvas);
+}
+
+.room-chat-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.room-chat-head h3,
+.room-chat-head p {
+  margin: 0;
+}
+
+.room-chat-head h3 {
+  font-size: 14px;
+}
+
+.room-chat-head p,
+.room-chat-head small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.room-chat-messages {
+  display: grid;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+}
+
+.room-chat-empty {
+  padding: 18px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.room-chat-message {
+  justify-self: start;
+  width: min(82%, 420px);
+}
+
+.room-chat-message.is-mine {
+  justify-self: end;
+}
+
+.room-chat-message > div {
+  display: flex;
+  gap: 7px;
+  margin: 0 4px 3px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.room-chat-message.is-mine > div {
+  justify-content: flex-end;
+}
+
+.room-chat-message p {
+  margin: 0;
+  border-radius: 10px 10px 10px 3px;
+  padding: 8px 10px;
+  background: #f0f0f0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.room-chat-message.is-mine p {
+  border-radius: 10px 10px 3px;
+  background: #e8f2e4;
+}
+
+.room-chat-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+}
+
+.room-chat-form input {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 8px 10px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
 .room-members small {
   margin-left: 2px;
   color: var(--primary-shadow);
