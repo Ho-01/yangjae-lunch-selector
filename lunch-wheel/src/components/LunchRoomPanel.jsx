@@ -42,6 +42,9 @@ export default function LunchRoomPanel({
   const [clock, setClock] = useState(Date.now())
   const [renaming, setRenaming] = useState(false)
   const [nicknameDraft, setNicknameDraft] = useState('')
+  const [activityOpen, setActivityOpen] = useState(
+    () => typeof window === 'undefined' || window.innerWidth > 640,
+  )
 
   const winner = room.menus.find((menu) => menu.id === room.winnerMenuId)
   const resultMessage = useMemo(
@@ -295,15 +298,34 @@ export default function LunchRoomPanel({
 
       {room.events?.length ? (
         <div className="room-activity">
-          <strong>최근 활동</strong>
-          <div>
-            {room.events
-              .slice(-5)
-              .reverse()
-              .map((event) => (
-                <span key={event.id}>{formatRoomEvent(event)}</span>
-              ))}
-          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            className="room-activity-toggle"
+            aria-expanded={activityOpen}
+            aria-controls="room-activity-list"
+            onClick={() => setActivityOpen((open) => !open)}
+          >
+            <span>
+              <strong>최근 활동</strong>
+              <small>{formatRoomEvent(room.events.at(-1))}</small>
+            </span>
+            {activityOpen ? (
+              <UI_ICONS.chevronUp aria-hidden />
+            ) : (
+              <UI_ICONS.chevronDown aria-hidden />
+            )}
+          </Button>
+          {activityOpen ? (
+            <div id="room-activity-list">
+              {room.events
+                .slice(-5)
+                .reverse()
+                .map((event) => (
+                  <span key={event.id}>{formatRoomEvent(event)}</span>
+                ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -487,7 +509,8 @@ export default function LunchRoomPanel({
           <div className="room-panel-actions">
             <Button
               type="button"
-              className={`btn ${isReady ? 'ghost' : 'primary'}`}
+              variant={isReady ? 'outline' : 'default'}
+              className="btn"
               disabled={loading}
               onClick={() => onSetReady(!isReady, likes, veto)}
             >
@@ -496,7 +519,8 @@ export default function LunchRoomPanel({
             {session.isHost ? (
               <Button
                 type="button"
-                className="btn primary"
+                variant={canFinalize ? 'default' : 'secondary'}
+                className="btn"
                 disabled={loading || !canFinalize}
                 onClick={onCloseVoting}
               >

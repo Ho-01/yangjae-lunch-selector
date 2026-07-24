@@ -472,23 +472,48 @@ body {
 
 .room-activity {
   display: grid;
-  gap: 7px;
   margin: 10px 16px 0;
-  padding: 10px 11px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface-1);
 }
 
-.room-activity > strong {
+.room-activity-toggle {
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 11px;
+  color: var(--ink);
+  text-align: left;
+  white-space: normal;
+}
+
+.room-activity-toggle > span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.room-activity-toggle strong {
   color: var(--muted-foreground);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 900;
+}
+
+.room-activity-toggle small {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .room-activity > div {
   display: grid;
   gap: 5px;
+  border-top: 1px solid var(--line);
+  padding: 9px 11px 11px;
 }
 
 .room-activity span {
@@ -799,7 +824,9 @@ body {
   }
 
   .room-activity {
-    margin-inline: 12px;
+    margin: 10px 0 0;
+    border-inline: 0;
+    border-radius: 0;
   }
 
   .room-profile {
@@ -1089,6 +1116,7 @@ body {
   border-width: 0 0 0 1px;
   border-color: var(--line);
   border-radius: 0;
+  background: color-mix(in oklch, var(--destructive), transparent 94%);
   color: var(--destructive);
 }
 
