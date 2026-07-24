@@ -23,11 +23,11 @@ test('모션 감소 환경에서는 중앙에 정지한다', () => {
   })
 })
 
-test('중앙·일반·경계 직전 정지가 모두 발생한다', () => {
+test('세그먼트 전체 안전 범위에 균등한 정지 위치를 만든다', () => {
   const segment = { start: 0, end: 1, center: 0.5 }
-  assert.equal(createSuspenseLanding(segment, 0.1).mode, 'center')
-  assert.equal(createSuspenseLanding(segment, 0.45).mode, 'regular')
-  assert.equal(createSuspenseLanding(segment, 0.7).mode, 'boundary')
+  assert.equal(createSuspenseLanding(segment, 0).targetAngle, 0.04)
+  assert.equal(createSuspenseLanding(segment, 0.5).targetAngle, 0.5)
+  assert.ok(createSuspenseLanding(segment, 0.999999).targetAngle < 0.96)
 })
 
 test('점심방 정지 난수는 같은 키에서 재현된다', () => {

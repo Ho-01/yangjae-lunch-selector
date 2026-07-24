@@ -13,6 +13,7 @@ import {
 import {
   buildSegments,
   createSuspenseLanding,
+  easeOutCubic,
   easeOutQuint,
   normalizeAngle,
   stableSpinRandom,
@@ -141,7 +142,7 @@ export default function LunchWheel({
     targetMenu,
     weatherSnapshot,
     segments,
-    duration = 4300,
+    duration = 5400,
     landingRandom = Math.random(),
   ) {
     const seg = segments.find((item) => item.id === targetMenu.id)
@@ -175,7 +176,9 @@ export default function LunchWheel({
 
     const frame = (now) => {
       const p = Math.min(1, (now - begin) / actualDuration)
-      const next = start + (end - start) * easeOutQuint(p)
+      const next =
+        start +
+        (end - start) * (reducedMotion ? easeOutQuint(p) : easeOutCubic(p))
       setRotation(next)
       if (p < 1) {
         rafRef.current = requestAnimationFrame(frame)
