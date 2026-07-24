@@ -107,6 +107,12 @@ test('persists the recent-result weighting preference', async ({ page }, testInf
   await page.getByText('최근 메뉴 덜 나오게', { exact: true }).click()
   await expect(preference).toBeChecked()
   await page.reload()
+  if ((testInfo.project.use.viewport?.width || 1000) <= 640) {
+    await page
+      .getByRole('button')
+      .filter({ hasText: '최근 결과' })
+      .click()
+  }
   await expect(preference).toBeChecked()
 })
 
