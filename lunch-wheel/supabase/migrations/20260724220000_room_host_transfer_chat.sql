@@ -6,7 +6,7 @@ alter table public.t_lunch_room_event
   add constraint t_lunch_room_event_event_type_check
   check (event_type in (
     'CANDIDATE_ADDED', 'MEMBER_READY', 'MEMBER_UNREADY',
-    'NUDGE_SENT', 'HOST_TRANSFERRED'
+    'MEMBER_RENAMED', 'NUDGE_SENT', 'HOST_TRANSFERRED'
   ));
 
 create table public.t_lunch_room_message (
