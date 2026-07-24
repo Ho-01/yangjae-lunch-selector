@@ -37,7 +37,7 @@ function Toast({ message }) {
 }
 
 export default function App() {
-  const [mode, setMode] = useState('team')
+  const [mode, setMode] = useState('room')
   const isNearby = mode === 'nearby'
   const isRoom = mode === 'room'
 
@@ -431,7 +431,6 @@ export default function App() {
     try {
       await nearby.locate()
       showToast('현재 위치를 확인했습니다.')
-      await refreshWeather()
     } catch (err) {
       showToast(err?.message || '위치를 확인하지 못했습니다.')
     }
@@ -445,7 +444,6 @@ export default function App() {
           ? `저장된 식당 ${result.places.length}곳을 불러왔습니다.`
           : `주변 식당 ${result.places.length}곳을 찾았습니다.`,
       )
-      await refreshWeather()
     } catch (err) {
       showToast(err?.message || '주변 식당을 불러오지 못했습니다.')
     }
@@ -456,7 +454,6 @@ export default function App() {
       nearby.clearCache()
       const result = await nearby.loadNearby({ force: true })
       showToast(`주변 식당 ${result.places.length}곳을 새로 찾았습니다.`)
-      await refreshWeather()
     } catch (err) {
       showToast(err?.message || '주변 식당을 불러오지 못했습니다.')
     }
@@ -520,7 +517,10 @@ export default function App() {
   }, [isNearby])
 
   const busy =
-    spinning || menuSaving || exclusionSaving || nearby.loading || nearby.locating
+    spinning ||
+    (isNearby
+      ? nearby.loading || nearby.locating
+      : menuSaving || exclusionSaving)
   const locationLabel = isRoom
     ? lunchRoom.room?.locationLabel || '점심방'
     : isNearby
@@ -586,7 +586,7 @@ export default function App() {
               <Button
                 type="button"
                 className="btn ghost"
-                disabled={busy}
+                disabled={spinning || nearby.loading || nearby.locating}
                 onClick={handleNearbyLocate}
                 aria-label="현재 위치 다시 확인"
               >
@@ -606,7 +606,7 @@ export default function App() {
               type="button"
               aria-pressed={!isNearby && !isRoom}
               className={!isNearby && !isRoom ? 'is-active' : ''}
-              disabled={busy}
+              disabled={spinning}
               onClick={() => setMode('team')}
             >
               양재역 주변
@@ -615,7 +615,7 @@ export default function App() {
               type="button"
               aria-pressed={isRoom}
               className={isRoom ? 'is-active' : ''}
-              disabled={busy}
+              disabled={spinning}
               onClick={() => setMode('room')}
             >
               같이 고르기
@@ -624,7 +624,7 @@ export default function App() {
               type="button"
               aria-pressed={isNearby}
               className={isNearby ? 'is-active' : ''}
-              disabled={busy}
+              disabled={spinning}
               onClick={() => setMode('nearby')}
             >
               내 주변

@@ -69,24 +69,44 @@ export function useMenus() {
       }
 
       const activeTeam = await fetchActiveTeamBySlug(TEAM_SLUG)
-      const [types, activeMenus, exclusions, links] = await Promise.all([
-        fetchActiveMenuTypes(activeTeam.id),
-        fetchActiveMenus(activeTeam.id),
+      const typesPromise = fetchActiveMenuTypes(activeTeam.id)
+      const menusPromise = fetchActiveMenus(activeTeam.id)
+      const secondaryPromise = Promise.allSettled([
         fetchExclusions(activeTeam.id, getKoreaDateString()),
         fetchPlaceLinks(activeTeam.id),
+      ])
+      const [types, activeMenus] = await Promise.all([
+        typesPromise,
+        menusPromise,
       ])
 
       setTeam(activeTeam)
       setMenuTypes(types)
-      setMenus(attachLinks(activeMenus, links))
-      setExcludedIds(new Set(exclusions.map((row) => row.menu_id)))
+      setMenus(activeMenus)
 
-      // Background: cache missing photos / refresh weekly (does not block UI)
-      refreshStalePlaceLinks(links, {
-        onUpdated: (nextLink) => {
-          setMenus((prev) => replaceLinkInMenus(prev, nextLink))
-        },
-      }).catch((err) => console.error(err))
+      // Exclusions and rich place metadata are useful but must not block the
+      // first interactive screen.
+      void secondaryPromise.then(([exclusionsResult, linksResult]) => {
+        if (exclusionsResult.status === 'fulfilled') {
+          setExcludedIds(
+            new Set(exclusionsResult.value.map((row) => row.menu_id)),
+          )
+        } else {
+          console.error(exclusionsResult.reason)
+        }
+
+        if (linksResult.status === 'fulfilled') {
+          const links = linksResult.value
+          setMenus((current) => attachLinks(current, links))
+          refreshStalePlaceLinks(links, {
+            onUpdated: (nextLink) => {
+              setMenus((prev) => replaceLinkInMenus(prev, nextLink))
+            },
+          }).catch((err) => console.error(err))
+        } else {
+          console.error(linksResult.reason)
+        }
+      })
     } catch (err) {
       console.error(err)
       setError(err?.message || '데이터를 불러오지 못했습니다.')

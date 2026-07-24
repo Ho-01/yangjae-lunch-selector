@@ -145,7 +145,7 @@ export function useLunchRoom(teamId) {
       setSession(next)
       setSessionValidated(true)
       setRoom(await fetchRoom(next.code))
-      await refreshRecentRooms()
+      refreshRecentRooms().catch((err) => console.error(err))
       return next
     })
 
@@ -156,7 +156,7 @@ export function useLunchRoom(teamId) {
       setSessionValidated(true)
       setRoom(await fetchRoom(next.code))
       notifyRoomChanged('member_joined')
-      await refreshRecentRooms()
+      refreshRecentRooms().catch((err) => console.error(err))
       return next
     })
 
@@ -166,7 +166,7 @@ export function useLunchRoom(teamId) {
       setSession(next)
       setSessionValidated(true)
       setRoom(await fetchRoom(next.code))
-      await refreshRecentRooms()
+      refreshRecentRooms().catch((err) => console.error(err))
       return next
     })
 

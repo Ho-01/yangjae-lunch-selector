@@ -12,6 +12,10 @@ async function expectNoHorizontalOverflow(page) {
   ).toBeLessThanOrEqual(dimensions.clientWidth + 1)
 }
 
+async function openTeamMode(page) {
+  await page.getByRole('button', { name: '양재역 주변' }).click()
+}
+
 test.beforeEach(async ({ page }) => {
   await page.route('https://api.bigdatacloud.net/**', async (route) => {
     await route.fulfill({
@@ -76,13 +80,13 @@ test('switches between all decision modes', async ({ page }) => {
   const roomMode = page.getByRole('button', { name: '같이 고르기' })
   const nearbyMode = page.getByRole('button', { name: '내 주변', exact: true })
 
-  await expect(teamMode).toHaveAttribute('aria-pressed', 'true')
-
-  await roomMode.click()
   await expect(roomMode).toHaveAttribute('aria-pressed', 'true')
   await expect(
     page.getByRole('heading', { name: '어디를 기준으로 고를까요?' }),
   ).toBeVisible()
+
+  await teamMode.click()
+  await expect(teamMode).toHaveAttribute('aria-pressed', 'true')
 
   await nearbyMode.click()
   await expect(nearbyMode).toHaveAttribute('aria-pressed', 'true')
@@ -93,6 +97,7 @@ test('switches between all decision modes', async ({ page }) => {
 })
 
 test('opens and closes the menu manager with the keyboard', async ({ page }) => {
+  await openTeamMode(page)
   const manageButton = page.getByRole('button', { name: '메뉴 관리' })
   await manageButton.focus()
   await page.keyboard.press('Enter')
@@ -122,6 +127,7 @@ test('filters nearby places by Google food category', async ({ page }) => {
 })
 
 test('keeps the primary page within the viewport', async ({ page }) => {
+  await openTeamMode(page)
   await expectNoHorizontalOverflow(page)
 
   const spinButton = page.getByRole('button', { name: /돌림판 돌리기|다시 돌리기/ })
@@ -133,6 +139,7 @@ test('keeps the primary page within the viewport', async ({ page }) => {
 
 test('keeps secondary panels collapsible on mobile', async ({ page }, testInfo) => {
   test.skip((testInfo.project.use.viewport?.width || 1000) > 640)
+  await openTeamMode(page)
 
   const toggle = page
     .getByRole('button')
@@ -144,6 +151,7 @@ test('keeps secondary panels collapsible on mobile', async ({ page }, testInfo) 
 })
 
 test('persists the recent-result weighting preference', async ({ page }, testInfo) => {
+  await openTeamMode(page)
   if ((testInfo.project.use.viewport?.width || 1000) <= 640) {
     await page
       .getByRole('button')
@@ -157,6 +165,7 @@ test('persists the recent-result weighting preference', async ({ page }, testInf
   await page.getByText('최근 메뉴 덜 나오게', { exact: true }).click()
   await expect(preference).toBeChecked()
   await page.reload()
+  await openTeamMode(page)
   if ((testInfo.project.use.viewport?.width || 1000) <= 640) {
     await page
       .getByRole('button')
@@ -168,6 +177,7 @@ test('persists the recent-result weighting preference', async ({ page }, testInf
 
 test('downloads an image card when file sharing is unavailable', async ({ page }, testInfo) => {
   test.skip((testInfo.project.use.viewport?.width || 0) <= 640)
+  await openTeamMode(page)
 
   await page.getByRole('button', { name: '돌림판 돌리기' }).click()
   const shareButton = page.getByRole('button', { name: '결과 공유하기' })
