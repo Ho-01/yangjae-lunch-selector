@@ -21,10 +21,14 @@ export default function NearbyControls({
   fetchedAt,
   filteredCount,
   rawCount,
+  selectedCategoryIds,
+  categoryCounts,
   error,
   onLocate,
   onLoad,
   onForceRefresh,
+  onToggleCategory,
+  onClearCategories,
 }) {
   const cacheMinutes = Math.round(NEARBY_CACHE_TTL_MS / 60000)
   const fetchedLabel = fetchedAt
@@ -113,6 +117,40 @@ export default function NearbyControls({
           </NativeSelect>
         </label>
       </div>
+
+      {categoryCounts.length ? (
+        <fieldset className="nearby-categories">
+          <legend>음식 종류</legend>
+          <p className="desc">여러 종류를 함께 고를 수 있어요.</p>
+          <div className="nearby-category-list">
+            {categoryCounts.map((category) => {
+              const selected = selectedCategoryIds.includes(category.id)
+              return (
+                <Button
+                  key={category.id}
+                  type="button"
+                  variant={selected ? 'default' : 'outline'}
+                  aria-pressed={selected}
+                  disabled={disabled || loading || locating}
+                  onClick={() => onToggleCategory(category.id)}
+                >
+                  {category.label} {category.count}
+                </Button>
+              )
+            })}
+            {selectedCategoryIds.length ? (
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={disabled || loading || locating}
+                onClick={onClearCategories}
+              >
+                전체 보기
+              </Button>
+            ) : null}
+          </div>
+        </fieldset>
+      ) : null}
 
       <div className="nearby-actions">
         <Button

@@ -1,4 +1,4 @@
-import { WEIGHT_MAX, WEIGHT_MIN } from '../constants/app'
+import { WEIGHT_MAX, WEIGHT_MIN } from '../constants/app.js'
 
 const RAIN_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99]
 const SNOW_CODES = [71, 73, 75, 77, 85, 86]
@@ -42,12 +42,11 @@ function configValue(config, key, fallback = 1) {
 }
 
 /**
- * Pure weight calculation using t_menu_type.weather_weight_config
- * @param {{ weather_weight_config?: object }} menuType
+ * @param {{ weight_config?: object } | null} weatherProfile
  * @param {object | null} weather
  */
-export function calculateMenuWeight(menuType, weather) {
-  const config = menuType?.weather_weight_config ?? {}
+export function calculateMenuWeight(weatherProfile, weather) {
+  const config = weatherProfile?.weight_config ?? {}
   let weight = configValue(config, 'base', 1)
 
   if (!weather) {
@@ -67,7 +66,7 @@ export function calculateMenuWeight(menuType, weather) {
 }
 
 /**
- * @param {Array<{ id: string, name: string, menu_type: object }>} menus
+ * @param {Array<{ id: string, name: string, weather_profile?: object }>} menus
  * @param {Set<string>|string[]} excludedIds
  * @param {object | null} weather
  */
@@ -84,7 +83,13 @@ export function getWeightedMenus(
     .map((menu) => ({
       ...menu,
       weight:
-        calculateMenuWeight(menu.menu_type, weather) *
+        calculateMenuWeight(
+          menu.weather_profile ?? {
+            code: menu.menu_type?.code,
+            weight_config: menu.menu_type?.weather_weight_config,
+          },
+          weather,
+        ) *
         (reduceRecent && recent.has(menu.id) ? 0.55 : 1),
       recentPenalty: reduceRecent && recent.has(menu.id),
     }))
@@ -100,7 +105,7 @@ export function weatherReason(menu, weather) {
   }
 
   const flags = getWeatherFlags(weather)
-  const code = menu.menu_type?.code
+  const code = menu.weather_profile?.code ?? menu.menu_type?.code
 
   if (code === 'hot_soup' && (flags.temp <= 13 || flags.isRain)) {
     return '쌀쌀하거나 비 오는 날에 잘 맞는 뜨끈한 메뉴라 확률이 올라갔어요.'

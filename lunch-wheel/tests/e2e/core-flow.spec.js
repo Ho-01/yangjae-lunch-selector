@@ -13,6 +13,40 @@ async function expectNoHorizontalOverflow(page) {
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.route('https://api.bigdatacloud.net/**', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        locality: '서울',
+        principalSubdivision: '서울특별시',
+      }),
+    })
+  })
+  await page.route('**/api/places/nearby', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        places: [
+          {
+            placeId: 'korean-1',
+            placeName: '든든한 국밥',
+            rating: 4.5,
+            ratingCount: 120,
+            primaryType: 'korean_restaurant',
+            types: ['korean_restaurant', 'restaurant', 'food'],
+          },
+          {
+            placeId: 'japanese-1',
+            placeName: '오늘의 라멘',
+            rating: 4.4,
+            ratingCount: 80,
+            primaryType: 'ramen_restaurant',
+            types: ['ramen_restaurant', 'japanese_restaurant', 'restaurant'],
+          },
+        ],
+      }),
+    })
+  })
   await page.route('https://api.open-meteo.com/**', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
@@ -69,6 +103,22 @@ test('opens and closes the menu manager with the keyboard', async ({ page }) => 
 
   await page.keyboard.press('Escape')
   await expect(dialog).not.toBeVisible()
+})
+
+test('filters nearby places by Google food category', async ({ page }) => {
+  await page.getByRole('button', { name: '내 주변', exact: true }).click()
+  await page.getByRole('button', { name: '위치 다시 확인' }).click()
+  await expect(page.locator('.nearby-location-main strong').first()).toHaveText(
+    '서울 · 서울특별시',
+  )
+  await page.getByRole('button', { name: '주변 식당 불러오기' }).click()
+
+  const koreanCategory = page.getByRole('button', { name: '한식 1' })
+  await expect(koreanCategory).toBeVisible()
+  await expect(page.getByRole('button', { name: '일식 1' })).toBeVisible()
+  await koreanCategory.click()
+  await expect(koreanCategory).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByText('찾은 식당 1곳')).toBeVisible()
 })
 
 test('keeps the primary page within the viewport', async ({ page }) => {

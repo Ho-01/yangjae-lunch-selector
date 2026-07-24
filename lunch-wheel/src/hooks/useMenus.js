@@ -264,6 +264,15 @@ export function useMenus() {
                   color: updated.color,
                   weather_weight_config: updated.weather_weight_config,
                 },
+                weather_profile: {
+                  id: updated.id,
+                  code: updated.code,
+                  name: updated.name,
+                  icon_key: updated.icon_key,
+                  color: updated.color,
+                  weight_config: updated.weather_weight_config,
+                  source: 'manual',
+                },
               }
             : menu,
         ),
@@ -280,7 +289,7 @@ export function useMenus() {
       const used = await countActiveMenusForType(id)
       if (used > 0) {
         throw new Error(
-          `이 타입을 쓰는 메뉴가 ${used}개 있습니다. 메뉴 타입을 바꾼 뒤 삭제해주세요.`,
+          `이 성향을 쓰는 메뉴가 ${used}개 있습니다. 메뉴의 날씨 성향을 바꾼 뒤 삭제해주세요.`,
         )
       }
       await deactivateMenuType(id)

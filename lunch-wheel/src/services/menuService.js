@@ -1,6 +1,17 @@
 import { getSupabase } from '../lib/supabase'
 
 function mapMenuRow(row) {
+  const legacyType = row.t_menu_type
+    ? {
+        id: row.t_menu_type.id,
+        code: row.t_menu_type.code,
+        name: row.t_menu_type.name,
+        icon_key: row.t_menu_type.icon_key,
+        color: row.t_menu_type.color,
+        weather_weight_config: row.t_menu_type.weather_weight_config,
+      }
+    : null
+
   return {
     id: row.id,
     team_id: row.team_id,
@@ -8,16 +19,21 @@ function mapMenuRow(row) {
     sort_order: row.sort_order,
     is_active: row.is_active,
     menu_type_id: row.menu_type_id,
-    menu_type: row.t_menu_type
+    // Compatibility during the additive DB rollout. UI management still uses
+    // menu_type while probability logic consumes weather_profile.
+    menu_type: legacyType,
+    weather_profile: legacyType
       ? {
-          id: row.t_menu_type.id,
-          code: row.t_menu_type.code,
-          name: row.t_menu_type.name,
-          icon_key: row.t_menu_type.icon_key,
-          color: row.t_menu_type.color,
-          weather_weight_config: row.t_menu_type.weather_weight_config,
+          id: legacyType.id,
+          code: legacyType.code,
+          name: legacyType.name,
+          icon_key: legacyType.icon_key,
+          color: legacyType.color,
+          weight_config: legacyType.weather_weight_config,
+          source: 'manual',
         }
       : null,
+    food_category: null,
   }
 }
 

@@ -3130,3 +3130,20 @@ footer {
     height: 51px;
   }
 }
+.nearby-categories {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.nearby-categories legend {
+  margin-bottom: 0.25rem;
+  font-weight: 800;
+}
+
+.nearby-category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}

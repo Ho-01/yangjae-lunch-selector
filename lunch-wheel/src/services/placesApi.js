@@ -77,14 +77,19 @@ export function placesToMenus(places) {
       id: `nearby-${place.placeId}`,
       name: place.placeName,
       sort_order: index + 1,
-      place_category: category,
-      menu_type: {
-        id: `nearby-${category.id}`,
+      food_category: category,
+      weather_profile: {
+        id: 'nearby-neutral',
+        code: 'neutral',
+        name: '날씨 영향 없음',
+        source: 'default',
+        weight_config: { base: 1 },
+      },
+      category_display: {
         code: category.id,
         name: category.label,
         icon_key: 'utensils',
         color: '#f97316',
-        weather_weight_config: { base: 1 },
       },
       place_links: [
         {

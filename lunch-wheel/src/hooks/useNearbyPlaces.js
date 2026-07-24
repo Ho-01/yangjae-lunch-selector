@@ -9,6 +9,8 @@ import {
   placesToMenus,
   searchNearbyGooglePlaces,
 } from '../services/placesApi'
+import { PLACE_CATEGORY_DEFINITIONS } from '../constants/placeCategories'
+import { classifyGooglePlace } from '../utils/placeCategories'
 
 const DEFAULT_SETTINGS = {
   radiusMeters: 1000,
@@ -176,6 +178,7 @@ export function useNearbyPlaces() {
   const [locateError, setLocateError] = useState(null)
 
   const [rawPlaces, setRawPlaces] = useState([])
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([])
   const [excludedIds, setExcludedIds] = useState(() => new Set())
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -191,12 +194,42 @@ export function useNearbyPlaces() {
     setSettingsState((prev) => ({ ...prev, ...patch }))
   }, [])
 
-  const filteredPlaces = useMemo(
+  const ratingFilteredPlaces = useMemo(
     () => filterByRating(rawPlaces, settings.minRating),
     [rawPlaces, settings.minRating],
   )
 
+  const categoryCounts = useMemo(() => {
+    const counts = new Map(
+      PLACE_CATEGORY_DEFINITIONS.map((category) => [category.id, 0]),
+    )
+    ratingFilteredPlaces.forEach((place) => {
+      const category = classifyGooglePlace(place)
+      counts.set(category.id, (counts.get(category.id) || 0) + 1)
+    })
+    return PLACE_CATEGORY_DEFINITIONS.map((category) => ({
+      ...category,
+      count: counts.get(category.id) || 0,
+    })).filter((category) => category.count > 0)
+  }, [ratingFilteredPlaces])
+
+  const filteredPlaces = useMemo(() => {
+    if (!selectedCategoryIds.length) return ratingFilteredPlaces
+    const selected = new Set(selectedCategoryIds)
+    return ratingFilteredPlaces.filter((place) =>
+      selected.has(classifyGooglePlace(place).id),
+    )
+  }, [ratingFilteredPlaces, selectedCategoryIds])
+
   const menus = useMemo(() => placesToMenus(filteredPlaces), [filteredPlaces])
+
+  const toggleCategory = useCallback((categoryId) => {
+    setSelectedCategoryIds((current) =>
+      current.includes(categoryId)
+        ? current.filter((id) => id !== categoryId)
+        : [...current, categoryId],
+    )
+  }, [])
 
   const weatherLocation = useMemo(() => {
     if (!coords) return null
@@ -258,6 +291,7 @@ export function useNearbyPlaces() {
             setFromCache(true)
             setFetchedAt(cached.savedAt)
             setExcludedIds(new Set())
+            setSelectedCategoryIds([])
             return { places: cached.places, fromCache: true }
           }
         }
@@ -274,6 +308,7 @@ export function useNearbyPlaces() {
         setFromCache(false)
         setFetchedAt(Date.now())
         setExcludedIds(new Set())
+        setSelectedCategoryIds([])
         setApiCallsThisSession((n) => n + 1)
         return { places, fromCache: false }
       } catch (err) {
@@ -303,6 +338,10 @@ export function useNearbyPlaces() {
     locateError,
     menus,
     rawPlaces,
+    selectedCategoryIds,
+    categoryCounts,
+    toggleCategory,
+    clearCategories: () => setSelectedCategoryIds([]),
     filteredPlaces,
     excludedIds,
     setExcludedIds,

@@ -15,7 +15,7 @@ export const WEIGHT_MAX = 4.2
 export const WEATHER_TIMEOUT_MS = 7000
 
 /** Nearby mode: Places API is only called on explicit refresh */
-export const NEARBY_CACHE_KEY = 'yangjaeNearbyPlacesCacheV1'
+export const NEARBY_CACHE_KEY = 'yangjaeNearbyPlacesCacheV2'
 export const NEARBY_SETTINGS_KEY = 'yangjaeNearbySettingsV1'
 export const NEARBY_CACHE_TTL_MS = 30 * 60 * 1000
 export const NEARBY_RADIUS_OPTIONS = [500, 1000, 1500, 2000, 3000]

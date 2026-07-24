@@ -144,7 +144,7 @@ export default function App() {
       getWeightedMenus(
         menus,
         excludedIds,
-        weatherWeightEnabled ? weather : null,
+        weatherWeightEnabled && !isNearby ? weather : null,
         {
           recentMenuIds: recentResults
             .filter((result) => result.mode === mode)
@@ -158,6 +158,7 @@ export default function App() {
       excludedIds,
       weather,
       weatherWeightEnabled,
+      isNearby,
       recentResults,
       mode,
       reduceRecent,
@@ -249,6 +250,14 @@ export default function App() {
           color: '#f97316',
           weather_weight_config: { base: 1 },
         },
+        weather_profile: {
+          id: 'room-neutral',
+          code: 'neutral',
+          name: '날씨 영향 없음',
+          source: 'default',
+          weight_config: { base: 1 },
+        },
+        food_category: null,
         place_links: [],
       }))
   }, [lunchRoom.room])
@@ -391,30 +400,30 @@ export default function App() {
   async function handleAddMenuType(payload) {
     try {
       await addMenuType(payload)
-      showToast('메뉴 타입을 추가했습니다.')
+      showToast('날씨 성향을 추가했습니다.')
     } catch (err) {
       console.error(err)
-      showToast(err?.message || '메뉴 타입을 추가하지 못했습니다.')
+      showToast(err?.message || '날씨 성향을 추가하지 못했습니다.')
     }
   }
 
   async function handleSaveMenuType(payload) {
     try {
       await saveMenuType(payload)
-      showToast('메뉴 타입을 저장했습니다.')
+      showToast('날씨 성향을 저장했습니다.')
     } catch (err) {
       console.error(err)
-      showToast(err?.message || '메뉴 타입을 저장하지 못했습니다.')
+      showToast(err?.message || '날씨 성향을 저장하지 못했습니다.')
     }
   }
 
   async function handleDeleteMenuType(id) {
     try {
       await removeMenuType(id)
-      showToast('메뉴 타입을 삭제했습니다.')
+      showToast('날씨 성향을 삭제했습니다.')
     } catch (err) {
       console.error(err)
-      showToast(err?.message || '메뉴 타입을 삭제하지 못했습니다.')
+      showToast(err?.message || '날씨 성향을 삭제하지 못했습니다.')
     }
   }
 
@@ -642,9 +651,9 @@ export default function App() {
                 className="btn ghost"
                 disabled={busy}
                 onClick={() => setTypeManageOpen(true)}
-                aria-label="메뉴 타입 관리"
+                aria-label="날씨 성향 관리"
               >
-                타입 관리
+                날씨 성향
               </Button>
               <Button
                 type="button"
@@ -779,7 +788,7 @@ export default function App() {
                 }
               : null
           }
-          ignoreWeather={isRoom}
+          ignoreWeather={isRoom || isNearby}
           weatherWeightEnabled={weatherWeightEnabled}
           recentMenuIds={recentResults
             .filter((result) => result.mode === mode)
@@ -815,24 +824,34 @@ export default function App() {
         <aside className="side">
           <CollapsibleSidePanel
             title="날씨 가중치"
-            summary={weatherWeightEnabled ? '사용 중' : '사용 안 함'}
+            summary={
+              isNearby
+                ? '내 주변에서는 미적용'
+                : weatherWeightEnabled
+                  ? '사용 중'
+                  : '사용 안 함'
+            }
           >
           <section className="card side-card weather-weight-control">
             <div>
               <h2>날씨 가중치</h2>
               <p className="desc">
-                끄면 날씨와 관계없이 모든 활성 메뉴를 같은 확률로 돌립니다.
+                {isNearby
+                  ? '음식 종류와 날씨 성향을 분리해, 내 주변 식당은 현재 같은 기본 확률로 돌립니다.'
+                  : '끄면 날씨와 관계없이 모든 활성 메뉴를 같은 확률로 돌립니다.'}
               </p>
             </div>
             <label className="switch-control">
               <Switch
                 className="app-switch"
                 checked={weatherWeightEnabled}
-                disabled={busy}
+                disabled={busy || isNearby}
                 onCheckedChange={handleWeatherWeightToggle}
                 aria-label="날씨 가중치 사용"
               />
-              <strong>{weatherWeightEnabled ? 'ON' : 'OFF'}</strong>
+              <strong>
+                {isNearby ? '미적용' : weatherWeightEnabled ? 'ON' : 'OFF'}
+              </strong>
             </label>
           </section>
           </CollapsibleSidePanel>
@@ -857,10 +876,14 @@ export default function App() {
               fetchedAt={nearby.fetchedAt}
               filteredCount={nearby.filteredPlaces.length}
               rawCount={nearby.rawPlaces.length}
+              selectedCategoryIds={nearby.selectedCategoryIds}
+              categoryCounts={nearby.categoryCounts}
               error={nearby.error}
               onLocate={handleNearbyLocate}
               onLoad={handleNearbyLoad}
               onForceRefresh={handleNearbyForceRefresh}
+              onToggleCategory={nearby.toggleCategory}
+              onClearCategories={nearby.clearCategories}
             />
             </CollapsibleSidePanel>
           ) : null}
@@ -884,7 +907,7 @@ export default function App() {
           >
           <ProbabilityList
             items={weightedItems}
-            weather={weatherWeightEnabled ? weather : null}
+            weather={weatherWeightEnabled && !isNearby ? weather : null}
             reduceRecent={reduceRecent}
           />
           </CollapsibleSidePanel>

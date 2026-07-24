@@ -123,11 +123,11 @@ export default function MenuTypeManagerDialog({
     const name = draft.name.trim()
     const code = slugifyCode(draft.code || draft.name)
     if (!name) {
-      onToast?.('타입 이름을 입력해주세요.')
+      onToast?.('날씨 성향 이름을 입력해주세요.')
       return
     }
     if (!code) {
-      onToast?.('타입 코드는 영문/숫자/밑줄만 사용할 수 있습니다.')
+      onToast?.('날씨 성향 코드는 영문/숫자/밑줄만 사용할 수 있습니다.')
       return
     }
 
@@ -156,7 +156,7 @@ export default function MenuTypeManagerDialog({
     >
       <div className="modal-head">
         <div>
-          <h2>메뉴 타입 관리</h2>
+          <h2>날씨 성향 관리</h2>
         </div>
         <Button
           type="button"
@@ -176,7 +176,7 @@ export default function MenuTypeManagerDialog({
             disabled={saving}
             onClick={startCreate}
           >
-            타입 추가
+            성향 추가
           </Button>
           <div className="type-list">
             {menuTypes.map((type) => {
@@ -204,7 +204,7 @@ export default function MenuTypeManagerDialog({
 
         <div className="type-edit-panel">
           {!menuTypes.length && !isCreating ? (
-            <StateMessage compact title="메뉴 타입이 없습니다" description="새 타입 추가 버튼으로 첫 타입을 만들어주세요." />
+            <StateMessage compact title="날씨 성향이 없습니다" description="성향 추가 버튼으로 첫 성향을 만들어주세요." />
           ) : (
             <>
               <div className="type-basic-grid">
@@ -345,7 +345,7 @@ export default function MenuTypeManagerDialog({
                     onClick={() => {
                       if (
                         window.confirm(
-                          `'${menuTypes.find((type) => type.id === selectedId)?.name || draft.name}' 메뉴 타입을 삭제할까요?`,
+                          `'${menuTypes.find((type) => type.id === selectedId)?.name || draft.name}' 날씨 성향을 삭제할까요?`,
                         )
                       ) {
                         onDelete(selectedId)

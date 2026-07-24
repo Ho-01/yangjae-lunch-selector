@@ -21,7 +21,8 @@ export default function MenuExclusionList({
     const normalized = query.trim().toLocaleLowerCase('ko')
     if (!normalized) return menus
     return menus.filter((menu) => {
-      const typeName = menu.menu_type?.name || ''
+      const typeName =
+        menu.food_category?.label || menu.menu_type?.name || ''
       return `${menu.name} ${typeName}`
         .toLocaleLowerCase('ko')
         .includes(normalized)
@@ -85,7 +86,9 @@ export default function MenuExclusionList({
                   <span className="ban-name" title={menu.name}>
                     {menu.name}
                   </span>
-                  <TypeChip menuType={menu.menu_type} />
+                  <TypeChip
+                    menuType={menu.category_display || menu.menu_type}
+                  />
                 </label>
                 <PlaceMeta
                   placeLinks={menu.place_links}

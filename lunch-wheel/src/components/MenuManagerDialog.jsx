@@ -97,7 +97,7 @@ export default function MenuManagerDialog({
             }}
           />
           <label className="sr-only" htmlFor="newMenuType">
-            메뉴 타입
+            날씨 성향
           </label>
           <NativeSelect
             id="newMenuType"
