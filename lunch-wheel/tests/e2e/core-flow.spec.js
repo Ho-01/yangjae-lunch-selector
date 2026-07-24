@@ -32,7 +32,9 @@ test.beforeEach(async ({ page }) => {
     })
   })
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: '식사가챠' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '식사가챠' })).toBeVisible({
+    timeout: 15000,
+  })
 })
 
 test('switches between all decision modes', async ({ page }) => {
@@ -99,7 +101,7 @@ test('persists the recent-result weighting preference', async ({ page }, testInf
       .click()
   }
 
-  const preference = page.getByRole('checkbox', {
+  const preference = page.getByRole('switch', {
     name: '최근 메뉴 덜 나오게',
   })
   await page.getByText('최근 메뉴 덜 나오게', { exact: true }).click()

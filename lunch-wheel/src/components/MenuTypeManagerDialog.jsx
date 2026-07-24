@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { NativeSelect } from '@/components/ui/native-select'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   DEFAULT_WEATHER_WEIGHT_CONFIG,
@@ -155,32 +158,32 @@ export default function MenuTypeManagerDialog({
         <div>
           <h2>메뉴 타입 관리</h2>
         </div>
-        <button
+        <Button
           type="button"
           className="close-x"
           aria-label="닫기"
           onClick={onClose}
         >
           <CloseIcon className="ui-icon" aria-hidden />
-        </button>
+        </Button>
       </div>
 
       <div className="modal-body type-modal-body">
         <aside className="type-list-panel">
-          <button
+          <Button
             type="button"
             className="btn primary type-add-btn"
             disabled={saving}
             onClick={startCreate}
           >
             타입 추가
-          </button>
+          </Button>
           <div className="type-list">
             {menuTypes.map((type) => {
               const Icon = TYPE_ICON_MAP[type.icon_key] || TYPE_ICON_MAP.utensils
               const active = !isCreating && type.id === selectedId
               return (
-                <button
+                <Button
                   key={type.id}
                   type="button"
                   className={`type-list-item${active ? ' is-active' : ''}`}
@@ -193,7 +196,7 @@ export default function MenuTypeManagerDialog({
                     <Icon className="ui-icon" aria-hidden />
                   </span>
                   <span>{type.name}</span>
-                </button>
+                </Button>
               )
             })}
           </div>
@@ -207,7 +210,7 @@ export default function MenuTypeManagerDialog({
               <div className="type-basic-grid">
                 <label htmlFor="type-name">
                   이름
-                  <input
+                  <Input
                     id="type-name"
                     type="text"
                     maxLength={40}
@@ -226,7 +229,7 @@ export default function MenuTypeManagerDialog({
                 </label>
                 <label htmlFor="type-code">
                   코드
-                  <input
+                  <Input
                     id="type-code"
                     type="text"
                     maxLength={40}
@@ -241,7 +244,7 @@ export default function MenuTypeManagerDialog({
                 </label>
                 <label htmlFor="type-icon">
                   아이콘
-                  <select
+                  <NativeSelect
                     id="type-icon"
                     value={draft.icon_key}
                     onChange={(event) =>
@@ -256,12 +259,12 @@ export default function MenuTypeManagerDialog({
                         {option.label}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </label>
                 <label htmlFor="type-color">
                   색상
                   <div className="type-color-row">
-                    <input
+                    <Input
                       id="type-color"
                       type="color"
                       value={draft.color || '#6A5B85'}
@@ -274,7 +277,7 @@ export default function MenuTypeManagerDialog({
                     />
                     <div className="type-color-presets">
                       {MENU_TYPE_COLOR_PRESETS.map((hex) => (
-                        <button
+                        <Button
                           key={hex}
                           type="button"
                           className="type-color-swatch"
@@ -310,7 +313,7 @@ export default function MenuTypeManagerDialog({
                   <label key={field.key} htmlFor={`weight-${field.key}`}>
                     <span className="weight-label">{field.label}</span>
                     <span className="weight-hint">{field.hint}</span>
-                    <input
+                    <Input
                       id={`weight-${field.key}`}
                       type="number"
                       step="0.01"
@@ -326,16 +329,16 @@ export default function MenuTypeManagerDialog({
               </div>
 
               <div className="type-edit-actions">
-                <button
+                <Button
                   type="button"
                   className="btn primary"
                   disabled={saving}
                   onClick={handleSave}
                 >
                   {isCreating ? '추가' : '저장'}
-                </button>
+                </Button>
                 {!isCreating && selectedId ? (
-                  <button
+                  <Button
                     type="button"
                     className="icon-btn delete"
                     disabled={saving}
@@ -350,7 +353,7 @@ export default function MenuTypeManagerDialog({
                     }}
                   >
                     삭제
-                  </button>
+                  </Button>
                 ) : null}
               </div>
             </>

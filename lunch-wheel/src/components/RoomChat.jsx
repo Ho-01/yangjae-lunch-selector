@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useEffect, useRef, useState } from 'react'
 
 function formatTime(value) {
@@ -65,7 +67,7 @@ export default function RoomChat({
         <label className="sr-only" htmlFor="room-chat-input">
           채팅 메시지
         </label>
-        <input
+        <Input
           id="room-chat-input"
           value={body}
           maxLength={300}
@@ -73,13 +75,13 @@ export default function RoomChat({
           placeholder="메시지를 입력하세요"
           onChange={(event) => setBody(event.target.value)}
         />
-        <button
+        <Button
           type="submit"
           className="btn primary"
           disabled={disabled || !body.trim()}
         >
           보내기
-        </button>
+        </Button>
       </form>
     </section>
   )

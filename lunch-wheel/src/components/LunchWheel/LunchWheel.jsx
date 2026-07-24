@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import WheelCanvas from './WheelCanvas'
 import WeatherPanel from '../WeatherPanel'
@@ -382,7 +383,7 @@ export default function LunchWheel({
       </div>
 
       <div className="spin-area">
-        <button
+        <Button
           type="button"
           className="spin-btn"
           disabled={spinning || disabledExtras}
@@ -390,8 +391,8 @@ export default function LunchWheel({
           aria-label={disabledExtras && disabledLabel ? disabledLabel : spinLabel}
         >
           {disabledExtras && disabledLabel ? disabledLabel : spinLabel}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           className="mini-btn"
           title={onRequestSpin ? '점심방에서는 모두 같은 순서를 사용해요' : '돌림판 메뉴 순서 섞기'}
@@ -401,7 +402,7 @@ export default function LunchWheel({
         >
           <ShuffleIcon className="ui-icon" aria-hidden />
           순서 섞기
-        </button>
+        </Button>
       </div>
 
       <ResultCard

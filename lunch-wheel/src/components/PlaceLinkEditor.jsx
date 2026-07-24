@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 import { getPrimaryGoogleLink, searchGooglePlaces } from '../services/placesApi'
 import { getPlacePhotoSrcs } from '../services/placePhotoCache'
@@ -90,7 +92,7 @@ export default function PlaceLinkEditor({
                 지도
               </a>
             ) : null}
-            <button
+            <Button
               type="button"
               className="icon-btn"
               disabled={saving}
@@ -100,15 +102,15 @@ export default function PlaceLinkEditor({
               }}
             >
               변경
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               className="icon-btn delete"
               disabled={saving}
               onClick={handleDisconnect}
             >
               해제
-            </button>
+            </Button>
           </div>
           {photos.length > 0 ? (
             <div className="place-photo-row">
@@ -121,7 +123,7 @@ export default function PlaceLinkEditor({
       ) : (
         <div className="place-link-empty">
           <span>Google 장소 미연결</span>
-          <button
+          <Button
             type="button"
             className="icon-btn save"
             disabled={saving}
@@ -131,7 +133,7 @@ export default function PlaceLinkEditor({
             }}
           >
             장소 연결
-          </button>
+          </Button>
         </div>
       )}
 
@@ -141,7 +143,7 @@ export default function PlaceLinkEditor({
             <label className="sr-only" htmlFor={`place-search-${menu.id}`}>
               Google 장소 검색
             </label>
-            <input
+            <Input
               id={`place-search-${menu.id}`}
               type="text"
               value={query}
@@ -154,18 +156,18 @@ export default function PlaceLinkEditor({
               }}
               placeholder="장소 이름 검색"
             />
-            <button
+            <Button
               type="button"
               className="btn primary"
               disabled={searching || saving}
               onClick={handleSearch}
             >
               {searching ? '검색 중…' : '검색'}
-            </button>
+            </Button>
           </div>
           <div className="place-search-results">
             {results.map((place) => (
-              <button
+              <Button
                 key={place.placeId}
                 type="button"
                 className="place-result"
@@ -181,7 +183,7 @@ export default function PlaceLinkEditor({
                     ? `${Number(place.rating).toFixed(1)}★`
                     : '—'}
                 </em>
-              </button>
+              </Button>
             ))}
           </div>
         </div>

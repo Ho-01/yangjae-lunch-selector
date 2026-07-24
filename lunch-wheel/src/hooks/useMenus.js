@@ -65,7 +65,7 @@ export function useMenus() {
 
     try {
       if (!backend.isConfigured()) {
-        throw new Error('Supabase 환경변수가 설정되지 않았습니다.')
+        throw new Error('메뉴를 불러올 준비가 되지 않았습니다. 잠시 후 다시 시도해주세요.')
       }
 
       const activeTeam = await fetchActiveTeamBySlug(TEAM_SLUG)

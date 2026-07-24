@@ -18,6 +18,7 @@ Vite 앱은 `lunch-wheel/`, Vercel 서버 함수는 `lunch-wheel/api/`, Supabase
 
 - `src/backend/`: 백엔드 포트, 구현체 선택과 공급자별 실시간 어댑터
 - `src/components/`: 화면과 사용자 상호작용
+- `src/components/ui/`: shadcn/ui에서 생성한 공통 UI 프리미티브
 - `src/hooks/`: 메뉴·날씨·주변 식당·점심방 상태 조정
 - `src/services/`: Supabase와 HTTP 접근
 - `src/utils/`: 룰렛·가중치·날짜·공유·점심방 순수 로직
@@ -27,6 +28,17 @@ Vite 앱은 `lunch-wheel/`, Vercel 서버 함수는 `lunch-wheel/api/`, Supabase
 조립된 포트에만 의존한다. 현재 `services/`와 `backend/adapters/supabase/`가
 Supabase 구현체이며 향후 같은 계약의 Spring 어댑터로 교체한다. 데이터 접근은
 어댑터, 여러 컴포넌트에 걸친 상태와 부수효과는 훅, 결정적인 계산은 유틸리티에 둔다.
+
+## UI 컴포넌트 계층
+
+버튼, 입력, 선택 상자, 체크박스와 스위치는 shadcn/ui CLI로 생성한
+`src/components/ui/` 컴포넌트를 사용한다. 이 계층은 외부 패키지의 블랙박스가 아니라
+저장소가 소유하는 소스이며, `components.json`이 생성 기준과 경로를 기록한다.
+
+제품 화면은 공통 프리미티브를 가져와 조합한다. 식사가챠 고유의 녹색 기본 동작,
+파란색 보조 동작, 최소 조작 크기와 포커스 표현은 CSS 토큰과 공통 변형으로 맞춘다.
+새 기본 컨트롤을 화면 안에서 직접 구현하지 않는다. 제품 고유 UI가 필요하면 먼저
+shadcn/ui 프리미티브의 조합으로 만들고, 여러 화면에서 반복될 때 공통 컴포넌트로 올린다.
 
 백엔드 전환 규칙과 데이터 이관 절차는 `docs/SPRING_MIGRATION.md`, 결정 배경은
 `docs/decisions/0004-backend-ports-and-adapters.md`에 기록한다.

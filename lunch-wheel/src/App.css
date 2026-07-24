@@ -111,7 +111,7 @@ body {
   .side-card { padding: 14px; }
   .ban-actions button, .icon-btn { min-height: 44px; }
   .ban-item { min-height: 44px; }
-  .ban-item input { width: 20px; height: 20px; }
+  .ban-item [data-slot='checkbox'] { width: 20px; height: 20px; }
 
   dialog {
     width: calc(100% - 16px);
@@ -1795,14 +1795,7 @@ canvas {
   cursor: pointer;
 }
 
-.switch-control input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.switch-control span {
-  position: relative;
+.switch-control .app-switch {
   width: 42px;
   height: 24px;
   border: 1px solid var(--line);
@@ -1811,35 +1804,31 @@ canvas {
   transition: background 160ms ease, border-color 160ms ease;
 }
 
-.switch-control span::after {
-  position: absolute;
-  top: 3px;
-  left: 3px;
+.switch-control .app-switch [data-slot='switch-thumb'] {
   width: 16px;
   height: 16px;
-  border-radius: 50%;
+  border-radius: 999px;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
-  content: '';
   transition: transform 160ms ease;
 }
 
-.switch-control input:checked + span {
+.switch-control .app-switch[data-state='checked'] {
   border-color: var(--primary);
   background: var(--primary);
 }
 
-.switch-control input:checked + span::after {
+.switch-control .app-switch[data-state='checked'] [data-slot='switch-thumb'] {
   transform: translateX(18px);
 }
 
-.switch-control input:focus-visible + span {
+.switch-control .app-switch:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.switch-control input:disabled + span,
-.switch-control input:disabled ~ strong {
+.switch-control .app-switch:disabled,
+.switch-control:has(.app-switch:disabled) strong {
   cursor: not-allowed;
   opacity: 0.55;
 }
@@ -2409,10 +2398,15 @@ canvas {
   min-height: 34px;
 }
 
-.ban-item input {
+.ban-item [data-slot='checkbox'] {
   width: 17px;
   height: 17px;
-  accent-color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+.ban-item [data-slot='checkbox'][data-state='checked'] {
+  background: var(--accent-red);
+  color: #fff;
 }
 
 .ban-name {

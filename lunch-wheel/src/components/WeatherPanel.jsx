@@ -19,7 +19,7 @@ export default function WeatherPanel({
     Icon = getWeatherIcon('alert')
     iconClass = 'ui-icon is-alert'
     title = '날씨 연결 실패 · 기본 확률 사용'
-    meta = '네트워크 또는 브라우저 보안 설정을 확인해주세요.'
+    meta = '인터넷 연결을 확인한 뒤 다시 시도해주세요.'
     timeLabel = '기본 모드'
   } else if (!loading && weather) {
     const desc = getWeatherDescription(weather.code)

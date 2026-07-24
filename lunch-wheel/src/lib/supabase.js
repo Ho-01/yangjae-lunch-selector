@@ -23,7 +23,7 @@ export function isSupabaseConfigured() {
 
 export function createClient() {
   if (!isSupabaseConfigured()) {
-    throw new Error('Supabase 환경변수가 설정되지 않았습니다.')
+    throw new Error('서비스 연결을 준비하지 못했습니다. 잠시 후 다시 시도해주세요.')
   }
   const auditClientId = getAuditClientId()
 

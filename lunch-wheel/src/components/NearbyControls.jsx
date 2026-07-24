@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { NativeSelect } from '@/components/ui/native-select'
 import {
   NEARBY_CACHE_TTL_MS,
   NEARBY_MIN_RATING_OPTIONS,
@@ -19,7 +21,6 @@ export default function NearbyControls({
   fetchedAt,
   filteredCount,
   rawCount,
-  apiCallsThisSession,
   error,
   onLocate,
   onLoad,
@@ -43,8 +44,7 @@ export default function NearbyControls({
     <section className="card side-card nearby-card">
       <h2>내 주변 설정</h2>
       <p className="desc">
-        위치 확인과 식당 검색은 분리되어 있습니다. Places 호출은 &quot;주변 식당
-        불러오기&quot;를 누를 때만 나갑니다.
+        현재 위치를 확인한 뒤 원하는 거리와 별점을 골라 식당을 찾아보세요.
       </p>
 
       <div className="nearby-location-box">
@@ -53,33 +53,33 @@ export default function NearbyControls({
           {coordsText ? <span>{coordsText}</span> : null}
           {locatedLabel ? <span>확인 {locatedLabel}</span> : null}
         </div>
-        <button
+        <Button
           type="button"
           className="icon-btn save"
           disabled={disabled || locating || loading}
           onClick={onLocate}
         >
           {locating ? '확인 중…' : '위치 다시 확인'}
-        </button>
+        </Button>
       </div>
       {locateError ? (
         <div className="inline-error" role="alert">
           <span>{locateError}</span>
-          <button
+          <Button
             type="button"
             className="btn ghost"
             disabled={disabled || locating || loading}
             onClick={onLocate}
           >
             다시 시도
-          </button>
+          </Button>
         </div>
       ) : null}
 
       <div className="nearby-fields">
         <label htmlFor="nearby-radius">
           반경
-          <select
+          <NativeSelect
             id="nearby-radius"
             value={settings.radiusMeters}
             disabled={disabled || loading || locating}
@@ -92,12 +92,12 @@ export default function NearbyControls({
                 {meters}m
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
 
         <label htmlFor="nearby-rating">
           최소 별점
-          <select
+          <NativeSelect
             id="nearby-rating"
             value={settings.minRating}
             disabled={disabled || loading || locating}
@@ -110,28 +110,28 @@ export default function NearbyControls({
                 {rating === 0 ? '제한 없음' : `${rating}점 이상`}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
       </div>
 
       <div className="nearby-actions">
-        <button
+        <Button
           type="button"
           className="btn primary"
           disabled={disabled || loading || locating || !coords}
           onClick={onLoad}
         >
           {loading ? '불러오는 중…' : '주변 식당 불러오기'}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           className="btn ghost"
           disabled={disabled || loading || locating || !coords}
           onClick={onForceRefresh}
-          title="캐시를 무시하고 Places API를 다시 호출합니다"
+          title="저장된 목록 대신 주변 식당을 다시 찾아봅니다"
         >
-          강제 새로고침
-        </button>
+          목록 새로 받기
+        </Button>
       </div>
       {!coords && !locating ? (
         <p className="control-reason">
@@ -140,34 +140,31 @@ export default function NearbyControls({
       ) : null}
 
       <p className="nearby-hint">
-        위치가 안 되면: 사이트 위치 권한 허용, Windows 위치 서비스 ON,
-        HTTPS/localhost 접속을 확인하세요.
+        위치를 찾지 못하면 이 사이트의 위치 권한과 기기의 위치 설정을 켠 뒤 다시
+        시도해주세요.
       </p>
 
       <div className="nearby-status">
         {error ? (
           <div className="inline-error" role="alert">
             <span>{error}</span>
-            <button
+            <Button
               type="button"
               className="btn ghost"
               disabled={disabled || loading || locating || !coords}
               onClick={onLoad}
             >
               다시 시도
-            </button>
+            </Button>
           </div>
         ) : null}
         <p>
-          목록 {filteredCount}곳
-          {rawCount !== filteredCount ? ` (필터 전 ${rawCount})` : ''}
-          {fromCache ? ' · 캐시 사용 중' : fetchedAt ? ' · API 방금 호출' : ''}
+          찾은 식당 {filteredCount}곳
+          {rawCount !== filteredCount ? ` · 전체 ${rawCount}곳 중 조건에 맞는 결과` : ''}
+          {fromCache ? ' · 저장된 목록' : fetchedAt ? ' · 방금 업데이트' : ''}
         </p>
-        {fetchedLabel ? <p>식당 목록 갱신 {fetchedLabel}</p> : null}
-        <p>
-          이번 세션 Places 호출 {apiCallsThisSession}회 · 캐시 유효 {cacheMinutes}
-          분
-        </p>
+        {fetchedLabel ? <p>마지막으로 찾은 시간 {fetchedLabel}</p> : null}
+        <p>이 목록은 {cacheMinutes}분 동안 빠르게 다시 볼 수 있어요.</p>
       </div>
     </section>
   )

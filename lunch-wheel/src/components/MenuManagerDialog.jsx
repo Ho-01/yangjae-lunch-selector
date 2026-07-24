@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { NativeSelect } from '@/components/ui/native-select'
 import { useEffect, useRef, useState } from 'react'
 import { UI_ICONS } from '../constants/icons'
 import PlaceLinkEditor from './PlaceLinkEditor'
@@ -65,21 +68,21 @@ export default function MenuManagerDialog({
         <div>
           <h2>메뉴 관리</h2>
         </div>
-        <button
+        <Button
           type="button"
           className="close-x"
           aria-label="닫기"
           onClick={onClose}
         >
           <CloseIcon className="ui-icon" aria-hidden />
-        </button>
+        </Button>
       </div>
       <div className="modal-body">
         <div className="add-row">
           <label className="sr-only" htmlFor="newMenuName">
             추가할 메뉴 이름
           </label>
-          <input
+          <Input
             id="newMenuName"
             type="text"
             maxLength={40}
@@ -96,7 +99,7 @@ export default function MenuManagerDialog({
           <label className="sr-only" htmlFor="newMenuType">
             메뉴 타입
           </label>
-          <select
+          <NativeSelect
             id="newMenuType"
             value={newTypeId}
             onChange={(event) => setNewTypeId(event.target.value)}
@@ -106,15 +109,15 @@ export default function MenuManagerDialog({
                 {type.name}
               </option>
             ))}
-          </select>
-          <button
+          </NativeSelect>
+          <Button
             type="button"
             className="btn primary"
             disabled={saving || !menuTypes.length}
             onClick={handleAdd}
           >
             메뉴 추가
-          </button>
+          </Button>
         </div>
 
         <div className="menu-table">
@@ -132,7 +135,7 @@ export default function MenuManagerDialog({
                     <label className="sr-only" htmlFor={`menu-name-${menu.id}`}>
                       메뉴 이름
                     </label>
-                    <input
+                    <Input
                       id={`menu-name-${menu.id}`}
                       type="text"
                       maxLength={40}
@@ -147,7 +150,7 @@ export default function MenuManagerDialog({
                     <label className="sr-only" htmlFor={`menu-type-${menu.id}`}>
                       메뉴 성격
                     </label>
-                    <select
+                    <NativeSelect
                       id={`menu-type-${menu.id}`}
                       value={draft.menuTypeId}
                       onChange={(event) =>
@@ -165,8 +168,8 @@ export default function MenuManagerDialog({
                           {type.name}
                         </option>
                       ))}
-                    </select>
-                    <button
+                    </NativeSelect>
+                    <Button
                       type="button"
                       className="icon-btn save"
                       disabled={saving}
@@ -179,8 +182,8 @@ export default function MenuManagerDialog({
                       }
                     >
                       저장
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       className="icon-btn delete"
                       disabled={saving}
@@ -191,7 +194,7 @@ export default function MenuManagerDialog({
                       }}
                     >
                       삭제
-                    </button>
+                    </Button>
                   </div>
                   <PlaceLinkEditor
                     menu={menu}

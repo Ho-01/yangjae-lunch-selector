@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import StateMessage from './StateMessage'
 
 function modeLabel(mode) {
@@ -18,16 +20,16 @@ export default function RecentResultsPanel({
       <div className="recent-results-head">
         <div>
           <h2>최근 결과</h2>
-          <p className="desc">최근 10개 결과는 이 브라우저에만 저장됩니다.</p>
+          <p className="desc">최근 10개 결과는 이 기기에만 저장됩니다.</p>
         </div>
         <label className="switch-control recent-switch">
-          <input
-            type="checkbox"
+          <Switch
+            className="app-switch"
             checked={reduceRecent}
             disabled={disabled}
-            onChange={(event) => onToggleReduce(event.target.checked)}
+            onCheckedChange={onToggleReduce}
+            aria-label="최근 메뉴 덜 나오게"
           />
-          <span aria-hidden />
           <strong>최근 메뉴 덜 나오게</strong>
         </label>
       </div>
@@ -57,12 +59,11 @@ export default function RecentResultsPanel({
               </li>
             ))}
           </ol>
-          <button type="button" className="btn ghost recent-clear" onClick={onClear}>
+          <Button type="button" className="btn ghost recent-clear" onClick={onClear}>
             기록 전체 삭제
-          </button>
+          </Button>
         </>
       )}
     </section>
   )
 }
-

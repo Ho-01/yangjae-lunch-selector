@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 const STATUS_LABELS = {
   OPEN: '후보 고르는 중',
   VOTING_CLOSED: '최종 후보 결정',
@@ -38,7 +39,7 @@ export default function RecentRooms({
     <section className="recent-rooms card" aria-busy={loading}>
       <div className="recent-rooms-head">
         <div>
-          <span>이 브라우저에 저장됨</span>
+          <span>이 기기에 저장됨</span>
           <h2>최근 참여한 방</h2>
         </div>
         <small>최대 10개 · 다른 기기와 동기화되지 않아요.</small>
@@ -76,15 +77,15 @@ export default function RecentRooms({
                 ) : null}
               </div>
               <div className="recent-room-actions">
-                <button
+                <Button
                   type="button"
                   className="btn primary"
                   disabled={disabled || !room.available}
                   onClick={() => onResume(room)}
                 >
                   다시 들어가기
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   className="btn ghost"
                   disabled={disabled}
@@ -92,7 +93,7 @@ export default function RecentRooms({
                   aria-label={`${room.code} 방을 최근 목록에서 삭제`}
                 >
                   목록에서 삭제
-                </button>
+                </Button>
               </div>
             </article>
           ))}

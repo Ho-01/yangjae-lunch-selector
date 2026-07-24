@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useEffect, useMemo, useState } from 'react'
 import { searchGooglePlaces } from '../services/placesApi'
 import {
@@ -203,12 +205,12 @@ export default function LunchRoomPanel({
           <strong className="room-code">{room.code}</strong>
         </div>
         <div className="room-head-actions">
-          <button type="button" className="btn ghost" onClick={shareRoom}>
+          <Button type="button" className="btn ghost" onClick={shareRoom}>
             코드 공유
-          </button>
-          <button type="button" className="btn ghost" onClick={onLeave}>
+          </Button>
+          <Button type="button" className="btn ghost" onClick={onLeave}>
             나가기
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -225,7 +227,7 @@ export default function LunchRoomPanel({
             {member.id === session.memberId ? <small>나</small> : null}
             {member.isReady ? <small>준비</small> : null}
             {session.isHost && member.id !== session.memberId ? (
-              <button
+              <Button
                 type="button"
                 className="room-transfer-host"
                 disabled={loading}
@@ -240,7 +242,7 @@ export default function LunchRoomPanel({
                 }}
               >
                 방장 넘기기
-              </button>
+              </Button>
             ) : null}
           </span>
         ))}
@@ -248,7 +250,7 @@ export default function LunchRoomPanel({
       <div className="room-profile">
         {renaming ? (
           <div className="room-rename-form">
-            <input
+            <Input
               value={nicknameDraft}
               maxLength={20}
               autoFocus
@@ -259,24 +261,24 @@ export default function LunchRoomPanel({
                 if (event.key === 'Escape') setRenaming(false)
               }}
             />
-            <button
+            <Button
               type="button"
               className="btn primary"
               disabled={loading}
               onClick={saveNickname}
             >
               저장
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               className="btn ghost"
               onClick={() => setRenaming(false)}
             >
               취소
-            </button>
+            </Button>
           </div>
         ) : (
-          <button
+          <Button
             type="button"
             className="room-rename-open"
             onClick={() => {
@@ -286,7 +288,7 @@ export default function LunchRoomPanel({
           >
             <PencilIcon className="ui-icon" aria-hidden />
             내 닉네임 변경
-          </button>
+          </Button>
         )}
       </div>
 
@@ -319,7 +321,7 @@ export default function LunchRoomPanel({
               role="tablist"
               aria-label="후보 추가 방법"
             >
-              <button
+              <Button
                 type="button"
                 role="tab"
                 aria-selected={candidateSource === 'search'}
@@ -327,8 +329,8 @@ export default function LunchRoomPanel({
                 onClick={() => setCandidateSource('search')}
               >
                 식당 검색
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 role="tab"
                 aria-selected={candidateSource === 'manual'}
@@ -336,13 +338,13 @@ export default function LunchRoomPanel({
                 onClick={() => setCandidateSource('manual')}
               >
                 이름 직접 추가
-              </button>
+              </Button>
             </div>
             {candidateSource === 'search' ? (
               <div className="candidate-source-panel" role="tabpanel">
                 <p>Google 장소 검색 결과에서 식당을 후보로 추가합니다.</p>
               <div>
-                <input
+                <Input
                   value={query}
                   aria-label="추가할 식당 검색"
                   placeholder="예: 양재역 국밥"
@@ -350,17 +352,17 @@ export default function LunchRoomPanel({
                   onChange={(event) => setQuery(event.target.value)}
                   onKeyDown={(event) => event.key === 'Enter' && searchPlaces()}
                 />
-                <button type="button" className="btn ghost" disabled={searching || isReady} onClick={searchPlaces}>
+                <Button type="button" className="btn ghost" disabled={searching || isReady} onClick={searchPlaces}>
                   {searching ? '검색 중…' : '검색'}
-                </button>
+                </Button>
               </div>
               {searchResults.length ? (
                 <div className="room-search-results">
                   {searchResults.map((place) => (
-                    <button type="button" key={place.placeId} disabled={isReady} onClick={() => addPlace(place)}>
+                    <Button type="button" key={place.placeId} disabled={isReady} onClick={() => addPlace(place)}>
                       <strong>{place.placeName}</strong>
                       <span>{place.formattedAddress}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               ) : null}
@@ -371,9 +373,9 @@ export default function LunchRoomPanel({
                 <div className="inline-error" role="alert">
                   <span>{searchError}</span>
                   {searchAttempted ? (
-                    <button type="button" className="btn ghost" onClick={searchPlaces}>
+                    <Button type="button" className="btn ghost" onClick={searchPlaces}>
                       다시 시도
-                    </button>
+                    </Button>
                   ) : null}
                 </div>
               ) : null}
@@ -382,14 +384,14 @@ export default function LunchRoomPanel({
               <div className="candidate-source-panel" role="tabpanel">
                 <p>장소 정보 없이 원하는 메뉴나 식당 이름만 직접 추가합니다.</p>
               <div>
-                <input
+                <Input
                   value={manualName}
                   aria-label="직접 추가할 후보 이름"
                   placeholder="예: 김치찌개"
                   disabled={isReady}
                   onChange={(event) => setManualName(event.target.value)}
                 />
-                <button type="button" className="btn ghost" disabled={isReady} onClick={addManual}>추가</button>
+                <Button type="button" className="btn ghost" disabled={isReady} onClick={addManual}>추가</Button>
               </div>
               </div>
             )}
@@ -401,7 +403,7 @@ export default function LunchRoomPanel({
           <div className="room-menu-grid">
             {room.menus.map((menu) => (
               <div className="room-menu-item" key={menu.id}>
-                <button
+                <Button
                   type="button"
                   className={`room-like${likes.includes(menu.id) ? ' is-active' : ''}`}
                   disabled={isReady}
@@ -409,9 +411,9 @@ export default function LunchRoomPanel({
                 >
                   <strong>{menu.name}</strong>
                   <span>좋아요 {menu.likeCount}</span>
-                </button>
+                </Button>
                 {session.isHost ? (
-                  <button
+                  <Button
                     type="button"
                     className="room-remove"
                     title="후보 삭제"
@@ -423,9 +425,9 @@ export default function LunchRoomPanel({
                     }}
                   >
                     ×
-                  </button>
+                  </Button>
                 ) : null}
-                <button
+                <Button
                   type="button"
                   className={`room-veto${veto === menu.id ? ' is-active' : ''}`}
                   disabled={isReady}
@@ -437,7 +439,7 @@ export default function LunchRoomPanel({
                   title="이 메뉴는 피하고 싶어요"
                 >
                   제외 {menu.vetoCount}
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -466,7 +468,7 @@ export default function LunchRoomPanel({
               />
             </div>
             {isReady && !allReady ? (
-              <button
+              <Button
                 type="button"
                 className="room-nudge"
                 disabled={loading || nudgeRemaining > 0}
@@ -475,20 +477,20 @@ export default function LunchRoomPanel({
                 {nudgeRemaining > 0
                   ? `${nudgeRemaining}초 후 다시 재촉`
                   : '아직 준비 전인 사람 재촉하기'}
-              </button>
+              </Button>
             ) : null}
           </div>
           <div className="room-panel-actions">
-            <button
+            <Button
               type="button"
               className={`btn ${isReady ? 'ghost' : 'primary'}`}
               disabled={loading}
               onClick={() => onSetReady(!isReady, likes, veto)}
             >
               {isReady ? '준비 취소' : '준비 완료!'}
-            </button>
+            </Button>
             {session.isHost ? (
-              <button
+              <Button
                 type="button"
                 className="btn primary"
                 disabled={loading || !canFinalize}
@@ -499,7 +501,7 @@ export default function LunchRoomPanel({
                   : allReady
                     ? '최종 후보 결정'
                     : `${readyCount}/${room.members.length}명 준비`}
-              </button>
+              </Button>
             ) : null}
           </div>
         </>
@@ -536,12 +538,12 @@ export default function LunchRoomPanel({
             )}
           </p>
           <div className="room-result-actions">
-            <button type="button" className="btn primary" onClick={shareResult}>
+            <Button type="button" className="btn primary" onClick={shareResult}>
               결과 공유
-            </button>
-            <button type="button" className="btn ghost" onClick={saveResult}>
+            </Button>
+            <Button type="button" className="btn ghost" onClick={saveResult}>
               이미지 저장
-            </button>
+            </Button>
           </div>
         </div>
       )}

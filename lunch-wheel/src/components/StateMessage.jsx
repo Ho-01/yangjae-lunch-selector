@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 export default function StateMessage({
   type = 'empty',
   title,
@@ -12,9 +13,9 @@ export default function StateMessage({
       {title ? <strong>{title}</strong> : null}
       {description ? <p>{description}</p> : null}
       {actionLabel && onAction ? (
-        <button type="button" className="btn ghost" onClick={onAction}>
+        <Button type="button" className="btn ghost" onClick={onAction}>
           {actionLabel}
-        </button>
+        </Button>
       ) : null}
     </div>
   )

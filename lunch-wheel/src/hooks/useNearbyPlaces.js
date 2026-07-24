@@ -84,14 +84,14 @@ function getCurrentPosition() {
     if (!window.isSecureContext) {
       reject(
         new Error(
-          '위치 정보는 HTTPS(또는 localhost)에서만 사용할 수 있습니다. 배포 URL이나 npm run dev로 접속해주세요.',
+          '현재 접속 환경에서는 위치를 확인할 수 없습니다. 안전한 주소로 다시 접속해주세요.',
         ),
       )
       return
     }
 
     if (!navigator.geolocation) {
-      reject(new Error('이 브라우저는 위치 정보를 지원하지 않습니다.'))
+      reject(new Error('현재 기기에서는 위치를 확인할 수 없습니다. 직접 고르는 모드를 이용해주세요.'))
       return
     }
 
@@ -105,7 +105,7 @@ function getCurrentPosition() {
 
     const explainError = (err) => {
       if (err?.code === 1 || err?.code === err?.PERMISSION_DENIED) {
-        return '위치 권한이 거부되었습니다. 주소창 왼쪽 자물쇠/사이트 설정에서 위치를 허용한 뒤 다시 시도해주세요.'
+        return '위치 권한이 꺼져 있습니다. 이 사이트의 위치 권한을 허용한 뒤 다시 시도해주세요.'
       }
       if (err?.code === 3 || err?.code === err?.TIMEOUT) {
         return '위치 확인 시간이 초과되었습니다. Wi-Fi/GPS를 켠 뒤 다시 시도해주세요.'

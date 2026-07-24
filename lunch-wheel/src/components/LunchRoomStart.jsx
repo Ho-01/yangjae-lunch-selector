@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { NativeSelect } from '@/components/ui/native-select'
 import { useState } from 'react'
 import RecentRooms from './RecentRooms'
 
@@ -99,9 +102,9 @@ export default function LunchRoomStart({
           <h2>어디를 기준으로 고를까요?</h2>
           <p>방을 만든 뒤 장소 검색이나 이름 직접 추가도 할 수 있어요.</p>
         </div>
-        <button type="button" className="btn ghost" onClick={onOpenJoin}>
+        <Button type="button" className="btn ghost" onClick={onOpenJoin}>
           코드로 참여
-        </button>
+        </Button>
       </div>
       <div className="room-source-grid">
         {[
@@ -109,7 +112,7 @@ export default function LunchRoomStart({
           ['NEARBY', '내 위치 주변', '현재 위치 반경의 식당으로 시작'],
           ['NONE', '빈 방으로 시작', '방을 만든 뒤 후보를 추가'],
         ].map(([id, title, desc]) => (
-          <button
+          <Button
             type="button"
             key={id}
             className={source === id ? 'is-active' : ''}
@@ -117,13 +120,13 @@ export default function LunchRoomStart({
           >
             <strong>{title}</strong>
             <span>{desc}</span>
-          </button>
+          </Button>
         ))}
       </div>
       {source === 'NEARBY' ? (
         <div className="room-radius">
           <span>검색 반경</span>
-          <select
+          <NativeSelect
             value={nearby.settings.radiusMeters}
             onChange={(event) =>
               nearby.setSettings((prev) => ({
@@ -136,25 +139,25 @@ export default function LunchRoomStart({
             <option value={1000}>1km</option>
             <option value={2000}>2km</option>
             <option value={3000}>3km</option>
-          </select>
+          </NativeSelect>
           <small>{nearby.locationLabel || '방을 만들 때 현재 위치를 확인합니다.'}</small>
         </div>
       ) : null}
       <div className="room-start-create">
-        <input
+        <Input
           value={nickname}
           maxLength={20}
           placeholder="닉네임 (비워두면 자동 생성)"
           onChange={(event) => setNickname(event.target.value)}
         />
-        <button
+        <Button
           type="button"
           className="btn primary"
           disabled={loading}
           onClick={create}
         >
           {loading ? '준비 중…' : '점심방 만들기'}
-        </button>
+        </Button>
       </div>
     </section>
     </>

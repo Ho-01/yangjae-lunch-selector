@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 
 export default function CollapsibleSidePanel({
@@ -24,7 +25,7 @@ export default function CollapsibleSidePanel({
   return (
     <div className={`side-collapse${open ? ' is-open' : ''}`}>
       {mobile ? (
-        <button
+        <Button
           type="button"
           className="side-collapse-toggle"
           aria-expanded={open}
@@ -35,7 +36,7 @@ export default function CollapsibleSidePanel({
             {summary ? <small>{summary}</small> : null}
           </span>
           <span aria-hidden>{open ? '접기' : '펼치기'}</span>
-        </button>
+        </Button>
       ) : null}
       <div className="side-collapse-content" hidden={mobile && !open}>
         {children}

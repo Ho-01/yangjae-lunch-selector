@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import LunchWheel from './components/LunchWheel/LunchWheel'
@@ -162,8 +164,7 @@ export default function App() {
     ],
   )
 
-  function handleWeatherWeightToggle(event) {
-    const enabled = event.target.checked
+  function handleWeatherWeightToggle(enabled) {
     setWeatherWeightEnabled(enabled)
     try {
       window.localStorage.setItem('weather-weight-enabled', String(enabled))
@@ -219,7 +220,7 @@ export default function App() {
   }
 
   function handleClearRecent() {
-    if (!window.confirm('이 브라우저에 저장된 최근 결과를 모두 삭제할까요?')) {
+    if (!window.confirm('이 기기에 저장된 최근 결과를 모두 삭제할까요?')) {
       return
     }
     setRecentResults([])
@@ -432,8 +433,8 @@ export default function App() {
       const result = await nearby.loadNearby({ force: false })
       showToast(
         result.fromCache
-          ? `캐시에서 ${result.places.length}곳을 불러왔습니다.`
-          : `주변 식당 ${result.places.length}곳을 불러왔습니다. (Places 1회)`,
+          ? `저장된 식당 ${result.places.length}곳을 불러왔습니다.`
+          : `주변 식당 ${result.places.length}곳을 찾았습니다.`,
       )
       await refreshWeather()
     } catch (err) {
@@ -445,7 +446,7 @@ export default function App() {
     try {
       nearby.clearCache()
       const result = await nearby.loadNearby({ force: true })
-      showToast(`주변 식당 ${result.places.length}곳을 새로 불러왔습니다. (Places 1회)`)
+      showToast(`주변 식당 ${result.places.length}곳을 새로 찾았습니다.`)
       await refreshWeather()
     } catch (err) {
       showToast(err?.message || '주변 식당을 불러오지 못했습니다.')
@@ -567,13 +568,13 @@ export default function App() {
                 {nearby.coordsText ? (
                   <span className="location-coords">{nearby.coordsText}</span>
                 ) : (
-                  <span className="location-coords">좌표 없음</span>
+                  <span className="location-coords">위치 정보 없음</span>
                 )}
                 {nearby.locateError ? (
                   <span className="location-error">{nearby.locateError}</span>
                 ) : null}
               </div>
-              <button
+              <Button
                 type="button"
                 className="btn ghost"
                 disabled={busy}
@@ -581,7 +582,7 @@ export default function App() {
                 aria-label="현재 위치 다시 확인"
               >
                 {nearby.locating ? '확인 중…' : '위치 다시 확인'}
-              </button>
+              </Button>
             </div>
           ) : null}
           <p className="subtitle">
@@ -592,7 +593,7 @@ export default function App() {
               : '현재 날씨와 메뉴 성격을 반영해 후보별 확률을 조정합니다.'}
           </p>
           <div className="mode-toggle" role="group" aria-label="돌림판 모드">
-            <button
+            <Button
               type="button"
               aria-pressed={!isNearby && !isRoom}
               className={!isNearby && !isRoom ? 'is-active' : ''}
@@ -600,8 +601,8 @@ export default function App() {
               onClick={() => setMode('team')}
             >
               양재역 주변
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               aria-pressed={isRoom}
               className={isRoom ? 'is-active' : ''}
@@ -609,8 +610,8 @@ export default function App() {
               onClick={() => setMode('room')}
             >
               같이 고르기
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               aria-pressed={isNearby}
               className={isNearby ? 'is-active' : ''}
@@ -618,12 +619,12 @@ export default function App() {
               onClick={() => setMode('nearby')}
             >
               내 주변
-            </button>
+            </Button>
           </div>
         </div>
         <div className="toolbar">
           {!isRoom ? (
-          <button
+          <Button
             type="button"
             className="btn ghost"
             disabled={busy || weatherLoading || (isNearby && !nearby.coords)}
@@ -632,11 +633,11 @@ export default function App() {
           >
             <RefreshIcon className="ui-icon" aria-hidden />
             날씨 새로고침
-          </button>
+          </Button>
           ) : null}
           {!isNearby && !isRoom ? (
             <>
-              <button
+              <Button
                 type="button"
                 className="btn ghost"
                 disabled={busy}
@@ -644,8 +645,8 @@ export default function App() {
                 aria-label="메뉴 타입 관리"
               >
                 타입 관리
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 className="btn primary"
                 disabled={busy}
@@ -654,7 +655,7 @@ export default function App() {
               >
                 <ListPlusIcon className="ui-icon" aria-hidden />
                 메뉴 관리
-              </button>
+              </Button>
             </>
           ) : null}
         </div>
@@ -824,13 +825,13 @@ export default function App() {
               </p>
             </div>
             <label className="switch-control">
-              <input
-                type="checkbox"
+              <Switch
+                className="app-switch"
                 checked={weatherWeightEnabled}
                 disabled={busy}
-                onChange={handleWeatherWeightToggle}
+                onCheckedChange={handleWeatherWeightToggle}
+                aria-label="날씨 가중치 사용"
               />
-              <span aria-hidden />
               <strong>{weatherWeightEnabled ? 'ON' : 'OFF'}</strong>
             </label>
           </section>
@@ -856,7 +857,6 @@ export default function App() {
               fetchedAt={nearby.fetchedAt}
               filteredCount={nearby.filteredPlaces.length}
               rawCount={nearby.rawPlaces.length}
-              apiCallsThisSession={nearby.apiCallsThisSession}
               error={nearby.error}
               onLocate={handleNearbyLocate}
               onLoad={handleNearbyLoad}
@@ -907,14 +907,11 @@ export default function App() {
 
       {!isRoom ? (
       <footer>
-        현재 날씨: Open-Meteo API · 위치 기준: {locationLabel}
-        {weatherLocation
-          ? ` (${weatherLocation.weather_latitude}, ${weatherLocation.weather_longitude})`
-          : ''}
+        {locationLabel}의 현재 날씨를 메뉴 확률에 반영합니다.
         <br />
         {isNearby
-          ? '내 주변 모드는 Places Nearby를 불러오기 버튼으로만 호출하고, 결과는 브라우저에 30분 캐시합니다.'
-          : '메뉴와 오늘 제외 상태는 Supabase에 저장됩니다.'}
+          ? '찾은 식당은 30분 동안 이 기기에서 빠르게 다시 볼 수 있습니다.'
+          : '메뉴 변경과 오늘 제외 설정은 자동으로 저장됩니다.'}
       </footer>
       ) : null}
 

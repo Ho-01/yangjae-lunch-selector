@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import PlaceMeta from './PlaceMeta'
 import { getResultIcon } from '../constants/icons'
 import CelebrationBurst from './CelebrationBurst'
@@ -26,9 +27,9 @@ export default function ResultCard({
       ) : null}
       <div className="why">{reason}</div>
       {visible && onShare ? (
-        <button type="button" className="btn ghost result-share" onClick={onShare}>
+        <Button type="button" className="btn ghost result-share" onClick={onShare}>
           결과 공유하기
-        </button>
+        </Button>
       ) : null}
       {placeLinks?.length ? (
         <div className="result-place">

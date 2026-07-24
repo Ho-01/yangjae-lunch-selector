@@ -3,7 +3,7 @@ import { TEAM_SLUG } from '../constants/app'
 
 export async function fetchActiveTeamBySlug(slug = TEAM_SLUG) {
   if (!isSupabaseConfigured()) {
-    throw new Error('Supabase 연결 정보가 없습니다. 환경변수를 확인해주세요.')
+    throw new Error('메뉴 서비스를 연결하지 못했습니다. 잠시 후 다시 시도해주세요.')
   }
 
   const { data, error } = await getSupabase()

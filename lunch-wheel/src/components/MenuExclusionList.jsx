@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { useMemo, useState } from 'react'
 import TypeChip from './TypeChip'
 import PlaceMeta from './PlaceMeta'
@@ -34,7 +37,7 @@ export default function MenuExclusionList({
       <label className="menu-list-search">
         <span className="sr-only">메뉴 목록 검색</span>
         <SearchIcon className="ui-icon" aria-hidden />
-        <input
+        <Input
           type="search"
           value={query}
           placeholder="메뉴 또는 종류 검색"
@@ -42,22 +45,22 @@ export default function MenuExclusionList({
         />
       </label>
       <div className="ban-actions">
-        <button
+        <Button
           type="button"
           id="banAllBtn"
           disabled={disabled || !menus.length}
           onClick={onBanAll}
         >
           전부 제외
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           id="clearBanBtn"
           disabled={disabled || excludedIds.size === 0}
           onClick={onClearAll}
         >
           제외 해제
-        </button>
+        </Button>
       </div>
       <div className="ban-list">
         {!menus.length ? (
@@ -73,12 +76,11 @@ export default function MenuExclusionList({
                 className={`ban-item-block${banned ? ' is-banned' : ''}`}
               >
                 <label className="ban-item">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={banned}
                     disabled={disabled}
                     aria-label={`${menu.name} 오늘 제외`}
-                    onChange={(event) => onToggle(menu.id, event.target.checked)}
+                    onCheckedChange={(checked) => onToggle(menu.id, checked === true)}
                   />
                   <span className="ban-name" title={menu.name}>
                     {menu.name}
